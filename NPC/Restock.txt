@@ -1,0 +1,119 @@
+/*
+CREATE TABLE IF NOT EXISTS `restock` (
+  `charid` int(10) NOT NULL,
+  `restockid` int(6) NOT NULL,
+  `restkq` int(5) NOT NULL,
+  `restkf` int(10) NOT NULL default '1'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 ;
+
+Script By Dastgir/Hercules
+v1.0 - Intial Release
+TO be used with Restock Plugin
+*/
+
+prontera,140,140,5	script	Restock	999,{
+end;
+OnInit:
+query_sql "CREATE TABLE IF NOT EXISTS `restock` (`charid` int(10) NOT NULL,`restockid` int(6) NOT NULL,`restkq` int(5) NOT NULL,`restkf` int(10) NOT NULL default '1') ENGINE=MyISAM DEFAULT CHARSET=latin1 "; 
+bindatcmd("restock","Restock::OnAtcommandEnable",0,99);
+bindatcmd("restock2","Restock::OnAtcommand",0,99);
+end;
+
+OnAtcommandEnable:
+if (restk){
+	dispbottom "Restock System Disabled";
+	restk = 0;
+	end;
+}
+dispbottom "Restock System Enabled";
+restk = 1;
+end;
+
+OnAtcommand:
+if (restk==1){dispbottom "Restock is Currently Enabled";}
+if (!restk){dispbottom "Restock is Currently Disabled,use @restock to Enable"; end;}
+if ( .@atcmd_numparameters < 4){
+	dispbottom("Usage:");
+	dispbottom("@restock2 <itemid> <quantity> <type1> <type2>");
+	dispbottom("Type 1:");
+	dispbottom("1 = Storage");
+	dispbottom("2 = GStorage");
+	dispbottom("Type 2:");
+	dispbottom("1 = Add");
+	dispbottom("2 = Remove");
+	dispbottom("3 = Help");
+	dispbottom("4 = List");
+	dispbottom("5 = Empty The List");
+	dispbottom("@restock2 x y z 3 For Help");
+	dispbottom("@restock2 x y z 4 For Current Restocking List");
+	dispbottom("@restock2 x y z 5 For Removing All Items From Restock");
+	dispbottom("x,y,z Can be any number, e.g: @restock2 0 0 0 3 will give you help option,@restock2 x y z 5 will Empty your list");
+	end;
+}else if (atoi(.@atcmd_parameters$[3])==3){
+	dispbottom("Help:");
+	dispbottom("If you want to restock 5 Orange Potion item from Storage, you can type");
+	dispbottom("@restock2 502 5 1 1");
+	dispbottom("If you want to restock the Orange Potion from GStorage,");
+	dispbottom("@restock2 502 5 1 2");
+	dispbottom("If you want to remove the restock of Orange Potion");
+	dispbottom("@restock2 502 0 2 0");
+	dispbottom("If You used restock from storage (@restock2 502 5 1 1) and then used same item from GStorage");
+	dispbottom("then the value will be overwritten and the item will be restocked from GStorage.");
+	end;
+}else if (atoi(.@atcmd_parameters$[3])==4){
+	query_sql "SELECT `restockid`,`restkq`,`restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" ",.@id,.@qu,.@fr;
+	if (!.@id){dispbottom("No Item in Restock..."); end;}
+	.@id2 = getarraysize(.@id);
+	if (.@id2>128){.@id2 = 128;}
+	dispbottom("------------------- List of Restock Items -------------------");
+	for (.@i = 0; .@i <= .@id2; .@i = .@i+1){
+		if (getitemname(.@id[@i])!= "null"){
+			dispbottom("Restocking "+.@qu[.@i]+" "+getitemname(.@id[.@i])+" From "+(.@fr[.@i]==1?"Storage":"Guild Storage"));
+		}
+	}
+	dispbottom("-------------------     End of List       --------------------");
+	end;
+
+}else if (atoi(.@atcmd_parameters$[3])==5){
+	query_sql "DELETE FROM `restock` WHERE `charid`="+getcharid(0)+" ";
+	dispbottom("All Restock Items Deleted.");
+	end;
+
+}else if (!atoi(.@atcmd_parameters$[0])){
+	dispbottom("Please Input Proper Item ID");
+	end;
+}
+if (getitemname(atoi(.@atcmd_parameters$[0]))=="null"){dispbottom "Proper Item ID Please"; end;}
+if (!atoi(.@atcmd_parameters$[2]))||(atoi(.@atcmd_parameters$[2])>2){dispbottom "Input Proper Type1 Please"; end;}
+if (atoi(.@atcmd_parameters$[3])==1){
+	if (atoi(.@atcmd_parameters$[1]) < 1){dispbottom "Input Proper Quantity Please!";}
+	query_sql "SELECT `restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+atoi(.@atcmd_parameters$[0])+" ",.@rf;
+	if (.@rf){
+		query_sql "UPDATE `restock` SET `restkq`="+atoi(.@atcmd_parameters$[1])+", `restkf`="+atoi(.@atcmd_parameters$[2])+" WHERE `charid`="+getcharid(0)+" AND `restockid`="+atoi(.@atcmd_parameters$[0])+" ";
+	}
+	else{
+		query_sql "INSERT INTO `restock` VALUES("+getcharid(0)+","+atoi(.@atcmd_parameters$[0])+","+atoi(.@atcmd_parameters$[1])+","+atoi(.@atcmd_parameters$[2])+")";
+	}
+	if (!countitem(atoi(.@atcmd_parameters$[0]))){restkid = atoi(.@atcmd_parameters$[0]); callsub OnRestock;}
+	dispbottom("Restocking "+atoi(.@atcmd_parameters$[1])+" "+getitemname(atoi(.@atcmd_parameters$[0]))+" From "+((atoi(.@atcmd_parameters$[2])==1)?"Storage":"Guild Storage")+"!");
+	end;
+}
+if (atoi(.@atcmd_parameters$[3])==2){
+	query_sql "DELETE FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+atoi(.@atcmd_parameters$[0])+" ";
+	dispbottom("Deleted "+atoi(.@atcmd_parameters$[0])+" From Restocking!");
+	end;
+}
+end;
+
+OnRestock:
+	query_sql "SELECT `restkq`,`restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+restkid+" ",.@qu,.@fr;
+	if (.@qu){
+		.@ru = restkid;
+		restock_item(.@ru,.@qu,.@fr);
+		restkid = 0;
+	}
+	else{
+	}
+	restkid = 0;
+	end;
+}
