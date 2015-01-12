@@ -9,3 +9,4 @@ Plugin Owners:<br/>
   restock.c - Dastgir<br/>
   auraset - Dastgir<br/>
   dispbottom2 - Dastgir<br/>
+  hit-delay - Dastgir
