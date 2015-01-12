@@ -9,4 +9,5 @@ Plugin Owners:<br/>
   restock.c - Dastgir<br/>
   auraset - Dastgir<br/>
   dispbottom2 - Dastgir<br/>
-  hit-delay - Dastgir
+  hit-delay - Dastgir<br/>
+  storeit - Akinari (Updated by Dastgir)<br/>
