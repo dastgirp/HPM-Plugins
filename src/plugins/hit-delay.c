@@ -2,6 +2,15 @@
 	By Dastgir/Hercules
 	Warp Delays only if hit, if miss, you can still warp.
 	You can have a battle_config on any of the files in conf/battle with "go_warp_delay: Seconds*1000".
+	5 Battle Configs:
+	warp_delay
+	warp_delay_mob
+	warp_delay_pet
+	warp_delay_homun
+	warp_delay_merc
+	Format same as mentioned above.
+	
+v1.1 - Now Adjustable Delay from hits from player/homun/mobs/etc..
 */
 
 #include <stdio.h>
@@ -28,13 +37,19 @@ HPExport struct hplugin_info pinfo =
 {
 	"Warp Delay",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
+	"1.1",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-int64 warp_delay = 10000;	//Seconds*1000 Second Delay.
+int64 warp_delay = 10000;	//Seconds*1000 (Second) Delay(For Player and Others).
+int64 warp_delay_mob = 10000;	//Seconds*1000 (Second) Delay(For Monster).
+int64 warp_delay_pet = 10000;	//Seconds*1000 (Second) Delay(For Pet).
+int64 warp_delay_homun = 10000;	//Seconds*1000 (Second) Delay(For Homunculus).
+int64 warp_delay_merc = 10000;	//Seconds*1000 (Second) Delay(For Mercenary).
+
 struct warp_delay_tick {
 	int64 last_hit;
+	enum bl_type who_hit;
 };
 
 void pc_damage_received(struct map_session_data *sd,struct block_list *src,unsigned int hp, unsigned int sp){
@@ -42,9 +57,11 @@ void pc_damage_received(struct map_session_data *sd,struct block_list *src,unsig
 	if( !(delay_data = getFromMSD(sd,0)) ) {
 		CREATE(delay_data,struct warp_delay_tick,1);
 		delay_data->last_hit = timer->gettick();
+		delay_data->who_hit = BL_NUL;
 		addToMSD(sd,delay_data,0,true);
 	}
 	delay_data->last_hit = timer->gettick();
+	delay_data->who_hit = src->type;
 	return;
 	
 }
@@ -52,6 +69,7 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 	int16 m;
 	struct warp_delay_tick *delay_data;
 	unsigned short mapindex_ = *map_index;
+	int64 temp_delay;
 
 	if (!sd)
 		return 0;
@@ -63,24 +81,59 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 	if( !(delay_data = getFromMSD(sd,0)) ) {
 		return 0;
 	}
-	if (DIFF_TICK(timer->gettick(),delay_data->last_hit) < warp_delay ){
+	switch(delay_data->who_hit){
+		case BL_MOB:
+			temp_delay = warp_delay_mob;
+			break;
+		case BL_PET:
+			temp_delay = warp_delay_pet;
+			break;
+		case BL_HOM:
+			temp_delay = warp_delay_homun;
+			break;
+		case BL_MER:
+			temp_delay = warp_delay_merc;
+			break;
+		default:
+			temp_delay = warp_delay;
+			break;
+	}
+	if (DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
 		char output[50];
-		sprintf(output,"Please Wait %d second before warping.",(int)((warp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
+		sprintf(output,"Please Wait %d second before warping.",(int)((temp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
 		clif->message(sd->fd,output);
 		hookStop();
 	}
 	return 0;
 }
-void go_warp_delay_setting(const char *val) {
-	/* do anything with the var e.g. config_switch(val) */
+
+int battle_config_validate(const char *val,const char *setting,int64 default_delay){
 	int value = config_switch(val);
 	if (value <= 0){
-		ShowDebug("Received Invalid Setting for go_warp_delay(%d), defaulting to %d\n",value,(int)warp_delay);
-		return;
+		ShowDebug("Received Invalid Setting for %s(%d), Defaulting to %d\n",setting,value,(int)default_delay);
+		return (int)default_delay;
 	}
-	warp_delay = (int64)value;
-	return;
-	
+	return value;
+}
+
+void go_warp_delay_setting(const char *val) {
+	warp_delay = (int64)battle_config_validate(val,"warp_delay",warp_delay);
+}
+
+void go_warp_delay_pet_setting(const char *val) {
+	warp_delay_pet = (int64)battle_config_validate(val,"warp_delay_pet",warp_delay_pet);
+}
+
+void go_warp_delay_homun_setting(const char *val) {
+	warp_delay_homun = (int64)battle_config_validate(val,"warp_delay_homun",warp_delay_homun);
+}
+
+void go_warp_delay_mob_setting(const char *val) {
+	warp_delay_mob = (int64)battle_config_validate(val,"warp_delay_mob",warp_delay_mob);
+}
+
+void go_warp_delay_merc_setting(const char *val) {
+	warp_delay_merc = (int64)battle_config_validate(val,"warp_delay_merc",warp_delay_merc);
 }
 
 /* Server Startup */
@@ -103,9 +156,13 @@ HPExport void plugin_init (void)
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("go_warp_delay",go_warp_delay_setting);
+	addBattleConf("warp_delay",go_warp_delay_setting);
+	addBattleConf("warp_delay_mob",go_warp_delay_mob_setting);
+	addBattleConf("warp_delay_pet",go_warp_delay_pet_setting);
+	addBattleConf("warp_delay_homun",go_warp_delay_homun_setting);
+	addBattleConf("warp_delay_merc",go_warp_delay_merc_setting);
 }
 
 HPExport void server_online (void) {
-	ShowInfo ("%s Plugin by Dastgir/Hercules\n",pinfo.name);
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
