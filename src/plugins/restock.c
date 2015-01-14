@@ -145,10 +145,7 @@ BUILDIN(restock_item){
 	return true;
 }
 
-/* run when server starts */
 HPExport void plugin_init(void) {
-
-	/* map-server interfaces */
 	mob = GET_SYMBOL("mob");
 	script = GET_SYMBOL("script");
 	clif = GET_SYMBOL("clif");
@@ -165,9 +162,7 @@ HPExport void plugin_init(void) {
 	addScriptCommand("restock_item","iii",restock_item);
 }
 
-/* run when server is shutting down */
-
 HPExport void server_online (void) {
-	ShowInfo ("%s Plugin by Dastgir/Hercules\n",pinfo.name);
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
 

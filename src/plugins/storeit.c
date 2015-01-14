@@ -75,6 +75,7 @@ HPExport void plugin_init (void) {
 	
     addAtcommand("storeit",storeit);
 }
+
 HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin Edited by Dastgir/Hercules\n",pinfo.name);
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }

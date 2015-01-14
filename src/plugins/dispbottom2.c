@@ -77,3 +77,7 @@ HPExport void plugin_init (void)
 
 	addScriptCommand("dispbottom2","ss?",dispbottom2);
 }
+
+HPExport void server_online (void) {
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+}
