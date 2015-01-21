@@ -9,8 +9,10 @@
 	warp_delay_homun
 	warp_delay_merc
 	Format same as mentioned above.
-	
+
+v1.0 - Initial Release.
 v1.1 - Now Adjustable Delay from hits from player/homun/mobs/etc..
+v1.1a- Fix Crash from @die.
 */
 
 #include <stdio.h>
@@ -37,7 +39,7 @@ HPExport struct hplugin_info pinfo =
 {
 	"Warp Delay",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.1",			// Plugin version
+	"1.1a",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -61,7 +63,10 @@ void pc_damage_received(struct map_session_data *sd,struct block_list *src,unsig
 		addToMSD(sd,delay_data,0,true);
 	}
 	delay_data->last_hit = timer->gettick();
-	delay_data->who_hit = src->type;
+	if (src)
+		delay_data->who_hit = src->type;
+	else
+		delay_data->who_hit = BL_NUL;
 	return;
 	
 }
@@ -94,6 +99,8 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 		case BL_MER:
 			temp_delay = warp_delay_merc;
 			break;
+		case BL_NUL:	//Self Die or something like that
+			temp_delay = 0;
 		default:
 			temp_delay = warp_delay;
 			break;

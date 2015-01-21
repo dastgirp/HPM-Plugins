@@ -3,7 +3,7 @@ Hercules Plugins
 
 Hercules Plugins<br/>
 Plugin Owners:<br/>
-  afk.c - Shikazu (Updated by Dastgir)<br/>
+  afk.c - Dastgir<br/>
   auraset.c - Dastgir<br/>
   autonext.c - Shikazu (Updated by Dastgir)<br/>
   Critical-Magic.c - Dastgir<br/>
