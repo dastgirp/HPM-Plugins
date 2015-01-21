@@ -5,6 +5,8 @@
 	x can be 1 or 2
 	1 = Blue Critical
 	2 = Red Critical
+	
+v1.0a - Fix Warnings on Windows
 */
 
 #include <stdio.h>
@@ -35,7 +37,7 @@ HPExport struct hplugin_info pinfo =
 {
 	"Critical Magic Attack",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
+	"1.0a",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -83,8 +85,8 @@ int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 void magic_critical_attack(int *attack_type, struct block_list* src, struct block_list *dsrc, struct block_list *bl, uint16 *skill_id_, uint16 *skill_lv_, int64 *tick_, int *flag_, int *type_, struct Damage *dmg, int64 *damage_) {
 	uint16 skill_id = *skill_id_;
 	uint16 skill_lv = *skill_lv_;
-	int16 tick = *tick_;
-	int64  damage = *damage_;
+	int64 tick = *tick_;
+	int64 damage = *damage_;
 	struct map_session_data *sd;
 	struct status_data *tstatus;
 	
@@ -101,9 +103,8 @@ void magic_critical_attack(int *attack_type, struct block_list* src, struct bloc
 		{
 			struct mob_data *md=NULL;
 			struct tmp_data *tmpd=NULL;
-			int d_ = 200;
-			unsigned int u_ = 0;
-			int i=0, _damage=0;
+			int i=0,d_=200;
+			int64 _damage = 0,u_=0;
 			int num=abs(skill->get_num(skill_id,skill_lv));
 			damage = damage*2;
 			md = mob->once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
@@ -124,14 +125,15 @@ void magic_critical_attack(int *attack_type, struct block_list* src, struct bloc
 			if( tstatus->hp <= damage )//delay to kill it
 			{
 				damage = 1;
-				status->change_start(NULL, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, u_, 2);   
-				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, u_, 2);              
+				status->change_start(NULL, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, (int)u_, 2);   
+				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, (int)u_, 2);              
 				timer->add(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
 			}
 			clif->skill_nodamage(src,src,skill_id,skill_lv,1);
 			for(i=0;i<num;i++)
-				timer->add(tick+d_*i +1,skill_mcri_hit,_damage,(intptr_t)md);
-			u_ = d_ = _damage = 0;
+				timer->add(tick+d_*i +1,skill_mcri_hit,(int)_damage,(intptr_t)md);
+			u_ = d_ = 0;
+			_damage = 0;
 			hookStop();
 		}
 	}

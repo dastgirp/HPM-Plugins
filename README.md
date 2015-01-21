@@ -13,3 +13,5 @@ Plugin Owners:<br/>
   npc-duplicate.c Dastgir<br/>
   restock.c - Dastgir<br/>
   storeit.c - Akinari (Updated by Dastgir)<br/>
+
+Support Topic: http://hercules.ws/board/topic/8202-plugin-collections/
