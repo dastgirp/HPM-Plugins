@@ -6,6 +6,7 @@ v1.0 - Initial Conversion
 v1.1 - Dead Person cannot @afk.
 v1.2 - Added afk_timeout option(Battle_Config too...) Yippy...
 v1.3 - Added noafk mapflag :D
+v1.4 - Compatible with new Hercules.
 
 Battle Config Adjustment:
 You can add "afk_timeout: seconds" in any of the files in conf/battle/ to make it work(so you don't have to recompile everytime you want to change timeout seconds)
@@ -43,7 +44,7 @@ HPExport struct hplugin_info pinfo =
 {
 	"@afk",			// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.3",			// Plugin version
+	"1.4",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
