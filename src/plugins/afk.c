@@ -35,6 +35,7 @@ prontera	mapflag	noafk
 #include "../map/pc.h"
 #include "../map/map.h"
 #include "../map/status.h"
+#include "../map/channel.h"
 
 #include "../common/HPMDataCheck.h"
 
@@ -81,7 +82,7 @@ ACMD(afk){
 	{
 		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout*1000,0);
 	}
-	clif->chsys_quit(sd); //Quit from Channels.
+	channel->quit(sd); //Quit from Channels.
 	clif->authfail_fd(fd, 15);
 	return true;
 }
@@ -126,6 +127,7 @@ HPExport void plugin_init (void){
 	timer = GET_SYMBOL("timer");
 	map = GET_SYMBOL("map");
 	status = GET_SYMBOL("status");
+	channel = GET_SYMBOL("channel");
 
 	addAtcommand("afk",afk);
 	addHookPre("npc->parse_unknown_mapflag",parse_noafk_mapflag);

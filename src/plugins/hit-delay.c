@@ -43,11 +43,11 @@ HPExport struct hplugin_info pinfo =
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-int64 warp_delay = 10000;	//Seconds*1000 (Second) Delay(For Player and Others).
-int64 warp_delay_mob = 10000;	//Seconds*1000 (Second) Delay(For Monster).
-int64 warp_delay_pet = 10000;	//Seconds*1000 (Second) Delay(For Pet).
-int64 warp_delay_homun = 10000;	//Seconds*1000 (Second) Delay(For Homunculus).
-int64 warp_delay_merc = 10000;	//Seconds*1000 (Second) Delay(For Mercenary).
+int64 warp_delay = 5000;	//Seconds*1000 (Second) Delay(For Player and Others).
+int64 warp_delay_mob = 6000;	//Seconds*1000 (Second) Delay(For Monster).
+int64 warp_delay_pet = 7000;	//Seconds*1000 (Second) Delay(For Pet).
+int64 warp_delay_homun = 8000;	//Seconds*1000 (Second) Delay(For Homunculus).
+int64 warp_delay_merc = 9000;	//Seconds*1000 (Second) Delay(For Mercenary).
 
 struct warp_delay_tick {
 	int64 last_hit;
@@ -101,6 +101,7 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 			break;
 		case BL_NUL:	//Self Die or something like that
 			temp_delay = 0;
+			break;
 		default:
 			temp_delay = warp_delay;
 			break;
