@@ -14,6 +14,8 @@ v1.0 - Initial Release.
 v1.1 - Now Adjustable Delay from hits from player/homun/mobs/etc..
 v1.1a- Fix Crash from @die.
 v1.2 - Teleportation does not cause delay.
+v1.3 - Players and Others are now separated.
+v1.3a- You can now warp once dead.
 */
 
 #include <stdio.h>
@@ -40,15 +42,16 @@ HPExport struct hplugin_info pinfo =
 {
 	"Warp Delay",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.2",			// Plugin version
+	"1.3a",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-int64 warp_delay = 5000;	//Seconds*1000 (Second) Delay(For Player and Others).
+int64 warp_delay = 5000;		//Seconds*1000 (Second) Delay(For Player).
 int64 warp_delay_mob = 6000;	//Seconds*1000 (Second) Delay(For Monster).
 int64 warp_delay_pet = 7000;	//Seconds*1000 (Second) Delay(For Pet).
 int64 warp_delay_homun = 8000;	//Seconds*1000 (Second) Delay(For Homunculus).
 int64 warp_delay_merc = 9000;	//Seconds*1000 (Second) Delay(For Mercenary).
+int64 warp_delay_others = 10000;//Seconds*1000 (Second) Delay(For Others).
 
 struct warp_delay_tick {
 	int64 last_hit;
@@ -100,14 +103,17 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 		case BL_MER:
 			temp_delay = warp_delay_merc;
 			break;
-		case BL_NUL:	//Self Die or something like that
+		case BL_NUL:
 			temp_delay = 0;
 			break;
-		default:
+		case BL_PC:
 			temp_delay = warp_delay;
 			break;
+		default:
+			temp_delay = warp_delay_others;
+			break;
 	}
-	if (DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
+	if (sd->status.hp == 0 && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
 		char output[50];
 		sprintf(output,"Please Wait %d second before warping.",(int)((temp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
 		clif->message(sd->fd,output);
@@ -127,6 +133,10 @@ int battle_config_validate(const char *val,const char *setting,int64 default_del
 
 void go_warp_delay_setting(const char *val) {
 	warp_delay = (int64)battle_config_validate(val,"warp_delay",warp_delay);
+}
+
+void go_warp_delay_others_setting(const char *val) {
+	warp_delay_others = (int64)battle_config_validate(val,"warp_delay_others",warp_delay_others);
 }
 
 void go_warp_delay_pet_setting(const char *val) {
@@ -170,6 +180,7 @@ HPExport void server_preinit (void) {
 	addBattleConf("warp_delay_pet",go_warp_delay_pet_setting);
 	addBattleConf("warp_delay_homun",go_warp_delay_homun_setting);
 	addBattleConf("warp_delay_merc",go_warp_delay_merc_setting);
+	addBattleConf("warp_delay_others",go_warp_delay_others_setting);
 }
 
 HPExport void server_online (void) {
