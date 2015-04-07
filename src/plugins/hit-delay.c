@@ -2,12 +2,13 @@
 	By Dastgir/Hercules
 	Warp Delays only if hit, if miss, you can still warp.
 	You can have a battle_config on any of the files in conf/battle with "go_warp_delay: Seconds*1000".
-	5 Battle Configs:
+	6 Battle Configs:
 	warp_delay
 	warp_delay_mob
 	warp_delay_pet
 	warp_delay_homun
 	warp_delay_merc
+	warp_delay_others
 	Format same as mentioned above.
 
 v1.0 - Initial Release.
