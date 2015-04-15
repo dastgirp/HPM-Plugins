@@ -1,4 +1,4 @@
-// AuraSet (By Dastgir/ Hercules) Plugin v1.3
+// AuraSet (By Dastgir/ Hercules) Plugin v1.4
 
 #include <stdio.h>
 #include <string.h>
@@ -27,7 +27,7 @@
 HPExport struct hplugin_info pinfo = {	//[Dastgir/Hercules]
 	"AuraSet",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.3",			// Plugin version
+	"1.4",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -104,13 +104,12 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 {
 	int effect1, effect2, effect3;
 
-	if (pc_ishiding(sd))
+	if (pc_ishiding(sd)){
 		return;
-
+	}
 	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
 	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
 	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
-
 	if (effect1 >= 0)
 		clif->specialeffect_single(&sd->bl, effect1, dsd->fd);
 	if (effect2 >= 0)
@@ -119,12 +118,13 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 		clif->specialeffect_single(&sd->bl, effect3, dsd->fd);
 }
 
-void clif_sendauras(struct map_session_data *sd, enum send_target type)
+void clif_sendauras(struct map_session_data *sd, enum send_target type,bool is_hidden)
 {
 	int effect1, effect2, effect3;
 
-	if (pc_ishiding(sd))
+	if (pc_ishiding(sd) && is_hidden==true){
 		return;
+	}
 
 	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
 	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
@@ -139,17 +139,13 @@ void clif_sendauras(struct map_session_data *sd, enum send_target type)
 
 bool clif_spawn_AuraPost(bool retVal, struct block_list *bl){	//[Dastgir/Hercules]
 	struct view_data *vd;
-
 	vd = status->get_viewdata(bl);
 	if (retVal == false) { return false; }
-	if ((bl->type == BL_NPC
-		&& !((TBL_NPC*)bl)->chat_id
-		&& (((TBL_NPC*)bl)->option&OPTION_INVISIBLE)) // Hide NPC from maya purple card.
-		|| (vd->class_ == INVISIBLE_CLASS)
-		)
+	if (vd->class_ == INVISIBLE_CLASS){
 		return true; // Doesn't need to be spawned, so everything is alright
+	}
 	if (bl->type == BL_PC){
-		clif_sendauras((TBL_PC*)bl, AREA);
+		clif_sendauras((TBL_PC*)bl, AREA, true);
 	}
 	return true;
 }
@@ -159,14 +155,10 @@ void clif_getareachar_unit_AuraPost(struct map_session_data* sd, struct block_li
 	struct view_data *vd;
 
 	vd = status->get_viewdata(bl);
-	if (!vd || vd->class_ == INVISIBLE_CLASS)
+	if (!vd)
 		return;
-
-	/**
-	* Hide NPC from maya purple card.
-	**/
-	if (bl->type == BL_NPC && !((TBL_NPC*)bl)->chat_id && (((TBL_NPC*)bl)->option&OPTION_INVISIBLE))
-		return;
+	if (vd->class_ == INVISIBLE_CLASS){
+	}
 	if (bl->type == BL_PC){
 		TBL_PC* tsd = (TBL_PC*)bl;
 		clif_sendaurastoone(tsd, sd);
@@ -229,7 +221,7 @@ int status_change_start_postAura(int retVal,struct block_list *src, struct block
 	if (sd && data->hidden==false && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option == OPTION_INVISIBLE || type == SC_CHASEWALK || type == SC_CHASEWALK2 || type == SC_CAMOUFLAGE)){
 		data->hidden=true;
 		clif->clearunit_area(&sd->bl, 0);
-		clif_getareachar_char(&sd->bl, 1);
+		clif_getareachar_char(&sd->bl, 0);
 	}
 	return 1;
 }
@@ -240,24 +232,23 @@ int status_change_end_preAura(struct block_list* bl, enum sc_type *type_, int *t
 	struct status_change_entry *sce;
 	enum sc_type type = *type_;
 	struct hide_data* data;
-	
 	if (bl == NULL)
 		return 0;
 	
 	sc = &((TBL_PC*)bl)->sc;
-
 	if (type < 0 || type >= SC_MAX || !sc || !(sce = sc->data[type]))
 		return 0;
 
 	sd = BL_CAST(BL_PC, bl);
-	data = hd_search(sd);
-
 	if (sce->timer != *tid && (*tid) != INVALID_TIMER)
 		return 0;
 
-	if (sd && data->hidden==true && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option==OPTION_INVISIBLE || type==SC_CHASEWALK || type==SC_CHASEWALK2 || type==SC_CAMOUFLAGE)){
-		data->hidden=false;
-		clif_sendauras(sd, AREA_WOS);
+	if (sd){
+		data = hd_search(sd);
+		if (data->hidden==true && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option==OPTION_INVISIBLE || type==SC_CHASEWALK || type==SC_CHASEWALK2 || type==SC_CAMOUFLAGE)){
+			data->hidden=false;
+			clif_sendauras(sd, AREA, false);
+		}
 	}
 	return 1;
 }
