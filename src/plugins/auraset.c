@@ -1,4 +1,4 @@
-// AuraSet (By Dastgir/ Hercules) Plugin v1.2
+// AuraSet (By Dastgir/ Hercules) Plugin v1.3
 
 #include <stdio.h>
 #include <string.h>
@@ -13,35 +13,36 @@
 #include "../common/nullpo.h"
 #include "../common/timer.h"
 
-
+#include "../map/battle.h"
 #include "../map/script.h"
 #include "../map/pc.h"
 #include "../map/clif.h"
-#include "../map/map.h"
 #include "../map/status.h"
 #include "../map/npc.h"
 #include "../map/mob.h"
+#include "../map/map.h"
 
 #include "../common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {	//[Dastgir/Hercules]
 	"AuraSet",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.2",			// Plugin version
+	"1.3",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-//Had to duplicate
-void assert_report(const char *file, int line, const char *func, const char *targetname, const char *title) {
-	if (file == NULL)
-		file = "??";
+struct hide_data {
+	bool hidden;
+};
 
-	if (func == NULL || *func == '\0')
-		func = "unknown";
-
-	ShowError("--- %s --------------------------------------------\n", title);
-	ShowError("%s:%d: '%s' in function `%s'\n", file, line, targetname, func);
-	ShowError("--- end %s ----------------------------------------\n", title);
+struct hide_data* hd_search(struct map_session_data* sd){
+	struct hide_data *data;
+	if( !(data = getFromMSD(sd,0)) ) {
+		CREATE(data,struct hide_data,1);
+		data->hidden = false;
+		addToMSD(sd,data,0,true);
+	}
+	return data;
 }
 
 /*==========================================
@@ -128,7 +129,6 @@ void clif_sendauras(struct map_session_data *sd, enum send_target type)
 	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
 	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
 	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
-
 	if (effect1 >= 0)
 		clif->specialeffect(&sd->bl, effect1, type);
 	if (effect2 >= 0)
@@ -155,7 +155,7 @@ bool clif_spawn_AuraPost(bool retVal, struct block_list *bl){	//[Dastgir/Hercule
 }
 
 void clif_getareachar_unit_AuraPost(struct map_session_data* sd, struct block_list *bl) {	//[Dastgir/Hercules]
-//	struct unit_data *ud;
+	
 	struct view_data *vd;
 
 	vd = status->get_viewdata(bl);
@@ -202,57 +202,61 @@ int clif_insight2(struct block_list *bl, va_list ap)
 
 void clif_getareachar_char(struct block_list *bl, short flag)
 {
-	map->foreachinarea(clif_insight2, bl->m, bl->x - AREA_SIZE, bl->y - AREA_SIZE, bl->x + AREA_SIZE, bl->y + AREA_SIZE, BL_PC, bl, flag);
+	map->foreachinarea(
+						clif_insight2,
+						bl->m,
+						bl->x - AREA_SIZE,
+						bl->y - AREA_SIZE,
+						bl->x + AREA_SIZE,
+						bl->y + AREA_SIZE,
+						BL_PC,
+						bl,
+						flag
+	);
 }
 
-int status_change_start_postAura(int retVal,struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag) {	//[Dastgir/Hercules]
+int status_change_start_postAura(int retVal,struct block_list *src, struct block_list *bl, enum sc_type *type_, int *rate, int *val1, int *val2, int *val3, int *val4, int *tick, int *flag) {	//[Dastgir/Hercules]
 	struct map_session_data *sd = NULL;
-	int effect1, effect2, effect3;
+	enum sc_type type = *type_;
+	struct hide_data* data;
 
 	if (retVal == 0){ return 0; }
 	if (bl->type != BL_PC){ return 0; }
 
 	sd = BL_CAST(BL_PC, bl);
-	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
-	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
-	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
+	data = hd_search(sd);
 
-	if (sd && (effect1 > 0 || effect2>0 || effect3>0) && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option == OPTION_INVISIBLE || type == SC_CHASEWALK || type == SC_CHASEWALK2 || type == SC_CAMOUFLAGE)){
-		pc_setglobalreg(sd,script->add_str("USERAURA"),effect1*-1);
-		pc_setglobalreg(sd,script->add_str("USERAURA1"),effect2*-1);
-		pc_setglobalreg(sd,script->add_str("USERAURA2"),effect3*-1);
+	if (sd && data->hidden==false && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option == OPTION_INVISIBLE || type == SC_CHASEWALK || type == SC_CHASEWALK2 || type == SC_CAMOUFLAGE)){
+		data->hidden=true;
 		clif->clearunit_area(&sd->bl, 0);
-		clif_getareachar_char(&sd->bl, 0);
+		clif_getareachar_char(&sd->bl, 1);
 	}
 	return 1;
 }
 
-int status_change_end_postAura(int retVal, struct block_list* bl, enum sc_type type, int tid, const char* file, int line) {	//[Dastgir/Hercules]
+int status_change_end_preAura(struct block_list* bl, enum sc_type *type_, int *tid, const char* file, int *line) {	//[Dastgir/Hercules]
 	struct map_session_data *sd;
 	struct status_change *sc;
 	struct status_change_entry *sce;
-	int effect1, effect2, effect3;
-	if (retVal == 0){ return 0; }
-	if (bl == NULL){ return 0;  }
-	sc = status->get_sc(bl);
+	enum sc_type type = *type_;
+	struct hide_data* data;
+	
+	if (bl == NULL)
+		return 0;
+	
+	sc = &((TBL_PC*)bl)->sc;
 
 	if (type < 0 || type >= SC_MAX || !sc || !(sce = sc->data[type]))
 		return 0;
 
 	sd = BL_CAST(BL_PC, bl);
+	data = hd_search(sd);
 
-	if (sce->timer != tid && tid != INVALID_TIMER)
+	if (sce->timer != *tid && (*tid) != INVALID_TIMER)
 		return 0;
 
-
-	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
-	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
-	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
-
-	if (sd && (effect1<0 || effect2<0 || effect3<0) && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option==OPTION_INVISIBLE || type==SC_CHASEWALK || type==SC_CHASEWALK2 || type==SC_CAMOUFLAGE)){
-		pc_setglobalreg(sd,script->add_str("USERAURA"),effect1*-1);
-		pc_setglobalreg(sd,script->add_str("USERAURA1"),effect2*-1);
-		pc_setglobalreg(sd,script->add_str("USERAURA2"),effect3*-1);
+	if (sd && data->hidden==true && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CHASEWALK || sd->sc.option==OPTION_INVISIBLE || type==SC_CHASEWALK || type==SC_CHASEWALK2 || type==SC_CAMOUFLAGE)){
+		data->hidden=false;
 		clif_sendauras(sd, AREA_WOS);
 	}
 	return 1;
@@ -277,12 +281,14 @@ HPExport void plugin_init(void) {	//[Dastgir/Hercules]
 	status = GET_SYMBOL("status");
 	npc = GET_SYMBOL("npc");
 	mob = GET_SYMBOL("mob");
-
+	battle = GET_SYMBOL("battle");
+	nullpo = GET_SYMBOL("nullpo");
+	
 	addAtcommand("aura", aura);
 	addScriptCommand("aura", "i??", aura);
 	addHookPost("clif->spawn", clif_spawn_AuraPost);
 	addHookPost("clif->getareachar_unit", clif_getareachar_unit_AuraPost);
-	addHookPost("status->change_end_", status_change_end_postAura);
+	addHookPre("status->change_end_", status_change_end_preAura);
 	addHookPost("status->change_start", status_change_start_postAura);
 	addHookPost("clif->refresh",clif_sendauraself);
 }

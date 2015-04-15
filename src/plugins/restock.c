@@ -156,6 +156,7 @@ HPExport void plugin_init(void) {
 	storage = GET_SYMBOL("storage");
 	itemdb = GET_SYMBOL("itemdb");
 	guild = GET_SYMBOL("guild");
+	gstorage = GET_SYMBOL("gstorage");
 
 	addHookPre("pc->delitem", pc_restock_misc_pre);
 	addHookPost("pc->delitem", pc_restock_misc_post);

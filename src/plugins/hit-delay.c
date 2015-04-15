@@ -17,6 +17,7 @@ v1.1a- Fix Crash from @die.
 v1.2 - Teleportation does not cause delay.
 v1.3 - Players and Others are now separated.
 v1.3a- You can now warp once dead.
+v1.3b- Some Crash Fixes.
 */
 
 #include <stdio.h>
@@ -43,7 +44,7 @@ HPExport struct hplugin_info pinfo =
 {
 	"Warp Delay",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.3a",			// Plugin version
+	"1.3b",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -164,7 +165,6 @@ HPExport void plugin_init (void)
 	script = GET_SYMBOL("script");
 	skill = GET_SYMBOL("skill");
 	pc = GET_SYMBOL("pc");
-	strlib = GET_SYMBOL("strlib");
 	battle = GET_SYMBOL("battle");
 	timer = GET_SYMBOL("timer");
 	map = GET_SYMBOL("map");
@@ -176,6 +176,7 @@ HPExport void plugin_init (void)
 }
 
 HPExport void server_preinit (void) {
+	strlib = GET_SYMBOL("strlib");
 	addBattleConf("warp_delay",go_warp_delay_setting);
 	addBattleConf("warp_delay_mob",go_warp_delay_mob_setting);
 	addBattleConf("warp_delay_pet",go_warp_delay_pet_setting);

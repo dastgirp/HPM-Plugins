@@ -123,7 +123,6 @@ HPExport void plugin_init (void){
 	script = GET_SYMBOL("script");
 	skill = GET_SYMBOL("skill");
 	pc = GET_SYMBOL("pc");
-	strlib = GET_SYMBOL("strlib");
 	battle = GET_SYMBOL("battle");
 	timer = GET_SYMBOL("timer");
 	map = GET_SYMBOL("map");
@@ -135,6 +134,7 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
+	strlib = GET_SYMBOL("strlib");
 	addBattleConf("afk_timeout",afk_timeout_adjust);
 }
 
