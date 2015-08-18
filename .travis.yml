@@ -1,0 +1,36 @@
+language: c
+sudo: false
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-5
+
+before_script:
+  - uname -a
+  - chmod a+x travis-HPM.sh
+  - ./travis-HPM.sh getrepo || true
+  - ./travis-HPM.sh createdb ragnarok root
+  - ./travis-HPM.sh importdb ragnarok travis
+  - mysql -u root -e "SET PASSWORD FOR 'travis'@'localhost' = PASSWORD('travis');"
+
+script:
+  - ./travis-HPM.sh build $CONFIGURE_FLAGS
+  - ./travis-HPM.sh test ragnarok travis travis
+
+matrix:
+  exclude:
+  - env: ignore=this
+  include:
+  - compiler: gcc
+    env: CONFIGURE_FLAGS="--enable-debug --enable-sanitize=full CC=gcc-5 --disable-manager"
+  - compiler: gcc
+    env: CONFIGURE_FLAGS="--enable-debug --enable-sanitize=full CC=gcc-5 --disable-manager --disable-renewal"
+  
+notifications:
+  email: false
+  
+branches:
+  except:
+    - rathena
