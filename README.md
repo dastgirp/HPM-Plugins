@@ -1,6 +1,8 @@
 Hercules Plugins
 ===========
 
+Build Status: [![Build Status](https://travis-ci.org/dastgir/HPM-Plugins.svg?branch=master)](https://travis-ci.org/dastgir/HPM-plugins) 
+
 Hercules Plugins<br/>
 Plugin Owners:<br/>
   afk.c - Dastgir<br/>
