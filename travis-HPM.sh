@@ -57,6 +57,7 @@ case "$MODE" in
 		(cd tools && ./validateinterfaces.py silent) || aborterror "Interface validation error."
 		./configure $@ || aborterror "Configure error, aborting build."
 		make sql -j3 || aborterror "Build failed."
+		make plugin.HPMHooking -j3 || aborterror "Build failed."
 		make plugin.script_mapquit -j3 || aborterror "Build failed."
 		make plugin.Critical-Magic -j3 || aborterror "Build failed."
 		make plugin.afk -j3 || aborterror "Build failed."
@@ -100,6 +101,7 @@ log_db_ip: localhost
 EOF
 		[ $? -eq 0 ] || aborterror "Unable to import configuration, aborting tests."
 		ARGS="--load-script npc/dev/test.txt "
+		ARGS="--load-plugin HPMHooking $ARGS"
 		# Load All Custom Plugins
 		ARGS="--load-plugin Critical-Magic $ARGS"
 		ARGS="--load-plugin afk $ARGS"
