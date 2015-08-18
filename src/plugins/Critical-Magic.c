@@ -45,27 +45,23 @@ HPExport struct hplugin_info pinfo =
 
 //Configuration 
 int blue_red_critical = 1;		//1=Red,2=Blue
-int allowed_critical = 9;		//1=BL_PC,2=BL_HOM,4=BL_MER,8=BL_MOB,16=BL_ELEM (BitWise.) (Default:9 -> Player And Monster)
 /* Don't Change below this. */
 
 struct tmp_data {
-    struct block_list *src;
-    struct block_list *bl;
-    uint16 num[2];
+	struct block_list *src;
+	struct block_list *bl;
+	uint16 num[2];
 };
 
 int skill_mcri_hit(int tid, int64 tick, int id, intptr_t data)
 {
 	struct mob_data *md = (struct mob_data *)data;
 	struct tmp_data *tmpd;
-	if( !(tmpd = getFromMOBDATA(md,0)) ) {
-		CREATE(tmpd,struct tmp_data,1);
-		addToMOBDATA(md,tmpd,0,true);
-	}
+	tmpd = getFromMOBDATA(md,0);
 	if(tmpd!=NULL){
 		switch(blue_red_critical){	// 1 = red ; 2 = blue
 			case 1:
-				clif->damage(tmpd->src, tmpd->bl, 1, 1, id, 0, 10, 0);          
+				clif->damage(tmpd->src, tmpd->bl, 1, 1, id, 0, 10, 0);		  
 				break;
 			case 2:
 				clif->skill_damage(tmpd->src,tmpd->bl,timer->gettick(), 1, 1, id, 0, TK_STORMKICK, 1, 8);
@@ -77,10 +73,14 @@ int skill_mcri_hit(int tid, int64 tick, int id, intptr_t data)
 }
 int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 {
-    struct block_list *bl = map->id2bl(id);
-    if(bl!=NULL)
-        status_kill(bl);
-    return 0;
+	struct block_list *bl = map->id2bl(id);
+	struct block_list *src = (struct block_list *)data;
+	struct mob_data *md = BL_CAST(BL_MOB, bl);
+	if(bl!=NULL){
+		if (md != NULL)
+			mob->dead(md, src, 0)
+	}
+	return 0;
 }
 
 void magic_critical_attack(int *attack_type, struct block_list* src, struct block_list *dsrc, struct block_list *bl, uint16 *skill_id_, uint16 *skill_lv_, int64 *tick_, int *flag_, int *type_, struct Damage *dmg, int64 *damage_) {
@@ -104,7 +104,7 @@ void magic_critical_attack(int *attack_type, struct block_list* src, struct bloc
 		{
 			struct mob_data *md=NULL;
 			struct tmp_data *tmpd=NULL;
-			int i=0,d_=200;
+			int i=0, d_=200;
 			int64 _damage = 0,u_=0;
 			int num=abs(skill->get_num(skill_id,skill_lv));
 			damage = damage*2;
@@ -127,7 +127,7 @@ void magic_critical_attack(int *attack_type, struct block_list* src, struct bloc
 			{
 				damage = 1;
 				status->change_start(NULL, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, (int)u_, 2);   
-				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, (int)u_, 2);              
+				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, (int)u_, 2);			  
 				timer->add(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
 			}
 			clif->skill_nodamage(src,src,skill_id,skill_lv,1);
