@@ -3,22 +3,24 @@
 	Edited by Dastgir/Hercules
 */
 
+#include "common/hercules.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../map/clif.h"
-#include "../map/script.h"
-#include "../map/skill.h"
-#include "../map/pc.h"
-#include "../map/map.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "map/clif.h"
+#include "map/script.h"
+#include "map/skill.h"
+#include "map/pc.h"
+#include "map/map.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
 	"AutoNext Script Command",		// Plugin name
@@ -60,12 +62,6 @@ BUILDIN(autonext)
 /* Server Startup */
 HPExport void plugin_init (void) 
 {
-	clif = GET_SYMBOL("clif");
-	script = GET_SYMBOL("script");
-	skill = GET_SYMBOL("skill");
-	pc = GET_SYMBOL("pc");
-	strlib = GET_SYMBOL("strlib");
-
 	addScriptCommand("autonext","i",autonext);
 }
 

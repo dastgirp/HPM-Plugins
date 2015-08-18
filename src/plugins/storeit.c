@@ -7,17 +7,19 @@ Original Made by: Akinari
 v 1.0 Initial Release
 Stores all item except equipment
 */
+#include "common/hercules.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../common/HPMi.h"
-#include "../common/mmo.h"
-#include "../map/clif.h"
-#include "../map/atcommand.h"
-#include "../map/storage.h"
-#include "../map/pc.h"
+#include "common/HPMi.h"
+#include "common/mmo.h"
+#include "map/clif.h"
+#include "map/atcommand.h"
+#include "map/storage.h"
+#include "map/pc.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
 	"@storeit",			// Plugin name
@@ -68,11 +70,6 @@ ACMD(storeit) {
 
 /* run when server starts */
 HPExport void plugin_init (void) {
-	storage = GET_SYMBOL("storage");
-	clif = GET_SYMBOL("clif");
-	atcommand = GET_SYMBOL("atcommand");
-	pc = GET_SYMBOL("pc");
-	
     addAtcommand("storeit",storeit);
 }
 

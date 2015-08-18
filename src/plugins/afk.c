@@ -18,27 +18,29 @@ prontera	mapflag	noafk
 ^ Add Above to any script, and it will make prontera to be noafk zone.
 */
 
+#include "common/hercules.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/timer.h"
-#include "../common/mapindex.h"
-#include "../map/battle.h"
-#include "../map/clif.h"
-#include "../map/script.h"
-#include "../map/skill.h"
-#include "../map/pc.h"
-#include "../map/map.h"
-#include "../map/status.h"
-#include "../map/channel.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/timer.h"
+#include "common/mapindex.h"
+#include "map/battle.h"
+#include "map/clif.h"
+#include "map/script.h"
+#include "map/skill.h"
+#include "map/pc.h"
+#include "map/map.h"
+#include "map/status.h"
+#include "map/channel.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
 {
@@ -118,27 +120,14 @@ void parse_noafk_mapflag(const char *name, char *w3, char *w4, const char* start
 
 /* Server Startup */
 HPExport void plugin_init (void){
-	iMalloc = GET_SYMBOL("iMalloc");
-	clif = GET_SYMBOL("clif");
-	script = GET_SYMBOL("script");
-	skill = GET_SYMBOL("skill");
-	pc = GET_SYMBOL("pc");
-	battle = GET_SYMBOL("battle");
-	timer = GET_SYMBOL("timer");
-	map = GET_SYMBOL("map");
-	status = GET_SYMBOL("status");
-	channel = GET_SYMBOL("channel");
-
 	addAtcommand("afk",afk);
 	addHookPre("npc->parse_unknown_mapflag",parse_noafk_mapflag);
 }
 
 HPExport void server_preinit (void) {
-	strlib = GET_SYMBOL("strlib");
 	addBattleConf("afk_timeout",afk_timeout_adjust);
 }
 
 HPExport void server_online (void) {
 	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
-

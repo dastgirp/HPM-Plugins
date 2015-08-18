@@ -2,6 +2,8 @@
 	By Dastgir/Hercules
 */
 
+#include "common/hercules.h"
+
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
@@ -9,27 +11,27 @@
 #include <string.h>
 #include <time.h>
 
-#include "../common/cbasetypes.h"
-#include "../common/db.h"
-#include "../common/ers.h"
-#include "../common/malloc.h"
-#include "../common/nullpo.h"
-#include "../common/showmsg.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/timer.h"
-#include "../common/utils.h"
-#include "../map/battle.h"
-#include "../map/clif.h"
-#include "../map/map.h"
-#include "../map/mob.h"
-#include "../map/pc.h"
-#include "../map/script.h"
-#include "../map/status.h"
-#include "../map/unit.h"
-#include "../map/npc.h"
+#include "common/cbasetypes.h"
+#include "common/db.h"
+#include "common/ers.h"
+#include "common/malloc.h"
+#include "common/nullpo.h"
+#include "common/showmsg.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/timer.h"
+#include "common/utils.h"
+#include "map/battle.h"
+#include "map/clif.h"
+#include "map/map.h"
+#include "map/mob.h"
+#include "map/pc.h"
+#include "map/script.h"
+#include "map/status.h"
+#include "map/unit.h"
+#include "map/npc.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
 	"Duplicate NPC's Command",		// Plugin name
@@ -205,23 +207,6 @@ BUILDIN(duplicateremove)
 /* Server Startup */
 HPExport void plugin_init (void) 
 {
-	DB = GET_SYMBOL("DB");
-	iMalloc = GET_SYMBOL("iMalloc");
-	mapindex = GET_SYMBOL("mapindex");
-	strlib = GET_SYMBOL("strlib");
-	timer = GET_SYMBOL("timer");
-	atcommand = GET_SYMBOL("atcommand");
-	battle = GET_SYMBOL("battle");
-	clif = GET_SYMBOL("clif");
-	map = GET_SYMBOL("map");
-	mapit = GET_SYMBOL("mapit");
-	mob = GET_SYMBOL("mob");
-	npc = GET_SYMBOL("npc");
-	pc = GET_SYMBOL("pc");
-	script = GET_SYMBOL("script");
-	status = GET_SYMBOL("status");
-	unit = GET_SYMBOL("unit");
-
 	addScriptCommand("duplicatenpc", "ssssiii???", duplicatenpc);
 	addScriptCommand("duplicateremove", "?", duplicateremove);
 

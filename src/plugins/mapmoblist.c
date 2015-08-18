@@ -3,25 +3,27 @@
 	Edited by Dastgir/Hercules
 */
 
+#include "common/hercules.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/mapindex.h"
-#include "../map/clif.h"
-#include "../map/script.h"
-#include "../map/skill.h"
-#include "../map/pc.h"
-#include "../map/map.h"
-#include "../map/mob.h"
-#include "../map/battle.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/mapindex.h"
+#include "map/clif.h"
+#include "map/script.h"
+#include "map/skill.h"
+#include "map/pc.h"
+#include "map/map.h"
+#include "map/mob.h"
+#include "map/battle.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
 	"@mapmoblist Atcommand",		// Plugin name
@@ -115,16 +117,6 @@ ACMD(mapmoblist)
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	clif = GET_SYMBOL("clif");
-	script = GET_SYMBOL("script");
-	battle = GET_SYMBOL("battle");
-	skill = GET_SYMBOL("skill");
-	pc = GET_SYMBOL("pc");
-	map = GET_SYMBOL("map");
-	mob = GET_SYMBOL("mob");
-	mapindex = GET_SYMBOL("mapindex");
-	mapit = GET_SYMBOL("mapit");
-	strlib = GET_SYMBOL("strlib");
 	addAtcommand("mapmoblist",mapmoblist);
 }
 

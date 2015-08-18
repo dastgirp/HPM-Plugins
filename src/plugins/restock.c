@@ -3,33 +3,34 @@
  -- By Dastgir/Hercules
  Please Load NPC- Restock.txt too
 */
+#include "common/hercules.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/sql.h"
-#include "../common/utils.h"
-#include "../common/nullpo.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/sql.h"
+#include "common/utils.h"
+#include "common/nullpo.h"
 
-#include "../map/mob.h"
-#include "../map/map.h"
-#include "../map/clif.h"
-#include "../map/pc.h"
-#include "../map/script.h"
-#include "../map/elemental.h"
-#include "../map/npc.h"
-#include "../map/status.h"
-#include "../map/storage.h"
-#include "../map/itemdb.h"
-#include "../map/guild.h"
+#include "map/mob.h"
+#include "map/map.h"
+#include "map/clif.h"
+#include "map/pc.h"
+#include "map/script.h"
+#include "map/elemental.h"
+#include "map/npc.h"
+#include "map/status.h"
+#include "map/storage.h"
+#include "map/itemdb.h"
+#include "map/guild.h"
 
-#include "../common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
+#include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {
 	"Restock System",// Plugin name
@@ -146,18 +147,6 @@ BUILDIN(restock_item){
 }
 
 HPExport void plugin_init(void) {
-	mob = GET_SYMBOL("mob");
-	script = GET_SYMBOL("script");
-	clif = GET_SYMBOL("clif");
-	pc = GET_SYMBOL("pc");
-	map = GET_SYMBOL("map");
-	npc = GET_SYMBOL("npc");
-	status = GET_SYMBOL("status");
-	storage = GET_SYMBOL("storage");
-	itemdb = GET_SYMBOL("itemdb");
-	guild = GET_SYMBOL("guild");
-	gstorage = GET_SYMBOL("gstorage");
-
 	addHookPre("pc->delitem", pc_restock_misc_pre);
 	addHookPost("pc->delitem", pc_restock_misc_post);
 	addScriptCommand("restock_item","iii",restock_item);

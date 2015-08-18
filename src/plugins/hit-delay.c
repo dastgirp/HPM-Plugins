@@ -19,26 +19,27 @@ v1.3 - Players and Others are now separated.
 v1.3a- You can now warp once dead.
 v1.3b- Some Crash Fixes.
 */
+#include "common/hercules.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/timer.h"
-#include "../common/mapindex.h"
-#include "../map/clif.h"
-#include "../map/script.h"
-#include "../map/skill.h"
-#include "../map/pc.h"
-#include "../map/map.h"
-#include "../map/battle.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/timer.h"
+#include "common/mapindex.h"
+#include "map/clif.h"
+#include "map/script.h"
+#include "map/skill.h"
+#include "map/pc.h"
+#include "map/map.h"
+#include "map/battle.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
 {
@@ -160,23 +161,11 @@ void go_warp_delay_merc_setting(const char *val) {
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	iMalloc = GET_SYMBOL("iMalloc");
-	clif = GET_SYMBOL("clif");
-	script = GET_SYMBOL("script");
-	skill = GET_SYMBOL("skill");
-	pc = GET_SYMBOL("pc");
-	battle = GET_SYMBOL("battle");
-	timer = GET_SYMBOL("timer");
-	map = GET_SYMBOL("map");
-	mapindex = GET_SYMBOL("mapindex");
-	
-
 	addHookPre("pc->setpos",pc_setpos_delay);
 	addHookPre("pc->damage",pc_damage_received);
 }
 
 HPExport void server_preinit (void) {
-	strlib = GET_SYMBOL("strlib");
 	addBattleConf("warp_delay",go_warp_delay_setting);
 	addBattleConf("warp_delay_mob",go_warp_delay_mob_setting);
 	addBattleConf("warp_delay_pet",go_warp_delay_pet_setting);

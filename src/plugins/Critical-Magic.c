@@ -9,30 +9,31 @@
 v1.0a - Fix Warnings on Windows
 v1.0b - Fix Bug of double drop
 */
+#include "common/hercules.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../common/HPMi.h"
-#include "../common/malloc.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/strlib.h"
-#include "../common/timer.h"
-#include "../common/mapindex.h"
-#include "../common/utils.h"
-#include "../map/clif.h"
-#include "../map/script.h"
-#include "../map/skill.h"
-#include "../map/pc.h"
-#include "../map/map.h"
-#include "../map/battle.h"
-#include "../map/status.h"
-#include "../map/mob.h"
-#include "../map/npc.h"
+#include "common/HPMi.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/strlib.h"
+#include "common/timer.h"
+#include "common/mapindex.h"
+#include "common/utils.h"
+#include "map/clif.h"
+#include "map/script.h"
+#include "map/skill.h"
+#include "map/pc.h"
+#include "map/map.h"
+#include "map/battle.h"
+#include "map/status.h"
+#include "map/mob.h"
+#include "map/npc.h"
 
-#include "../common/HPMDataCheck.h"
+#include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
 {
@@ -46,8 +47,6 @@ HPExport struct hplugin_info pinfo =
 int blue_red_critical = 1;		//1=Red,2=Blue
 int allowed_critical = 9;		//1=BL_PC,2=BL_HOM,4=BL_MER,8=BL_MOB,16=BL_ELEM (BitWise.) (Default:9 -> Player And Monster)
 /* Don't Change below this. */
-
-
 
 struct tmp_data {
     struct block_list *src;
@@ -156,25 +155,10 @@ void critical_color(const char *val) {
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	iMalloc = GET_SYMBOL("iMalloc");
-	clif = GET_SYMBOL("clif");
-	script = GET_SYMBOL("script");
-	skill = GET_SYMBOL("skill");
-	pc = GET_SYMBOL("pc");
-	battle = GET_SYMBOL("battle");
-	timer = GET_SYMBOL("timer");
-	map = GET_SYMBOL("map");
-	mapindex = GET_SYMBOL("mapindex");
-	status = GET_SYMBOL("status");
-	mob = GET_SYMBOL("mob");
-	npc = GET_SYMBOL("npc");
-	
-
 	addHookPre("skill->attack_display_unknown",magic_critical_attack);
 }
 
 HPExport void server_preinit (void) {
-	strlib = GET_SYMBOL("strlib");
 	addBattleConf("magic_critical_color",critical_color);
 }
 

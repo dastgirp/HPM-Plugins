@@ -1,28 +1,30 @@
 // AuraSet (By Dastgir/ Hercules) Plugin v1.4a
 
+#include "common/hercules.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "../common/HPMi.h"
-#include "../common/mmo.h"
-#include "../common/socket.h"
-#include "../common/malloc.h"
-#include "../common/strlib.h"
-#include "../common/nullpo.h"
-#include "../common/timer.h"
+#include "common/HPMi.h"
+#include "common/mmo.h"
+#include "common/socket.h"
+#include "common/malloc.h"
+#include "common/strlib.h"
+#include "common/nullpo.h"
+#include "common/timer.h"
 
-#include "../map/battle.h"
-#include "../map/script.h"
-#include "../map/pc.h"
-#include "../map/clif.h"
-#include "../map/status.h"
-#include "../map/npc.h"
-#include "../map/mob.h"
-#include "../map/map.h"
+#include "map/battle.h"
+#include "map/script.h"
+#include "map/pc.h"
+#include "map/clif.h"
+#include "map/status.h"
+#include "map/npc.h"
+#include "map/mob.h"
+#include "map/map.h"
 
-#include "../common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
+#include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {	//[Dastgir/Hercules]
 	"AuraSet",		// Plugin name
@@ -262,22 +264,6 @@ void clif_sendauraself(struct map_session_data *sd){
 
 /* run when server starts */
 HPExport void plugin_init(void) {	//[Dastgir/Hercules]
-
-	/* core interfaces */
-	iMalloc = GET_SYMBOL("iMalloc");
-
-	/* map-server interfaces */
-	script = GET_SYMBOL("script");
-	clif = GET_SYMBOL("clif");
-	pc = GET_SYMBOL("pc");
-	strlib = GET_SYMBOL("strlib");
-	map = GET_SYMBOL("map");
-	status = GET_SYMBOL("status");
-	npc = GET_SYMBOL("npc");
-	mob = GET_SYMBOL("mob");
-	battle = GET_SYMBOL("battle");
-	nullpo = GET_SYMBOL("nullpo");
-	
 	addAtcommand("aura", aura);
 	addScriptCommand("aura", "i??", aura);
 	addHookPost("clif->spawn", clif_spawn_AuraPost);
