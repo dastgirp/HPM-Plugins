@@ -78,7 +78,7 @@ int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 	struct mob_data *md = BL_CAST(BL_MOB, bl);
 	if(bl!=NULL){
 		if (md != NULL)
-			mob->dead(md, src, 0)
+			mob->dead(md, src, 0);
 	}
 	return 0;
 }
