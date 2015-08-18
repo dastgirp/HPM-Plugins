@@ -7,6 +7,7 @@
 	2 = Red Critical
 	
 v1.0a - Fix Warnings on Windows
+v1.0b - Fix Bug of double drop
 */
 
 #include <stdio.h>
@@ -37,11 +38,17 @@ HPExport struct hplugin_info pinfo =
 {
 	"Critical Magic Attack",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0a",			// Plugin version
+	"1.1",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-int blue_red_critical = 1;		//1=Blue,2=Red
+//Configuration 
+int blue_red_critical = 1;		//1=Red,2=Blue
+int allowed_critical = 9;		//1=BL_PC,2=BL_HOM,4=BL_MER,8=BL_MOB,16=BL_ELEM (BitWise.) (Default:9 -> Player And Monster)
+/* Don't Change below this. */
+
+
+
 struct tmp_data {
     struct block_list *src;
     struct block_list *bl;
@@ -72,13 +79,8 @@ int skill_mcri_hit(int tid, int64 tick, int id, intptr_t data)
 int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 {
     struct block_list *bl = map->id2bl(id);
-    struct block_list *src = (struct block_list *)data;
-    struct mob_data *md = BL_CAST(BL_MOB, bl);
     if(bl!=NULL)
-    {
-        if (md != NULL) { mob->dead(md,src,0); }                     
         status_kill(bl);
-    }
     return 0;
 }
 
