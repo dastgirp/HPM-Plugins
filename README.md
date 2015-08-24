@@ -1,7 +1,7 @@
 Hercules Plugins
 ===========
 
-Build Status: [![Build Status](https://travis-ci.org/dastgir/HPM-Plugins.svg?branch=master)](https://travis-ci.org/dastgir/HPM-plugins) 
+Build Status: [![Build Status](https://travis-ci.org/dastgir/HPM-Plugins.svg?branch=master)](https://travis-ci.org/dastgir/HPM-Plugins) 
 
 Hercules Plugins<br/>
 Plugin Owners:<br/>
