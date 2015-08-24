@@ -11,6 +11,7 @@ Plugin Owners:<br/>
   Critical-Magic.c - Dastgir<br/>
   dispbottom2.c - Dastgir<br/>
   hit-delay.c - Dastgir<br/>
+  itemmap.c - Xantara (Converted by Dastgir)<br/>
   mapmoblist.c - Shikazu (Updated by Dastgir)<br/>
   npc-duplicate.c Dastgir<br/>
   restock.c - Dastgir<br/>

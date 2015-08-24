@@ -1,4 +1,5 @@
 // AuraSet (By Dastgir/ Hercules) Plugin v1.4a
+// Recommended: Use via Repo: https://raw.githubusercontent.com/dastgir/HPM-Plugins/master/src/plugins/auraset.c
 
 #include "common/hercules.h"
 
