@@ -3,15 +3,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "common/HPMi.h"
 #include "common/nullpo.h"
+#include "common/malloc.h"
+#include "common/mmo.h"
 
 #include "map/atcommand.h"
 #include "map/battle.h"
 #include "map/clif.h"
 #include "map/map.h"
 #include "map/mob.h"
+#include "map/pc.h"
 #include "common/HPMDataCheck.h"
 
 
@@ -31,6 +35,7 @@ ACMD(monster_nde)
 	char name[NAME_LENGTH];
 	char monster[NAME_LENGTH];
 	char eventname[EVENT_NAME_LENGTH] = "";
+	char atcmd_output[256];
 	int mob_id;
 	int number = 0;
 	int count;
@@ -81,9 +86,9 @@ ACMD(monster_nde)
 	if (battle->bc->atc_spawn_quantity_limit && number > battle->bc->atc_spawn_quantity_limit)
 		number = battle->bc->atc_spawn_quantity_limit;
 
-	if (strcmpi(info->command, "monstersmall") == 0)
+	if (strcmpi(command, "monstersmall") == 0)
 		size = SZ_MEDIUM;
-	else if (strcmpi(info->command, "monsterbig") == 0)
+	else if (strcmpi(command, "monsterbig") == 0)
 		size = SZ_BIG;
 	else
 		size = SZ_SMALL;
@@ -129,6 +134,7 @@ int mob_dead_nde(struct mob_data *md, struct block_list *src, int *type) {
 	if (tmpd != NULL)
 		if (tmpd->no_drop_exp)
 			*type = 3;
+	return 3;
 }
 
 /* Server Startup */
