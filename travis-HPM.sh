@@ -69,6 +69,9 @@ case "$MODE" in
 		make plugin.npc-duplicate -j3 || aborterror "Build failed."
 		make plugin.restock -j3 || aborterror "Build failed."
 		make plugin.storeit -j3 || aborterror "Build failed."
+		#24-08-2015
+		make plugin.itemmap -j3 || aborterror "Build failed."
+		make plugin.monster_nodropexp -j3 || aborterror "Build failed."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
@@ -113,6 +116,9 @@ EOF
 		ARGS="--load-plugin npc-duplicate $ARGS"
 		ARGS="--load-plugin restock $ARGS"
 		ARGS="--load-plugin storeit $ARGS"
+		#24-08-2015
+		ARGS="--load-plugin itemmap $ARGS"
+		ARGS="--load-plugin monster_nodropexp $ARGS"
 		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
 		echo "Running Hercules with command line: ./map-server --run-once $ARGS"
 		ASAN_OPTIONS=detect_leaks=0 ./map-server --run-once $ARGS 2>runlog.txt || aborterror "Test failed."
