@@ -14,6 +14,7 @@ v 1.0 Initial Release
 #include <string.h>
 
 #include "common/HPMi.h"
+#include "common/showmsg.h"
 
 #include "map/atcommand.h"
 #include "map/battleground.h"
