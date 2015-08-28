@@ -197,7 +197,7 @@ int guild_invite_permission(struct map_session_data *sd, struct map_session_data
 			return 0;
 		}
 	}
-	return;
+	return 0;
 }
 
 int guild_leave_permission(struct map_session_data* sd, int *guild_id, int *account_id, int *char_id, const char* mes) {
@@ -210,6 +210,7 @@ int guild_leave_permission(struct map_session_data* sd, int *guild_id, int *acco
 			return 0;
 		}
 	}
+	return 0;
 }
 
 /* Server Startup */

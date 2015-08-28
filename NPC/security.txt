@@ -5,6 +5,9 @@
 -	script	Security	-1,{
 OnInit:
 	bindatcmd("security",strnpcinfo(0)+"::OnSecurity",0,99);
+	/* Config */
+	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
+	.ban_hour = 3;		//Hours to ban
 	end;
 	
 OnPCLoginEvent:
@@ -187,8 +190,4 @@ OnGMMenu:
 			close;
 	}
 	close;
-	
-OnInit:
-	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
-	.ban_hour = 3;		//Hours to ban
 }
