@@ -121,7 +121,8 @@ EOF
 		ARGS="--load-plugin monster_nodropexp $ARGS"
 		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
 		echo "Running Hercules with command line: ./map-server --run-once $ARGS"
-		ASAN_OPTIONS=detect_leaks=0 ./map-server --run-once $ARGS 2>runlog.txt || aborterror "Test failed."
+		ASAN_OPTIONS=detect_leaks=0 ./map-server --run-once $ARGS 2>runlog.txt
+		export errcode=$?
 		export teststr=$(cat runlog.txt)
 		if [[ -n "${teststr}" ]]; then
 			echo "Sanitizer errors found."
@@ -129,6 +130,10 @@ EOF
 			aborterror "Sanitize errors found."
 		else
 			echo "No sanitizer errors found."
+		fi
+		if [ ${errcode} -ne 0 ]; then
+			echo "server terminated with exit code ${errcode}"
+			aborterror "Test failed"
 		fi
 		;;
 	getrepo)
