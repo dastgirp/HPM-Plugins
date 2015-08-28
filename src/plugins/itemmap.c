@@ -191,28 +191,33 @@ ACMD(itemmap) {
 	memset(party_name, '\0', sizeof(party_name));
 	memset(guild_name, '\0', sizeof(guild_name));
 
-	if (strstr(command, "1") != NULL)
+	if (!strcmpi(info->command,"itemmap_p"))
 		get_type = 1;
-	else if (strstr(command, "2") != NULL)
+	else if (!strcmpi(info->command, "itemmap_g"))
 		get_type = 2;
 
-	if (!message || !*message || (
-		get_type == 0 && sscanf(message, "\"%99[^\"]\" %d", item_name, &amount) < 1 
-					  && sscanf(message, "%99s %d", item_name, &amount) < 1 )
+	if ( (!message || !*message) ||
+		( get_type == 0 &&
+		(sscanf(message, "\"%99[^\"]\" %d", item_name, &amount) < 1) &&
+		(sscanf(message, "%99s %d", item_name, &amount) < 1) )
 	) {
 		clif->message(fd, "Please, enter an item name/id (usage: @itemmap <item name or ID> {amount}).");
 		return false;
 	}
-	if ( get_type == 1 && sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, party_name) < 2 
-					   && sscanf(message, "%99s %d, %23[^\n]", item_name, &amount, party_name) < 2 )
-	{
-		clif->message(fd, "Please, enter an item name/id (usage: @itemmap1 <item id/name> <amount>, <party name>).");
+	if ( (!message || !*message) ||
+		( get_type == 1 &&
+		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, party_name) < 2) &&
+		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, party_name) < 2) )
+	) {
+		clif->message(fd, "Please, enter an item name/id (usage: @itemmap_p <item id/name> <amount> <party name>).");
 		return false;
 	}
-	if ( get_type == 2 && sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2 
-					   && sscanf(message, "%99s %d, %23[^\n]", item_name, &amount, guild_name) < 2 )
-	{
-		clif->message(fd, "Please, enter an item name/id (usage: @itemmap2 <item id/name> <amount>, <guild name>).");
+	if ( (!message || !*message) ||
+		( get_type == 2 &&
+		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2) &&
+		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, guild_name) < 2) )
+	) {
+		clif->message(fd, "Please, enter an item name/id (usage: @itemmap_g <item id/name> <amount> <guild name>).");
 		return false;
 	}
 	if ((item_data = itemdb->search_name(item_name)) == NULL &&
@@ -275,10 +280,9 @@ ACMD(itemmap) {
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addAtcommand("itemmap",itemmap);
-	addAtcommand("itemmap1",itemmap);
-	addAtcommand("itemmap2",itemmap);
-	addAtcommand("itemmap3",itemmap);
+	addAtcommand("itemmap",itemmap);	// All
+	addAtcommand("itemmap_p",itemmap);	// Party
+	addAtcommand("itemmap_g",itemmap);	// Guild
 
 	addScriptCommand("getitem_map","iis??",getitem_map);
 }
