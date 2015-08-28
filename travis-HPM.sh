@@ -120,7 +120,11 @@ EOF
 		ARGS="--load-plugin itemmap $ARGS"
 		ARGS="--load-plugin monster_nodropexp $ARGS"
 		# 28-08-2015
+		ARGS="--load-plugin security $ARGS"
+		# Scripts
+		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
+		ARGS="--load-script NPC/security.txt $ARGS"
 		# Hercules
 		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
 		echo "Running Hercules with command line: ./map-server --run-once $ARGS"

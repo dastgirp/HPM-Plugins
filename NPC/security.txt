@@ -1,0 +1,190 @@
+-	script	Security	-1,{
+OnInit:
+	bindatcmd("security",strnpcinfo(0)+"::OnSecurity",0,99);
+	end;
+	
+OnPCLoginEvent:
+	if ($security){
+		if (!#security){
+			callsub OnPlayerMenu;
+		}
+	}
+	close;
+
+OnSecurity:
+	if (getgmlevel()){
+		mes "[^FFA500 Security System ^000000]";
+		mes "Hello GM, How may I help you?";
+		callsub OnGMMenu;
+		end;
+	}
+	
+OnPlayerMenu:
+	// Don't Change Order.
+	setarray .@restrictions$,"Can't Drop Item",			//	1
+				"Can't receive Trade Requests",			//	2
+				"Can't send Trade Request",				//	4
+				"Can't open Guild Storage",				//	8
+				"Can't take item from guild storage",	//	16
+				"Can't add item to guild storage",		//	32
+				"Can't sell items",						//	64
+				"Can't use Vending",					//	128
+				"Can't delete items by any means",		//	256
+				"Can't buy items",						//	512
+				"Can't Send Guild Invite",				//	1024
+				"Can't Receive Guild Invite",			//	2048
+				"Can't Leave the guild";				//	4096
+	while (1){
+		mes "[^FFA500 Security System ^000000]";
+		mes "Security Status: "+ ((#security>0)?"^00FF00On^000000":"^FF0000Off^000000");
+		mes "Status: ";
+		for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++)
+			mes .@restrictions$[.@i] + " - "+ ((#secure_opt&(1<<.@i))?"^00FF00On^000000":"^FF0000Off^000000");
+		switch(select("Info",((#security>0)?"Dea":"A")+"ctivate the Security","Settings","Close")){
+			case 4:
+				close;
+			case 3:
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				if (!#security){
+					mes "^FF0000You don't have security enabled^000000";
+					next;
+					break;
+				}
+				mes "Enter your ^FF0000OLD^000000 Security Code";
+				mes "^FF0000- Wrong Code more than "+ .max_attempt +" times can result into ban.^000000";
+				mes "Chances Left: "+ (.max_attempt-security_maxtry);
+				input .@security;
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				if (#secure_code != .@security){
+					mes "Wrong Code...";
+					security_maxtry++;
+					if (security_maxtry >= .max_attempt){
+						atcommand "@ban +"+.ban_hour+"h \""+strcharinfo(0)+"\"";	//Ban the Player for 1 hour.
+						end;
+					}
+					close;
+				}
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				mes "Choose Restrictions to Enable/Disable";
+				.@menu$ = "";
+				for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++){
+					.@content$ = .@restrictions$[.@i] + " - "+ ((#secure_opt&(1<<.@i))?"^00FF00On^000000":"^FF0000Off^000000");
+					.@menu$ = .@menu$ + "" + .@content$ +":";
+					mes .@content$;
+				}
+				.@menu = select(.@menu$)-1;
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				mes .@restrictions$[.@i];
+				mes "Are you sure you want to "+ ((#secure_opt&(1<<.@menu))?"Disable":"Enable") +" this?";
+				if (select("Yes:No..") == 2){
+					next;
+					mes "[^FFA500 Security System ^000000]";
+					mes "As you wish..";
+					next;
+					break;
+				}
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				mes "Setting "+ ((#secure_opt&(1<<.@menu))?"Disabled":"Enabled");
+				if (#secure_opt&(1<<.@menu))
+					#secure_opt -= 1<<.@menu;
+				else
+					#secure_opt += 1<<.@menu;
+				next;
+				break;
+			case 2:
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				if (#security){
+					mes "Enter your ^FF0000OLD^000000 Security Code";
+					mes "^FF0000- Wrong Code more than "+ .max_attempt +" times can result into ban.^000000";
+					mes "Chances Left: "+ (.max_attempt-security_maxtry);
+					input .@security;
+					next;
+					mes "[^FFA500 Security System ^000000]";
+					if (#secure_code != .@security){
+						mes "Wrong Code...";
+						security_maxtry++;
+						if (security_maxtry >= .max_attempt){
+							atcommand "@ban +"+.ban_hour+"h \""+strcharinfo(0)+"\"";	//Ban the Player for 1 hour.
+							end;
+						}
+						close;
+					}
+					mes "Security Deactivated.";
+					#security = 0;
+					security_maxtry = 0;
+					close;
+				}
+				mes "Insert your ^00FF00NEW^000000 Security Code";
+				mes "^FF0000- Must be 4-8 Digits^000000";
+				mes "^FF0000- Only numerics are allowed(0-9)^000000";
+				mes "^FF0000- Don't use 0 in beginning of security code^000000";
+				input .@security;
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				if (.@security < 1000 || .@security > 99999999){
+					mes "Security code must be of 4-8 digits.";
+					next;
+					break;
+				}
+				mes "^00FF00 Re-insert the Security Code ^000000";
+				input .@secu2;
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				if (.@secu2 != .@security){
+					mes "Security Code Mismatch..";
+					next;
+					break;
+				}
+				mes "Security Code Set";
+				#secure_code = .@security;
+				#security = 1;
+				next;
+				break;
+			case 1:
+				next;
+				mes "[^FFA500 Security System ^000000]";
+				mes "Security Code can be of 4-8 Digits.";
+				mes "When Security Code is enabled, you can do following settings as a security step:";
+				for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++)
+					mes "^FF0000- "+ .@restrictions$[.@i] +"^000000";
+				next;
+				break;
+		}
+	}
+	close;
+	
+OnGMMenu:
+	switch(select("Player Menu: Settings")){
+		case 1:
+			next;
+			callsub OnPlayerMenu;
+			end;
+		case 2:
+			next;
+			mes "[^FFA500 Security System ^000000]";
+			mes "Force Player to set @security?";
+			mes "Status: "+  (($security>0)?"^00FF00On^000000":"^FF0000Off^000000");
+			.@menu = select((($security>0)?"^00FF00Disable^000000":"^FF0000Enable^000000"),"Cancel");
+			if (.@menu == 2)
+				close;
+			next;
+			mes "[^FFA500 Security System ^000000]";
+			if ($security)
+				$security = 0;
+			else
+				$security = 1;
+			mes "Force Security Setting Set.";
+			close;
+	}
+	close;
+	
+OnInit:
+	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
+	.ban_hour = 3;		//Hours to ban
+}
