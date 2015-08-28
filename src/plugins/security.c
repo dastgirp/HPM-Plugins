@@ -1,3 +1,8 @@
+/*
+	By Dastgir/Hercules
+	Use NPC too along with this plugin(Found in https://github.com/dastgir/HPM-Plugins)
+*/
+
 #include "common/hercules.h"
 
 #include <stdio.h>
