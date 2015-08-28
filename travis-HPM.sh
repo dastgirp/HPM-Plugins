@@ -72,6 +72,8 @@ case "$MODE" in
 		#24-08-2015
 		make plugin.itemmap -j3 || aborterror "Build failed."
 		make plugin.monster_nodropexp -j3 || aborterror "Build failed."
+		#28-08-2015
+		make plugin.security -j3 || aborterror "Build failed."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
