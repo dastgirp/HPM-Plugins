@@ -76,6 +76,7 @@ case "$MODE" in
 		make plugin.security -j3 || aborterror "Build failed."
 		#10-09-2015
 		make plugin.@arealoot -j3 || aborterror "Build failed."
+		make plugin.whosell -j3 || aborterror "Build failed."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
@@ -127,6 +128,7 @@ EOF
 		ARGS="--load-plugin security $ARGS"
 		# 10-09-2015
 		ARGS="--load-plugin @arealoot $ARGS"
+		ARGS="--load-plugin whosell $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
