@@ -74,6 +74,8 @@ case "$MODE" in
 		make plugin.monster_nodropexp -j3 || aborterror "Build failed."
 		#28-08-2015
 		make plugin.security -j3 || aborterror "Build failed."
+		#10-09-2015
+		make plugin.@arealoot -j3 || aborterror "Build failed."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
@@ -123,6 +125,8 @@ EOF
 		ARGS="--load-plugin monster_nodropexp $ARGS"
 		# 28-08-2015
 		ARGS="--load-plugin security $ARGS"
+		# 10-09-2015
+		ARGS="--load-plugin @arealoot $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
@@ -130,7 +134,7 @@ EOF
 		# Hercules
 		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
 		echo "Running Hercules with command line: ./map-server --run-once $ARGS"
-		ASAN_OPTIONS=detect_leaks=0 ./map-server --run-once $ARGS 2>runlog.txt
+		./map-server --run-once $ARGS 2>runlog.txt
 		export errcode=$?
 		export teststr=$(cat runlog.txt)
 		if [[ -n "${teststr}" ]]; then
