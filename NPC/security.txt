@@ -8,6 +8,7 @@ OnInit:
 	/* Config */
 	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
 	.ban_hour = 3;		//Hours to ban
+	.allowed = 1|2|4|8|16|32|64|128|256|512|1024|2048|4096;		//Allowed Settings..
 	end;
 	
 OnPCLoginEvent:
@@ -45,8 +46,11 @@ OnPlayerMenu:
 		mes "[^FFA500 Security System ^000000]";
 		mes "Security Status: "+ ((#security>0)?"^00FF00On^000000":"^FF0000Off^000000");
 		mes "Status: ";
-		for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++)
-			mes .@restrictions$[.@i] + " - "+ ((#secure_opt&(1<<.@i))?"^00FF00On^000000":"^FF0000Off^000000");
+		for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++){
+			.@bit = (1<<.@i);
+			if (.allowed&.@bit)
+				mes .@restrictions$[.@i] + " - "+ ((#secure_opt&.@bit)?"^00FF00On^000000":"^FF0000Off^000000");
+		}
 		switch(select("Info",((#security>0)?"Dea":"A")+"ctivate the Security","Settings","Close")){
 			case 4:
 				close;
@@ -77,15 +81,22 @@ OnPlayerMenu:
 				mes "[^FFA500 Security System ^000000]";
 				mes "Choose Restrictions to Enable/Disable";
 				.@menu$ = "";
+				.@opt = 0;
 				for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++){
-					.@content$ = .@restrictions$[.@i] + " - "+ ((#secure_opt&(1<<.@i))?"^00FF00On^000000":"^FF0000Off^000000");
-					.@menu$ = .@menu$ + "" + .@content$ +":";
-					mes .@content$;
+					.@bit = (1<<.@i);
+					if (.allowed&.@bit){
+						.@index[.@opt] = .@i;
+						.@opt++;
+						.@content$ = .@restrictions$[.@i] + " - "+ ((#secure_opt&.@bit)?"^00FF00On^000000":"^FF0000Off^000000");
+						.@menu$ = .@menu$ + "" + .@content$ +":";
+						mes .@content$;
+					}
 				}
-				.@menu = select(.@menu$)-1;
+				.@t_menu = select(.@menu$)-1;
 				next;
+				.@menu = .@index[.@t_menu];
 				mes "[^FFA500 Security System ^000000]";
-				mes .@restrictions$[.@i];
+				mes .@restrictions$[.@menu];
 				mes "Are you sure you want to "+ ((#secure_opt&(1<<.@menu))?"Disable":"Enable") +" this?";
 				if (select("Yes:No..") == 2){
 					next;
@@ -158,8 +169,11 @@ OnPlayerMenu:
 				mes "[^FFA500 Security System ^000000]";
 				mes "Security Code can be of 4-8 Digits.";
 				mes "When Security Code is enabled, you can do following settings as a security step:";
-				for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++)
-					mes "^FF0000- "+ .@restrictions$[.@i] +"^000000";
+				for (.@i = 0; .@i < getarraysize(.@restrictions$); .@i++){
+					.@bit = (1<<.@i);
+					if (.allowed&.@bit)
+						mes "^FF0000- "+ .@restrictions$[.@i] +"^000000";
+				}
 				next;
 				break;
 		}
