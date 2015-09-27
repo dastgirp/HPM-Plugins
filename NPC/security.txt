@@ -78,6 +78,7 @@ OnPlayerMenu:
 					close;
 				}
 				next;
+				security_maxtry = 0;
 				mes "[^FFA500 Security System ^000000]";
 				mes "Choose Restrictions to Enable/Disable";
 				.@menu$ = "";
