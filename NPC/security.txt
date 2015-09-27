@@ -73,6 +73,7 @@ OnPlayerMenu:
 					security_maxtry++;
 					if (security_maxtry >= .max_attempt){
 						atcommand "@ban +"+.ban_hour+"h \""+strcharinfo(0)+"\"";	//Ban the Player for 1 hour.
+						security_maxtry = 0;		//Reset After tha Ban
 						end;
 					}
 					close;
@@ -130,6 +131,7 @@ OnPlayerMenu:
 						security_maxtry++;
 						if (security_maxtry >= .max_attempt){
 							atcommand "@ban +"+.ban_hour+"h \""+strcharinfo(0)+"\"";	//Ban the Player for 1 hour.
+							security_maxtry = 0;		//Reset After tha Ban
 							end;
 						}
 						close;
