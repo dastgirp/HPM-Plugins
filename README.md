@@ -14,6 +14,7 @@ Plugin Owners:<br/>
   **hit-delay.c** - _Dastgir_<br/>
   **itemmap.c** - _Xantara_ (Converted by _Dastgir_)<br/>
   **mapmoblist.c** - _Shikazu_ (Updated by _Dastgir_)<br/>
+  **market.c** - _Dastgir_/_Annieruru_<br/>
   **monster_nodropexp.c** - _Dastgir_<br/>
   **npc-duplicate.c** _Dastgir_<br/>
   **restock.c** - _Dastgir_<br/>
