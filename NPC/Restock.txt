@@ -11,7 +11,7 @@ v1.0 - Intial Release
 TO be used with Restock Plugin
 */
 
-prontera,140,140,5	script	Restock	999,{
+prontera,140,140,5	script	Restock	4_M_ALCHE_C,{
 end;
 OnInit:
 query_sql "CREATE TABLE IF NOT EXISTS `restock` (`charid` int(10) NOT NULL,`restockid` int(6) NOT NULL,`restkq` int(5) NOT NULL,`restkf` int(10) NOT NULL default '1') ENGINE=MyISAM DEFAULT CHARSET=latin1 "; 
