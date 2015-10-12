@@ -20,7 +20,7 @@
 #include "map/pet.h"
 #include "map/map.h"
 #include "map/mob.h"
-#include "map/pc.h""
+#include "map/pc.h"
 
 #include "common/HPMDataCheck.h"
 

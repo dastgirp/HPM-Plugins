@@ -9,6 +9,7 @@ Plugin Owners:<br/>
   **afk.c** - _Dastgir_<br/>
   **auraset.c** - _Dastgir_<br/>
   **autonext.c** - _Shikazu_ (Updated by _Dastgir_)<br/>
+  **costumeitem.c** - _Mhalicot_ (Updated by _Dastgir_)<br/>
   **Critical-Magic.c** - _Dastgir_<br/>
   **dispbottom2.c** - _Dastgir_<br/>
   **hit-delay.c** - _Dastgir_<br/>
