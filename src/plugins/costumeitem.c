@@ -347,3 +347,7 @@ HPExport void plugin_init (void) {
 	//scriptCommand
 	addScriptCommand("costume","i",costume);
 }
+
+HPExport void server_online (void) {
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+}

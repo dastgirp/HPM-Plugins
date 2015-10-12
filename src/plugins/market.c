@@ -483,3 +483,7 @@ HPExport void plugin_init (void) {
 	addHookPost( "battle->check_target", battle_check_target_post );
 	addHookPost( "clif->getareachar_unit", clif_getareachar_unit_post );
 }
+
+HPExport void server_online (void) {
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+}

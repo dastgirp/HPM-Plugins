@@ -81,6 +81,7 @@ case "$MODE" in
 		make plugin.market -j3 || aborterror "Build failed."
 		#12-10-2015
 		make plugin.costumeitem -j3 || aborterror "Build failed."
+		make plugin.ExtendedVending -j3 || aborterror "Build failed."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
@@ -137,6 +138,7 @@ EOF
 		ARGS="--load-plugin market $ARGS"
 		#12-10-2015
 		ARGS="--load-plugin costumeitem $ARGS"
+		ARGS="--load-plugin ExtendedVending $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
