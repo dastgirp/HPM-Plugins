@@ -21,14 +21,13 @@ idnum2itemresnametable.txt
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <strlib.h>
 #include <assert.h>
 
 #include "common/HPMi.h"
 #include "common/utils.h"
 #include "common/mmo.h"
 #include "common/socket.h"
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/timer.h"
 #include "common/ers.h"
 #include "common/nullpo.h"

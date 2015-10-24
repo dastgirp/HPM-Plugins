@@ -16,7 +16,7 @@ Autoloots item in x by x Range
 #include "common/HPMi.h"
 #include "common/mmo.h"
 #include "common/socket.h"
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/nullpo.h"
 #include "common/mapindex.h"
 #include "common/strlib.h"

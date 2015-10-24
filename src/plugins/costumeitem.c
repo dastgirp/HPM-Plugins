@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/timer.h"
 #include "common/HPMi.h"
 #include "common/mmo.h"

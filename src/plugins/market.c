@@ -49,7 +49,7 @@ int market_clone_zenycost = 0;
 #include "map/unit.h"
 #include "map/skill.h"
 #include "map/battle.h"
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/strlib.h"
 #include "common/socket.h"
 #include "common/HPMi.h"

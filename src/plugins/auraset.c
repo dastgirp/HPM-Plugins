@@ -11,7 +11,7 @@
 #include "common/HPMi.h"
 #include "common/mmo.h"
 #include "common/socket.h"
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/strlib.h"
 #include "common/nullpo.h"
 #include "common/timer.h"

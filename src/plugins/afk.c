@@ -25,7 +25,7 @@ prontera	mapflag	noafk
 #include <string.h>
 
 #include "common/HPMi.h"
-#include "common/malloc.h"
+#include "common/memmgr.h"
 #include "common/mmo.h"
 #include "common/socket.h"
 #include "common/strlib.h"

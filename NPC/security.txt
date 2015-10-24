@@ -205,7 +205,7 @@ OnPlayerMenu:
 				break;
 		}
 	}
-	close;
+	end;
 	
 OnGMMenu:
 	switch(select("Player Menu: Settings")){
@@ -230,5 +230,5 @@ OnGMMenu:
 			mes "Force Security Setting Set.";
 			close;
 	}
-	close;
+	end;
 }
