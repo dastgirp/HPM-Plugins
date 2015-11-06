@@ -20,6 +20,7 @@ Plugin Owners:<br/>
   **monster_nodropexp.c** - _Dastgir_<br/>
   **npc-duplicate.c** _Dastgir_<br/>
   **restock.c** - _Dastgir_<br/>
+  **storeequip.c** - _Dastgir_<br/>
   **storeit.c** - _Akinari_ (Updated by _Dastgir_)<br/>
   **whosell.c** - _Ossi_ (Converted by _Dastgir_)<br/>
 
