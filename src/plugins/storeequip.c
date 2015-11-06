@@ -26,29 +26,27 @@ HPExport struct hplugin_info pinfo = {
 	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
 };
 
-/*==========================================
- * @storeequip
- * Put everything equipped into storage.
- *------------------------------------------*/
-ACMD(storeequip) {
-
-	int i;
+bool store_all_equip(struct map_session_data *sd) {
+	int fd;
 	
-	if (!sd) return false;
+	if (sd == NULL)
+		return false;
+	
+	fd = sd->fd;
 
 	if (sd->npc_id) {
 		clif->message(fd, "You cannot be talking to an NPC and use this command.");
-		return -1;
+		return false;
 	}
 
 	if (sd->state.storage_flag != 1) {
 		switch (storage->open(sd)) {
 			case 2: //Try again
 				clif->message(fd, "Failed to Open Storage, Try Again..");
-				return true;
+				return false;
 			case 1: //Failure
 				clif->message(fd, "You can't open the storage currently.");
-				return true;
+				return false;
 		}
 	}
 	for (i = 0; i < MAX_INVENTORY; i++) {
@@ -58,8 +56,29 @@ ACMD(storeequip) {
 		}
 	}
 	storage->close(sd);
+}
+
+/*==========================================
+ * @storeequip
+ * Put everything equipped into storage.
+ *------------------------------------------*/
+ACMD(storeequip) {
+
+	int i;
+	
+	if (store_all_equip(sd) == false)
+		return false;
 
 	clif->message(fd, "Stored All Items.");
+	return true;
+}
+
+BUILDIN(storeequip) {
+	TBL_PC *sd;
+
+	sd = script->rid2sd(st);
+	if (store_all_equip(sd) == false)
+		script_pushint(st, 0);
 	return true;
 }
 
@@ -67,6 +86,7 @@ ACMD(storeequip) {
 /* run when server starts */
 HPExport void plugin_init (void) {
     addAtcommand("storeequip",storeequip);
+	addScriptCommand("storeequip","",storeequip);
 }
 
 HPExport void server_online (void) {
