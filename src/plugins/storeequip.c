@@ -27,7 +27,7 @@ HPExport struct hplugin_info pinfo = {
 };
 
 bool store_all_equip(struct map_session_data *sd) {
-	int fd;
+	int fd, i;
 	
 	if (sd == NULL)
 		return false;
@@ -56,6 +56,7 @@ bool store_all_equip(struct map_session_data *sd) {
 		}
 	}
 	storage->close(sd);
+	return true;
 }
 
 /*==========================================
@@ -63,8 +64,6 @@ bool store_all_equip(struct map_session_data *sd) {
  * Put everything equipped into storage.
  *------------------------------------------*/
 ACMD(storeequip) {
-
-	int i;
 	
 	if (store_all_equip(sd) == false)
 		return false;
@@ -85,7 +84,7 @@ BUILDIN(storeequip) {
 
 /* run when server starts */
 HPExport void plugin_init (void) {
-    addAtcommand("storeequip",storeequip);
+	addAtcommand("storeequip",storeequip);
 	addScriptCommand("storeequip","",storeequip);
 }
 
