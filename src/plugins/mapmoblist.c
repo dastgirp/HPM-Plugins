@@ -45,10 +45,11 @@ ACMD(mapmoblist)
 {
 	char temp[100];
 	bool mob_searched[MAX_MOB_DB];
-	bool mob_mvp[MAX_MOB_DB]; // Store mvp data..
+	int mob_mvp[MAX_MOB_DB];
 	struct s_mapiterator* it;
 	unsigned short count = 0, i, mapindex_ = 0;
 	int m = 0;
+	int mvp_index = 0;
 
 	memset(mob_searched, 0, MAX_MOB_DB);
 	memset(mob_mvp, 0, MAX_MOB_DB);
@@ -69,7 +70,7 @@ ACMD(mapmoblist)
 
 	clif->message(fd, "--------Monster List--------");
 
-	sprintf(temp, "Mapname: %s", mapindex_id2name(mapindex_));
+	sprintf(temp, "Map Name: %s", mapindex_id2name(mapindex_));
 	clif->message(fd, temp);
 
 	clif->message(fd, "Monsters: ");
@@ -87,7 +88,7 @@ ACMD(mapmoblist)
 			continue; // Already found, skip it
 		if (mob->db(md->class_)->mexp) {
 			mob_searched[md->class_] = true;
-			mob_mvp[md->class_] = true; // Save id for later
+			mob_mvp[(mvp_index++)] = md->class_;
 			continue; // It's MVP!
 		}
 
@@ -103,12 +104,10 @@ ACMD(mapmoblist)
 	clif->message(fd, "MVP: ");
 
 	// Looping again and search for mvp, not sure if this is the best way..
-	for (i = 1000; i < MAX_MOB_DB; i++) { //First monster start at 1001 (Scorpion)
-		if (mob_mvp[i] == true) {
-			count = map->foreachinmap(count_mob, m, BL_MOB, i);
-			sprintf(temp, " %s[%d] : %d", (mob->db(i))->jname, i, count);
-			clif->message(fd, temp);
-		}
+	for (i=0; i < mvp_index; i++) {
+		count = map->foreachinmap(count_mob, m, BL_MOB, mob_mvp[i]);
+		sprintf(temp, " %s[%d] : %d", (mob->db(mob_mvp[i]))->jname, mob_mvp[i], count);
+		clif->message(fd, temp);
 	}
 
 	return true;
