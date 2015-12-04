@@ -51,12 +51,12 @@ int pc_restock_misc_pre(struct map_session_data *sd,int *n,int *amount,int *type
 	return 0;
 }
 int pc_restock_misc_post(int retVal, struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type* log_type){
-	if (retVal==1) return 1;
+	if (retVal==1) return retVal;
 	if (restock_misc_itemid && pc->search_inventory(sd,restock_misc_itemid) == -1){
 		pc_setglobalreg(sd,script->add_str("restkid"), restock_misc_itemid );
 		npc->event(sd, "Restock::OnRestock", 0);
 	}
-	return 0;
+	return retVal;
 }
 BUILDIN(restock_item){
 	int rid,rqu,fr;
