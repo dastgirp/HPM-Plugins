@@ -116,7 +116,7 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 			temp_delay = warp_delay_others;
 			break;
 	}
-	if (sd->status.hp == 0 && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
+	if (sd->status.hp && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
 		char output[50];
 		sprintf(output,"Please Wait %d second before warping.",(int)((temp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
 		clif->message(sd->fd,output);
