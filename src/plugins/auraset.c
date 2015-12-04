@@ -215,7 +215,7 @@ int status_change_start_postAura(int retVal,struct block_list *src, struct block
 	enum sc_type type = *type_;
 	struct hide_data* data;
 
-	if (retVak == 0 || bl->type != BL_PC){ return retVal; }
+	if (retVal == 0 || bl->type != BL_PC){ return retVal; }
 
 	sd = BL_CAST(BL_PC, bl);
 	data = hd_search(sd);
