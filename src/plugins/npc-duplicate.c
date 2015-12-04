@@ -96,8 +96,7 @@ BUILDIN(duplicatenpc)
 		return 0;
 	}
 
-	nd_target = npc->create_npc(tmapid, tx, ty);
-	
+	nd_target = npc->create_npc(nd_source->subtype, tmapid, tx, ty, tdir, tclass_);
 	strcat(targetname, dup_name);
 	strncat(targetname, "#", 1);
 	strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
@@ -105,70 +104,9 @@ BUILDIN(duplicatenpc)
 	safestrncpy(nd_target->name, targetname , sizeof(nd_target->name));
 	safestrncpy(nd_target->exname, targetname, sizeof(nd_target->exname));
 
-	nd_target->class_ = tclass_;
-	nd_target->speed = 200;
-	nd_target->src_id = sourceid;
-	nd_target->bl.type = BL_NPC;
-	nd_target->subtype = (enum npc_subtype)type;
-	switch(type)
-	{
-		case SCRIPT:
-			nd_target->u.scr.xs = txs;
-			nd_target->u.scr.ys = tys;
-			nd_target->u.scr.script = nd_source->u.scr.script;
-			nd_target->u.scr.label_list = nd_source->u.scr.label_list;
-			nd_target->u.scr.label_list_num = nd_source->u.scr.label_list_num;
-			nd_target->u.scr.shop = nd_source->u.scr.shop;
-			nd_target->u.scr.trader = nd_source->u.scr.trader;
-			break;
-
-		case SHOP:
-		case CASHSHOP:
-			nd_target->u.shop.shop_item = nd_source->u.shop.shop_item;
-			nd_target->u.shop.count = nd_source->u.shop.count;
-			break;
-
-		case WARP:
-			if( !battle->bc->warp_point_debug )
-				nd_target->class_ = WARP_CLASS;
-			else
-				nd_target->class_ = WARP_DEBUG_CLASS;
-			nd_target->u.warp.xs = txs;
-			nd_target->u.warp.ys = tys;
-			nd_target->u.warp.mapindex = nd_source->u.warp.mapindex;
-			nd_target->u.warp.x = nd_source->u.warp.x;
-			nd_target->u.warp.y = nd_source->u.warp.y;
-			break;
-	}
-
-	map->addnpc(tmapid, nd_target);
-	//status->change_init(&nd_target->bl);
-	//unit->dataset(&nd_target->bl);
-	nd_target->ud = &npc->base_ud;
-	nd_target->dir = tdir;
-	npc->setcells(nd_target);
-	map->addblock(&nd_target->bl);
-	if(tclass_ >= 0)
-	{
-		status->set_viewdata(&nd_target->bl, nd_target->class_);
-		if( map->list[tmapid].users )
-			clif->spawn(&nd_target->bl);
-	}
-	strdb_put(npc->name_db, nd_target->exname, nd_target);
-
-	if(type == SCRIPT)
-	{
-		for (i = 0; i < nd_target->u.scr.label_list_num; i++)
-		{
-			if (npc->event_export(nd_target, i)) {
-				ShowWarning("duplicatenpc: duplicate event %s::%s.\n",
-							 nd_target->exname, nd_target->u.scr.label_list[i].name);
-			}
-			npc->timerevent_export(nd_target, i);
-		}
-		nd_target->u.scr.timerid = INVALID_TIMER;
-	}
-
+	npc->duplicate_sub(nd, dnd, xs, ys, options);
+	//retval = EXIT_FAILURE;
+	
 	script_pushint(st, 1);
 	return true;
 }
