@@ -199,7 +199,6 @@ void ic_bc(const char *val) {
 //Clif Edits
 void clif_parse_SelectArrow_pre(int *fd,struct map_session_data *sd)
 {
-	bool i=false;
 	if (pc_istrading(sd)) {
 	//Make it fail to avoid shop exploits where you sell something different than you see.
 		clif->skill_fail(sd,sd->ud.skill_id,USESKILL_FAIL_LEVEL,0);
@@ -209,11 +208,11 @@ void clif_parse_SelectArrow_pre(int *fd,struct map_session_data *sd)
 	switch( sd->menuskill_id ) {
 		case MC_VENDING: // Extended Vending system 
 			skill_vending_ev(sd,RFIFOW(*fd,2));
-			i=true;
+			clif_menuskill_clear(sd);
+			hookStop();
 			break;
 	}
-	clif_menuskill_clear(sd);
-	if(i==true){hookStop();}
+	return;
 }
 
 void clif_parse_OpenVending_pre(int *fd, struct map_session_data* sd) {

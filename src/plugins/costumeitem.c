@@ -200,24 +200,21 @@ int HPM_map_reqnickdb(struct map_session_data * sd, int *char_id) {
 	return 1;
 }
 
-int HPM_pc_equippoint(int ret, struct map_session_data *sd, int *nn) { 
+int HPM_pc_equippoint(int retVal, struct map_session_data *sd, int *nn) { 
 	int char_id = 0, n = *nn;
 
-	if (!sd)
-		return 0;
-
-	if (!ret) // If the original function returned zero, we don't need to process it anymore
-		return 0;
+	if (!sd || !retVal)	// If the original function returned zero, we don't need to process it anymore
+		return retVal;
 
 	if( reserved_costume_id &&
 		sd->status.inventory[n].card[0] == CARD0_CREATE &&
 		(char_id = MakeDWord(sd->status.inventory[n].card[2],sd->status.inventory[n].card[3])) == reserved_costume_id )
 	{ // Costume Item - Converted
-		if( ret&EQP_HEAD_TOP ) { ret &= ~EQP_HEAD_TOP; ret |= EQP_COSTUME_HEAD_TOP; }
-		if( ret&EQP_HEAD_LOW ) { ret &= ~EQP_HEAD_LOW; ret |= EQP_COSTUME_HEAD_LOW; }
-		if( ret&EQP_HEAD_MID ) { ret &= ~EQP_HEAD_MID; ret |= EQP_COSTUME_HEAD_MID; }
+		if( retVal&EQP_HEAD_TOP ) { retVal &= ~EQP_HEAD_TOP; retVal |= EQP_COSTUME_HEAD_TOP; }
+		if( retVal&EQP_HEAD_LOW ) { retVal &= ~EQP_HEAD_LOW; retVal |= EQP_COSTUME_HEAD_LOW; }
+		if( retVal&EQP_HEAD_MID ) { retVal &= ~EQP_HEAD_MID; retVal |= EQP_COSTUME_HEAD_MID; }
 	}
-	return ret;
+	return retVal;
 }
 
 ACMD(costumeitem) {
