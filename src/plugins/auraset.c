@@ -215,8 +215,7 @@ int status_change_start_postAura(int retVal,struct block_list *src, struct block
 	enum sc_type type = *type_;
 	struct hide_data* data;
 
-	if (retVal == 0){ return 0; }
-	if (bl->type != BL_PC){ return 0; }
+	if (retVak == 0 || bl->type != BL_PC){ return retVal; }
 
 	sd = BL_CAST(BL_PC, bl);
 	data = hd_search(sd);
@@ -267,9 +266,10 @@ void clif_sendauraself(struct map_session_data *sd){
 HPExport void plugin_init(void) {	//[Dastgir/Hercules]
 	addAtcommand("aura", aura);
 	addScriptCommand("aura", "i??", aura);
+	addHookPre("status->change_end_", status_change_end_preAura);
+	
 	addHookPost("clif->spawn", clif_spawn_AuraPost);
 	addHookPost("clif->getareachar_unit", clif_getareachar_unit_AuraPost);
-	addHookPre("status->change_end_", status_change_end_preAura);
 	addHookPost("status->change_start", status_change_start_postAura);
 	addHookPost("clif->refresh",clif_sendauraself);
 }
