@@ -56,34 +56,35 @@ case "$MODE" in
 	build)
 		(cd tools && ./validateinterfaces.py silent) || aborterror "Interface validation error."
 		./configure $@ || aborterror "Configure error, aborting build."
-		make sql -j3 || aborterror "Build failed."
-		make plugin.HPMHooking -j3 || aborterror "Build failed."
-		make plugin.script_mapquit -j3 || aborterror "Build failed."
-		make plugin.Critical-Magic -j3 || aborterror "Build failed."
-		make plugin.afk -j3 || aborterror "Build failed."
-		make plugin.auraset -j3 || aborterror "Build failed."
-		make plugin.autonext -j3 || aborterror "Build failed."
-		make plugin.dispbottom2 -j3 || aborterror "Build failed."
-		make plugin.hit-delay -j3 || aborterror "Build failed."
-		make plugin.mapmoblist -j3 || aborterror "Build failed."
-		make plugin.npc-duplicate -j3 || aborterror "Build failed."
-		make plugin.restock -j3 || aborterror "Build failed."
-		make plugin.storeit -j3 || aborterror "Build failed."
+		make sql -j3 || aborterror "Build failed(CORE)."
+		make plugin.script_mapquit -j3 || aborterror "Build failed(MapQuit)."
+		make plugin.Critical-Magic -j3 || aborterror "Build failed(CriticalMagicAttack)."
+		make plugin.afk -j3 || aborterror "Build failed(Afk)."
+		make plugin.auraset -j3 || aborterror "Build failed(AuraSet)."
+		make plugin.autonext -j3 || aborterror "Build failed(AutoNext)."
+		make plugin.dispbottom2 -j3 || aborterror "Build failed(DispBottom2)."
+		make plugin.hit-delay -j3 || aborterror "Build failed(WarpHitDelay)."
+		make plugin.mapmoblist -j3 || aborterror "Build failed(MapMobList)."
+		make plugin.npc-duplicate -j3 || aborterror "Build failed(NpcDuplicate)."
+		make plugin.restock -j3 || aborterror "Build failed(restock)."
+		make plugin.storeit -j3 || aborterror "Build failed(storeit)."
 		#24-08-2015
-		make plugin.itemmap -j3 || aborterror "Build failed."
-		make plugin.monster_nodropexp -j3 || aborterror "Build failed."
+		make plugin.itemmap -j3 || aborterror "Build failed(itemmap)."
+		make plugin.monster_nodropexp -j3 || aborterror "Build failed(monster_nde)."
 		#28-08-2015
-		make plugin.security -j3 || aborterror "Build failed."
+		make plugin.security -j3 || aborterror "Build failed(Security)."
 		#10-09-2015
-		make plugin.@arealoot -j3 || aborterror "Build failed."
-		make plugin.whosell -j3 || aborterror "Build failed."
+		make plugin.@arealoot -j3 || aborterror "Build failed(AreaLoot)."
+		make plugin.whosell -j3 || aborterror "Build failed(WhoSell)."
 		#06-10-2015
-		make plugin.market -j3 || aborterror "Build failed."
+		make plugin.market -j3 || aborterror "Build failed(Market)."
 		#12-10-2015
-		make plugin.costumeitem -j3 || aborterror "Build failed."
-		make plugin.ExtendedVending -j3 || aborterror "Build failed."
+		make plugin.costumeitem -j3 || aborterror "Build failed(CostumeItem)."
+		make plugin.ExtendedVending -j3 || aborterror "Build failed(ExtendedVending)."
 		#06-11-2015
-		make plugin.storeequip -j3 || aborterror "Build failed."
+		make plugin.storeequip -j3 || aborterror "Build failed(StoreEquip)."
+		#HPMHooking should be last
+		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
