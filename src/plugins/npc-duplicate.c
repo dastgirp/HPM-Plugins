@@ -84,9 +84,6 @@ BUILDIN(duplicatenpc)
 		script_pushint(st, 0);
 		return 0;
 	}
-	
-	sourceid = nd_source->bl.id;
-	type = nd_source->subtype;
 
 	tmapid = map->mapname2mapid(tmap);
 	if(tmapid < 0)
