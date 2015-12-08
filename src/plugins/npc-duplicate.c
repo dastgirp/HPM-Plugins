@@ -50,7 +50,7 @@ BUILDIN(duplicatenpc)
 	int tx = script_getnum(st, 6);
 	int ty = script_getnum(st, 7);
 	int tdir = script_getnum(st, 8);
-	int tclass_, txs = -1, tys = -1, sourceid, type, tmapid, i;
+	int tclass_, txs = -1, tys = -1, tmapid;
 	struct npc_data *nd_source, *nd_target;
 	char targetname[24] = "";
 
@@ -104,8 +104,8 @@ BUILDIN(duplicatenpc)
 	safestrncpy(nd_target->name, targetname , sizeof(nd_target->name));
 	safestrncpy(nd_target->exname, targetname, sizeof(nd_target->exname));
 
-	npc->duplicate_sub(nd, dnd, xs, ys, options);
-	//retval = EXIT_FAILURE;
+	npc->duplicate_sub(nd_source, nd_target, txs, tys, NPO_ONINIT);
+	
 	
 	script_pushint(st, 1);
 	return true;
