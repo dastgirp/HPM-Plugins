@@ -335,6 +335,8 @@ HPExport void plugin_init (void) {
 	
 	//Hook
 	addHookPre("script->run_item_equip_script",script_stop_costume);
+	addHookPre("script->run_item_unequip_script",script_stop_costume);
+	addHookPre("script->run_use_script",script_stop_costume);
 	addHookPre("map->reqnickdb",HPM_map_reqnickdb);
 	addHookPost("pc->equippoint",HPM_pc_equippoint);
 	
