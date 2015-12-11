@@ -37,11 +37,12 @@
 3.4 Fixed Error when compiling.
 3.4a Updated According to new hercules.[Dastgir]
 3.5 Updated Costume with new Hercules, some other changes. [Dastgir]
+3.5a Attributes are no longer given. [Dastgir]
 */
 HPExport struct hplugin_info pinfo = {
 	"costumeitem",		// Plugin name
 	SERVER_TYPE_MAP,	// Which server types this plugin works with?
-	"3.5",				// Plugin version
+	"3.5a",				// Plugin version
 	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -101,10 +102,15 @@ int alternate_item(int index){
 
 void script_stop_costume(struct map_session_data *sd, struct item_data *data, int oid)
 {
-	if (data->equip <= 512){
+	if (data->equip <= EQP_HEAD_MID){
 		int alternate = alternate_item(data->equip);
-		if (alternate != -1 && pc->checkequip(sd,alternate) == data->nameid){
-			hookStop();
+		if (alternate != -1){
+			int equip_index = pc->checkequip(sd, alternate);
+			if (equip_index < 0 || !sd->inventory_data[equip_index] )
+				return;
+			if ( sd->inventory_data[equip_index]->nameid == data->nameid ){
+				hookStop();
+			}
 		}
 	}
 }
@@ -350,3 +356,4 @@ HPExport void plugin_init (void) {
 HPExport void server_online (void) {
 	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
+
