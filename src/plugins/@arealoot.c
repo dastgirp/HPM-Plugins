@@ -92,11 +92,24 @@ int arealoot_item(struct map_session_data *sd,struct flooritem_data *fitem){
 	return 1;
 }
 
-void arealoot_range_setting(const char *val) {
+void arealoot_range_setting(const char *key, const char *val) {
 	int value = atoi(val);
-	if (value < 1 || value > 10){ ShowError("'arealoot_range' is set to %d,(Min:1,Max:10)", value); return; }	//1 to 9 Range.
-	arealoot_range = value;
-	ShowDebug("Arealoot_Range set to %d",arealoot_range);
+	if (strcmpi(key,"arealoot_range") == 0){		//1 to 9 Range.
+		if (value < 1 || value > 10){
+			ShowError("'arealoot_range' is set to %d,(Min:1,Max:10)", value);
+			return;
+		}
+		arealoot_range = value;
+		ShowDebug("Arealoot_Range set to %d",arealoot_range);
+	}
+}
+
+int arealoot_range_return(const char *key)
+{
+	if (strcmpi(key, "arealoot_range") == 0)
+		return arealoot_range;
+
+	return 0;
 }
 
 /* run when server starts */
@@ -110,5 +123,5 @@ HPExport void server_online (void) {
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("arealoot_range",arealoot_range_setting);
+	addBattleConf("arealoot_range",arealoot_range_setting,arealoot_range_return);
 }

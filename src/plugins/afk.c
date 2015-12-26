@@ -90,15 +90,25 @@ ACMD(afk){
 	return true;
 }
 
-void afk_timeout_adjust(const char *val) {	//In Seconds
+void afk_timeout_adjust(const char *key, const char *val) {	//In Seconds
 	int value = config_switch(val);
-	if (value < 0){
-		ShowDebug("Received Invalid Setting for afk_timeout(%d), defaulting to 0\n",value);
-		return;
+	if (strcmpi(key,"afk_timeout") == 0){
+		if (value < 0){
+			ShowDebug("Received Invalid Setting for afk_timeout(%d), defaulting to 0\n",value);
+			return;
+		}
+		afk_timeout = value;
 	}
-	afk_timeout = value;
 	return;
 	
+}
+
+int afk_timeout_return(const char *key)
+{
+	if (strcmpi(key, "afk_timeout") == 0)
+		return afk_timeout;
+
+	return 0;
 }
 
 void parse_noafk_mapflag(const char *name, char *w3, char *w4, const char* start, const char* buffer, const char* filepath, int *retval){
@@ -125,7 +135,7 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("afk_timeout",afk_timeout_adjust);
+	addBattleConf("afk_timeout",afk_timeout_adjust,afk_timeout_return);
 }
 
 HPExport void server_online (void) {

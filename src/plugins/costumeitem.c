@@ -53,8 +53,18 @@ static inline void status_cpy(struct status_data* a, const struct status_data* b
 
 // Costume System
 int reserved_costume_id = 999998;
-void costume_id(const char *val) {
-	reserved_costume_id = atoi(val);
+void costume_id(const char *key, const char *val) {
+	if (strcmpi(key,"reserved_costume_id") == 0){
+		reserved_costume_id = atoi(val);
+	}
+}
+
+int costume_id_return(const char *key)
+{
+	if (strcmpi(key,"reserved_costume_id") == 0){
+		return reserved_costume_id;
+	}
+	return 0;
 }
 
 uint16 GetWord(uint32 val, int idx) {
@@ -331,7 +341,7 @@ BUILDIN(costume) {
 
 /* triggered when server starts loading, before any server-specific data is set */
 HPExport void server_preinit (void) {
-	addBattleConf("reserved_costume_id",costume_id);
+	addBattleConf("reserved_costume_id",costume_id,costume_id_return);
 }
 
 /* Server Startup */

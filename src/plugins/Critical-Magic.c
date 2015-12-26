@@ -140,16 +140,25 @@ void magic_critical_attack(int *attack_type, struct block_list* src, struct bloc
 	}
 }
 
-void critical_color(const char *val) {
+void critical_color(const char *key, const char *val) {
 	/* do anything with the var e.g. config_switch(val) */
-	int value = config_switch(val);
-	if (value < 1 || value >2){
-		ShowDebug("Received Invalid Setting for magic_critical_color(%d), defaulting to %d\n",value,blue_red_critical);
-		return;
+	if (strcmpi(key,"magic_critical_color") == 0){
+		int value = config_switch(val);
+		if (value < 1 || value >2){
+			ShowDebug("Received Invalid Setting for magic_critical_color(%d), defaulting to %d\n",value,blue_red_critical);
+			return;
+		}
+		blue_red_critical = value;
 	}
-	blue_red_critical = value;
 	return;
 	
+}
+int critical_color_return(const char *key)
+{
+	if (strcmpi(key,"magic_critical_color") == 0){
+		return blue_red_critical;
+	}
+	return 0;
 }
 
 /* Server Startup */
@@ -159,7 +168,7 @@ HPExport void plugin_init (void)
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("magic_critical_color",critical_color);
+	addBattleConf("magic_critical_color",critical_color, critical_color_return);
 }
 
 HPExport void server_online (void) {
