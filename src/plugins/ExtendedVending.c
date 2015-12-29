@@ -649,14 +649,12 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 	for( i = 0; i < count; i++ ) {
 		short amount = *(uint16*)(data + 4*i + 0);
 		short idx    = *(uint16*)(data + 4*i + 2);
-		const char *item_name;
+		const char *item_name = itemdb_jname(vsd->status.cart[idx].nameid);
 		double rev = 0.;
 		idx -= 2;
 
-		if(bc_ex_vending_info){ // Extended Vending system 
-			item_name = itemdb_jname(vsd->status.cart[idx].nameid);
+		if(bc_ex_vending_info) // Extended Vending system 
 			rev = ((double)vsd->vending[vend_list[i]].value * (double)amount);
-		}
 		
 		// vending item
 		pc->additem(sd, &vsd->status.cart[idx], amount, LOG_TYPE_VENDING);
@@ -667,9 +665,10 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 		//print buyer's name
 		if( battle->bc->buyer_name ) {
 			char temp[256];
-			if(bc_ex_vending_info) // Extended Vending system 
+			if(bc_ex_vending_info) { // Extended Vending system 
+				
 				sprintf(temp, "%s has bought '%s' in the amount of %d. Revenue: %d %s", sd->status.name, item_name, amount, (int)(rev -= rev * (battle->bc->vending_tax/10000.)), vend_loot?itemdb_jname(vend_loot):"Zeny");
-			else{
+			} else {
 				if (sd->lang_id >= atcommand->max_message_table)
 					sprintf(temp, atcommand->msg_table[0][265], sd->status.name);
 				else
