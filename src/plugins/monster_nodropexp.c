@@ -102,7 +102,7 @@ ACMD(monster_nde)
 		int k;
 		struct mob_data *md;
 		map->search_freecell(&sd->bl, 0, &mx,  &my, range, range, 0);
-		k = mob->once_spawn(sd, sd->bl.m, mx, my, name, mob_id, 1, eventname, size, AI_NONE|(mob_id == MOBID_EMPERIUM?0x200:0x0));
+		k = mob->once_spawn(sd, sd->bl.m, mx, my, name, mob_id, 1, eventname, size, AI_NONE|(mob_id == MOBID_EMPELIUM?0x200:0x0));
 		if (k) {
 			struct tmp_data *tmpd;
 			md = (TBL_MOB*)map->id2bl(k);

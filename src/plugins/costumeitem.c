@@ -52,16 +52,16 @@ static inline void status_cpy(struct status_data* a, const struct status_data* b
 }
 
 // Costume System
-int reserved_costume_id = 999998;
+int reserved_costume_id = INT_MAX-100;		//Random Number
 void costume_id(const char *key, const char *val) {
-	if (strcmpi(key,"reserved_costume_id") == 0){
+	if (strcmpi(key,"reserved_costume_id") == 0) {
 		reserved_costume_id = atoi(val);
 	}
 }
 
 int costume_id_return(const char *key)
 {
-	if (strcmpi(key,"reserved_costume_id") == 0){
+	if (strcmpi(key,"reserved_costume_id") == 0) {
 		return reserved_costume_id;
 	}
 	return 0;
