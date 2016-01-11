@@ -113,17 +113,17 @@ int gstorage_cant_add(struct map_session_data* sd, struct guild_storage* stor, s
 	return 0;
 }
 
-int gstorage_cant_take(struct map_session_data* sd, struct guild_storage* stor, int *n, int *amount) {
+int gstorage_cant_take(struct map_session_data* sd, int *index, int *amount) {
 	if (sd==NULL)
-		return 1;
+		return 0;
 	if (is_secure(sd)){
 		if (security_opt(sd)&S_CANT_TAKE_GS){
 			clif->message(sd->fd,"Security is on. You cannot take item from gStorage.");
 			hookStop();
-			return 1;
+			return 0;
 		}
 	}
-	return 0;
+	return 1;
 }
 
 int pc_restrict_items(struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type *log_type){
@@ -220,7 +220,8 @@ HPExport void plugin_init (void)
 	addHookPre("trade->request",cant_trade);
 	addHookPre("gstorage->open",gstorage_cant_open);
 	addHookPre("gstorage->additem",gstorage_cant_add);
-	addHookPre("gstorage->delitem",gstorage_cant_take);
+	addHookPre("gstorage->get",gstorage_cant_take);
+	addHookPre("gstorage->gettocart",gstorage_cant_take);
 	addHookPre("pc->delitem",pc_restrict_items);
 	addHookPre("npc->selllist",npc_cant_sell);
 	addHookPre("npc->buylist",npc_cant_buy);
