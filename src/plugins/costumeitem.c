@@ -83,45 +83,13 @@ uint32 MakeDWord(uint16 word0, uint16 word1) {
 		( (uint32)(word1 << 0x10) );
 }
 
-int alternate_item(int index){
-	switch(index){
-		case EQP_HEAD_LOW:
-			return EQP_COSTUME_HEAD_LOW;
-		case EQP_HEAD_TOP:
-			return EQP_COSTUME_HEAD_TOP;
-		case EQP_HEAD_MID:
-			return EQP_COSTUME_HEAD_MID;
-		case EQP_HAND_R:
-			return EQP_SHADOW_WEAPON;
-		case EQP_HAND_L:
-			return EQP_SHADOW_SHIELD;
-		case EQP_ARMOR:
-			return EQP_SHADOW_ARMOR;
-		case EQP_SHOES:
-			return EQP_SHADOW_SHOES;
-		case EQP_GARMENT:
-			return EQP_COSTUME_GARMENT;
-		case EQP_ACC_L:
-			return EQP_SHADOW_ACC_L;
-		case EQP_ACC_R:
-			return EQP_SHADOW_ACC_R;
-		default:
-			return -1;
-	}
-}
-
 void script_stop_costume(struct map_session_data *sd, struct item_data *data, int oid)
 {
 	if (data->equip <= EQP_HEAD_MID){
-		int alternate = alternate_item(data->equip);
-		if (alternate != -1){
-			int equip_index = pc->checkequip(sd, alternate);
-			if (equip_index < 0 || !sd->inventory_data[equip_index] )
-				return;
-			if ( sd->inventory_data[equip_index]->nameid == data->nameid ){
+		if( reserved_costume_id &&
+			sd->status.inventory[n].card[0] == CARD0_CREATE &&
+			MakeDWord(sd->status.inventory[n].card[2], sd->status.inventory[n].card[3]) == reserved_costume_id )
 				hookStop();
-			}
-		}
 	}
 }
 
