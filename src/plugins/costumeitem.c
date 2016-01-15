@@ -211,8 +211,8 @@ int HPM_map_reqnickdb(struct map_session_data * sd, int *char_id) {
 
 	if( reserved_costume_id && reserved_costume_id == *char_id ) {
 		clif->solved_charname(sd->fd, *char_id, "Costume");
+		hookStop();
 	}
-	hookStop();
 	return 1;
 }
 
