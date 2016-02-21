@@ -8,7 +8,7 @@ OnInit:
 	/* Config */
 	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
 	.ban_hour = 3;		//Hours to ban
-	.allowed = 1|2|4|8|16|32|64|128|512|1024|2048|4096;		//Allowed Settings..
+	.allowed = 1|2|4|8|64|128|512|1024|2048|4096;		//Allowed Settings..
 	end;
 	
 OnPCLoginEvent:
