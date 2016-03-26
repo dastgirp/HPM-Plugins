@@ -95,8 +95,10 @@ BUILDIN(duplicatenpc)
 
 	nd_target = npc->create_npc(nd_source->subtype, tmapid, tx, ty, tdir, tclass_);
 	strcat(targetname, dup_name);
-	strncat(targetname, "#", 1);
-	strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
+	if (strcmp(dup_hidden_name, "") != 0) {
+		strncat(targetname, "#", 1);
+		strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
+	}
 
 	safestrncpy(nd_target->name, targetname , sizeof(nd_target->name));
 	safestrncpy(nd_target->exname, targetname, sizeof(nd_target->exname));
