@@ -42,8 +42,9 @@ HPExport struct hplugin_info pinfo = {
 int restock_misc_itemid;
 
 int pc_restock_misc_pre(struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type* log_type){
-	if (!sd) return 1;
 	int index = *n;
+	if (sd == NULL)
+		return 1;
 	restock_misc_itemid = 0;
 	if(sd->status.inventory[index].nameid > 0){
 		restock_misc_itemid = sd->status.inventory[index].nameid;
@@ -51,7 +52,8 @@ int pc_restock_misc_pre(struct map_session_data *sd,int *n,int *amount,int *type
 	return 0;
 }
 int pc_restock_misc_post(int retVal, struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type* log_type){
-	if (retVal==1) return retVal;
+	if (retVal == 1)
+		return retVal;
 	if (restock_misc_itemid && pc->search_inventory(sd,restock_misc_itemid) == -1){
 		pc_setglobalreg(sd,script->add_str("restkid"), restock_misc_itemid );
 		npc->event(sd, "Restock::OnRestock", 0);
@@ -59,16 +61,17 @@ int pc_restock_misc_post(int retVal, struct map_session_data *sd,int *n,int *amo
 	return retVal;
 }
 BUILDIN(restock_item){
-	int rid,rqu,fr;
-	int i,j,flag;
-	TBL_PC *sd;
+	int rid, rqu, fr;
+	int i, j, flag;
+	struct map_session_data *sd;
 	struct item item_tmp;
-	rid = script_getnum( st, 2 );
-	rqu = script_getnum( st, 3 );
-	fr = script_getnum( st, 4 );
+	rid = script_getnum(st, 2);
+	rqu = script_getnum(st, 3);
+	fr = script_getnum(st, 4);
 	sd = script->rid2sd(st);
 
-	if (!sd) return 0;
+	if (sd == NULL)
+		return 0;
 	else if (fr == 2){
 		struct guild *g;
 		struct guild_storage *gstorage2;
