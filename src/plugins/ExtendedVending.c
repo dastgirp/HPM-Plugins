@@ -32,6 +32,7 @@ idnum2itemresnametable.txt
 #include "common/ers.h"
 #include "common/nullpo.h"
 #include "common/strlib.h"
+#include "common/sql.h"
 
 #include "map/battle.h"
 #include "map/clif.h"
