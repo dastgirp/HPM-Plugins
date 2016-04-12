@@ -36,7 +36,7 @@
 HPExport struct hplugin_info pinfo = {
 	"Duplicate NPC's Command",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
+	"1.1",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
@@ -95,13 +95,15 @@ BUILDIN(duplicatenpc)
 
 	nd_target = npc->create_npc(nd_source->subtype, tmapid, tx, ty, tdir, tclass_);
 	strcat(targetname, dup_name);
-	strncat(targetname, "#", 1);
-	strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
+	if (strcmp(dup_hidden_name, "") != 0) {
+		strncat(targetname, "#", 1);
+		strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
+	}
 
 	safestrncpy(nd_target->name, targetname , sizeof(nd_target->name));
 	safestrncpy(nd_target->exname, targetname, sizeof(nd_target->exname));
 
-	npc->duplicate_sub(nd_source, nd_target, txs, tys, NPO_ONINIT);
+	npc->duplicate_sub(nd_target, nd_source, txs, tys, NPO_ONINIT);
 	
 	
 	script_pushint(st, 1);

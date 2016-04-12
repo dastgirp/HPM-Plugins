@@ -1,0 +1,13 @@
+prontera,150,150,5	script	DupTest	999,{
+mes strnpcinfo(0);
+close;
+
+OnInit:
+if (strnpcinfo(0) == "DupTest") {
+    duplicatenpc(strnpcinfo(0),"Duplicated","","prontera",150,148,5,998);
+}
+end;
+
+OnWhisperGlobal:
+duplicateremove();
+}
