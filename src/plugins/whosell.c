@@ -13,11 +13,14 @@ v 1.0 Initial Release
 #include <stdlib.h>
 #include <string.h>
 #include "common/HPMi.h"
-#include "map/script.h"
-#include "map/pc.h"
-#include "map/map.h"
+#include "map/atcommand.h"
+#include "map/clif.h"
 #include "map/itemdb.h"
+#include "map/map.h"
+#include "map/pc.h"
+#include "map/script.h"
 #include "map/vending.h"
+#include "map/mapindex.h"
 #include "common/nullpo.h"
 #include "common/HPMDataCheck.h"
 
@@ -101,10 +104,8 @@ ACMD(whosell){
 	    }*/
     }
     iter = mapit_getallusers();
-    for( pl_sd = (TBL_PC*)mapit->first(iter); mapit->exists(iter); pl_sd = (TBL_PC*)mapit->next(iter) )
-    {
-	    if( pl_sd->state.vending ) //check if player is vending
-	    {
+    for (pl_sd = BL_UCAST(BL_PC, mapit->first(iter)); mapit->exists(iter); pl_sd = BL_UCAST(BL_PC, mapit->next(iter))) {
+	    if (pl_sd->state.vending ) {	 // check if player is vending
 		    for (j = 0; j < pl_sd->vend_num; j++) {
 			    if((item_data = itemdb->exists(pl_sd->status.cart[pl_sd->vending[j].index].nameid)) == NULL)
 				    continue;

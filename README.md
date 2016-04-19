@@ -23,6 +23,7 @@ Plugin Owners:<br/>
   **restock.c** - _Dastgir_<br/>
   **storeequip.c** - _Dastgir_<br/>
   **storeit.c** - _Akinari_ (Updated by _Dastgir_)<br/>
+  **whobuy.c** - Dastgir<br/>
   **whosell.c** - _Ossi_ (Converted by _Dastgir_)<br/>
 
 Support Topic: http://hercules.ws/board/topic/8202-plugin-collections/

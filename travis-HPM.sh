@@ -87,6 +87,8 @@ case "$MODE" in
 		make plugin.packet_sample -j3 || aborterror "Build failed(PacketSample)."
 		#15-01-2016
 		make plugin.autoattack -j3 || aborterror "Build failed(AutoAttack)."
+		#19-04-2016
+		make plugin.whobuy -j3 || aborterror "Build failed(WhoBuy)."
 		#HPMHooking should be last
 		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
@@ -152,6 +154,8 @@ EOF
 		ARGS="--load-plugin packet_sample $ARGS"
 		#15-01-2016
 		ARGS="--load-plugin autoattack $ARGS"
+		#19-04-2016
+		ARGS="--load-plugin whobuy $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
