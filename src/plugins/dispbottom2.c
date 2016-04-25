@@ -48,16 +48,16 @@ void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, unsi
 
 BUILDIN(dispbottom2) //Format : dispbottom2("0xFF00FF","Message"{,"Player Name"});
 {
-	TBL_PC *sd=script->rid2sd(st);	//Player Data
+	TBL_PC *sd = script->rid2sd(st);	//Player Data
 	const char *message;			//Message to Display
 	unsigned long color;			//Color to display
-	message=script_getstr(st,3);
-	color=strtoul(script_getstr(st,2),NULL,0);
-	if(script_hasdata(st,4)){
+	message = script_getstr(st,3);
+	color = strtoul(script_getstr(st,2), NULL, 0);
+	if (script_hasdata(st,4)) {
 		const char* player;
 		TBL_PC *tsd;
 		player = script_getstr(st,2);
-		tsd=map->nick2sd((char *) player);
+		tsd = map->nick2sd(player);
 		if (tsd)
 			clif_displaymessagecolor(tsd,message,color);
 		return true;

@@ -79,7 +79,8 @@ struct autotrade_data {
 
 //Clif Edits
 void clif_vend_message(struct map_session_data *sd, const char* msg, unsigned long color);
-void clif_vend_message(struct map_session_data *sd, const char* msg, unsigned long color){
+void clif_vend_message(struct map_session_data *sd, const char* msg, unsigned long color)
+{
 	int fd;
 	unsigned short len = strlen(msg) + 1;
 	
@@ -230,9 +231,9 @@ void clif_parse_SelectArrow_pre(int *fd,struct map_session_data *sd)
 void clif_parse_OpenVending_pre(int *fd, struct map_session_data* sd) {
 	int fd2 = *fd;
 	short len = (short)RFIFOW(fd2,2) - 85;
-	const char* mes_orig = (char*)RFIFOP(fd2,4);
+	const char* mes_orig = (const char*)RFIFOP(fd2,4);
 	bool flag = (bool)RFIFOB(fd2,84);
-	const uint8* data = (uint8*)RFIFOP(fd2,85);
+	const uint8* data = (const uint8*)RFIFOP(fd2,85);
 	char message[1024];
 	struct player_data* ssd;
 	struct item_data *item;
@@ -504,8 +505,8 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 	z = 0.; // zeny counter
 	w = 0;  // weight counter
 	for( i = 0; i < count; i++ ) {
-		short amount = *(uint16*)(data + 4*i + 0);
-		short idx    = *(uint16*)(data + 4*i + 2);
+		short amount = *(const uint16*)(data + 4*i + 0);
+		short idx    = *(const uint16*)(data + 4*i + 2);
 		idx -= 2;
 
 		if ( amount <= 0 )
@@ -641,9 +642,9 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 	}
 
 
-	for( i = 0; i < count; i++ ) {
-		short amount = *(uint16*)(data + 4*i + 0);
-		short idx    = *(uint16*)(data + 4*i + 2);
+	for (i = 0; i < count; i++) {
+		short amount = *(const uint16*)(data + 4*i + 0);
+		short idx    = *(const uint16*)(data + 4*i + 2);
 		const char *item_name = itemdb_jname(vsd->status.cart[idx].nameid);
 		double rev = 0.;
 		idx -= 2;
@@ -669,14 +670,14 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 				else
 					sprintf(temp, atcommand->msg_table[sd->lang_id][265], sd->status.name);
 			}
-			clif_disp_onlyself(vsd,temp,strlen(temp));
+			clif_disp_onlyself(vsd, temp);
 		}
 	}
 
 	if ( bc_ex_vending_info ) { // Extended Vending system 
 		char temp[256];
 		sprintf(temp, "Full revenue from %s is %d %s", sd->status.name, (int)z, vend_loot?itemdb_jname(vend_loot):"Zeny");
-		clif_disp_onlyself(vsd,temp,strlen(temp));
+		clif_disp_onlyself(vsd, temp);
 	}
 
 	// compact the vending list

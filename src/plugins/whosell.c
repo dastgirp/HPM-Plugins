@@ -120,7 +120,7 @@ ACMD(whosell){
 			    if(s_type & 4 && ((item_data->type != IT_ARMOR && item_data->type != IT_WEAPON) || pl_sd->status.cart[pl_sd->vending[j].index].refine != refine))
 				    continue;
 			    if(item_data->type == IT_ARMOR)
-				    snprintf(atcmd_output, CHAT_SIZE_MAX, "+%d %d[%d] | Price %d | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].refine
+				    snprintf(atcmd_output, CHAT_SIZE_MAX, "+%d %d[%d] | Price %ud | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].refine
 						    ,pl_sd->status.cart[pl_sd->vending[j].index].nameid
 						    ,pl_sd->status.cart[pl_sd->vending[j].index].card[0]
 						    ,pl_sd->vending[j].value
@@ -129,7 +129,7 @@ ACMD(whosell){
 						    ,pl_sd->bl.x,pl_sd->bl.y
 						    ,pl_sd->status.name);
 			    else if(item_data->type == IT_WEAPON)
-				    snprintf(atcmd_output, CHAT_SIZE_MAX, "+%d %d[%d,%d,%d,%d] | Price %d | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].refine
+				    snprintf(atcmd_output, CHAT_SIZE_MAX, "+%d %d[%d,%d,%d,%d] | Price %ud | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].refine
 						    ,pl_sd->status.cart[pl_sd->vending[j].index].nameid
 						    ,pl_sd->status.cart[pl_sd->vending[j].index].card[0]
 						    ,pl_sd->status.cart[pl_sd->vending[j].index].card[1]
@@ -141,7 +141,7 @@ ACMD(whosell){
 						    ,pl_sd->bl.x,pl_sd->bl.y
 						    ,pl_sd->status.name);
 			    else
-				    snprintf(atcmd_output, CHAT_SIZE_MAX, "ID %d | Price %d | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].nameid
+				    snprintf(atcmd_output, CHAT_SIZE_MAX, "ID %d | Price %ud | Amount %d | Map %s[%d,%d] | Seller %s",pl_sd->status.cart[pl_sd->vending[j].index].nameid
 						    ,pl_sd->vending[j].value
 						    ,pl_sd->vending[j].amount
 						    ,map->list[pl_sd->bl.m].name
@@ -154,7 +154,7 @@ ACMD(whosell){
 			    flag = 1;
 		    }
 			//if(flag && pl_sd->mapindex == sd->mapindex){
-		    if(flag && pl_sd->bl.m == sd->bl.m){
+		    if (flag && pl_sd->bl.m == sd->bl.m) {
 			    clif->viewpoint(sd, 1, 1, pl_sd->bl.x, pl_sd->bl.y, ++sat_num, 0xFFFFFF);
 			    flag = 0;
 		    }
@@ -162,7 +162,7 @@ ACMD(whosell){
     }
     mapit->free(iter);
     if(count > 0) {
-	    snprintf(atcmd_output,CHAT_SIZE_MAX, "Found %d ea. Prices from %dz to %dz", count, MinPrice, MaxPrice);
+	    snprintf(atcmd_output, CHAT_SIZE_MAX, "Found %d ea. Prices from %udz to %udz", count, MinPrice, MaxPrice);
 	    clif->message(fd, atcmd_output);
     } else
 	    clif->message(fd, "Nobody is selling it now.");
