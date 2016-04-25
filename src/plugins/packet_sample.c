@@ -55,7 +55,7 @@ ACMD(packet_test)
 	}
 	
 	common_value = atoi(message);
-	map_sendtochar(sd);
+	map_sendtochar();
 	ShowDebug("MAP: Common Value Set to %d\n",common_value);
 	
 	return true;
