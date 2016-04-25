@@ -35,7 +35,8 @@ int common_value = 0;
 
 #define chrif_check(a) do { if(!chrif->isconnected()) return a; } while(0)
 
-bool map_sendtochar() {
+bool map_sendtochar(void)
+{
 	chrif_check(false);
 
 	WFIFOHEAD(chrif->fd,6);
@@ -69,7 +70,7 @@ void char_receive_packet(int fd) {
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	switch(SERVER_TYPE){
 		case SERVER_TYPE_MAP:
@@ -81,6 +82,6 @@ HPExport void plugin_init (void)
 	}
 }
 
-HPExport void server_online (void) {
+HPExport void server_online(void) {
 	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }

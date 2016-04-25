@@ -82,8 +82,8 @@ ACMD(whobuy)
 	}
 	mapit->free(iter);
 
-	if(count > 0) {
-		snprintf(output, CHAT_SIZE_MAX, "Found %d ea. Prices from %dz to %dz", count, MinPrice, MaxPrice);
+	if (count > 0) {
+		snprintf(output, CHAT_SIZE_MAX, "Found %d ea. Prices from %udz to %udz", count, MinPrice, MaxPrice);
 		clif->message(fd, output);
 	} else
 		clif->message(fd, "Nobody buying it now.");
