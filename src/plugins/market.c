@@ -152,7 +152,7 @@ ACMD(market){
 		clif->message( fd, "You can't create a Market clone while you are dead." );
 		return false;
 	}
-	if ( sd->chatID ) {
+	if ( sd->chat_id ) {
 		clif->message( fd, "You can't create a Market clone while you already open a chatroom." );
 		return false;
 	}
@@ -326,7 +326,7 @@ int battle_check_target_post( int retVal, struct block_list *src, struct block_l
 
 bool chat_joinchat_pre( struct map_session_data *sd, int *chatid, const char *pass ) {
 	struct chat_data* cd = (struct chat_data*)map->id2bl( *chatid );
-	if( cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chatID || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit ) {
+	if( cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chat_id || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit ) {
 		clif->joinchatfail(sd,0); // room full
 		hookStop();
 		return false;

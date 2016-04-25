@@ -20,7 +20,7 @@ v 1.0 Initial Release
 #include "map/pc.h"
 #include "map/script.h"
 #include "map/vending.h"
-#include "map/mapindex.h"
+#include "common/mapindex.h"
 #include "common/nullpo.h"
 #include "common/HPMDataCheck.h"
 
