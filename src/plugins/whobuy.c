@@ -47,12 +47,12 @@ ACMD(whobuy)
 
 	if (!message || !*message || sscanf(message, "%99[^\n]", item_name) < 1) {
 		clif->message(fd, "Input item name or ID (use: @whobuy <name or ID>).");
-		return -1;
+		return false;
 	}
 	if ((item_data = itemdb->search_name(item_name)) == NULL &&
 		(item_data = itemdb->exists(atoi(item_name))) == NULL) {
 		clif->message(fd, msg_txt(19)); // Invalid item ID or name.
-		return -1;
+		return false;
 	}
 
 	item_id = item_data->nameid;
@@ -88,7 +88,7 @@ ACMD(whobuy)
 	} else
 		clif->message(fd, "Nobody buying it now.");
 
-	return 0;
+	return true;
 }
 
 /* Server Startup */
