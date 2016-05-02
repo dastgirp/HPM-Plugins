@@ -468,22 +468,22 @@ int skillnotok_pre( uint16 *skill_id, struct map_session_data **sd ) {
 }
 
 HPExport void plugin_init (void) {
-	addAtcommand( "market", market );
-	addAtcommand( "marketkill", marketkill );
-	addAtcommand( "reloadscript", reloadscript );
+	addAtcommand("market", market);
+	addAtcommand("marketkill", marketkill);
+	addAtcommand("reloadscript", reloadscript);
 
-	addHookPre( "chat->join", chat_joinchat_pre );
-	addHookPre( "clif->charnameack", clif_charnameack_pre );
-	addHookPre( "map->quit", map_quit_pre );
-	addHookPre( "atcommand->atkillmonster_sub", atkillmonster_sub_pre );
-	addHookPre( "script->buildin_killmonster_sub_strip", buildin_killmonster_sub_strip_pre );
-	addHookPre( "script->buildin_killmonster_sub", buildin_killmonster_sub_pre );
-	addHookPre( "script->buildin_killmonsterall_sub_strip", buildin_killmonsterall_sub_strip_pre );
-	addHookPre( "script->buildin_killmonsterall_sub", buildin_killmonsterall_sub_pre );
-	addHookPre( "skill->not_ok", skillnotok_pre );
+	addHookPre(chat, join, chat_joinchat_pre);
+	addHookPre(clif, charnameack, clif_charnameack_pre);
+	addHookPre(map, quit, map_quit_pre);
+	addHookPre(atcommand, atkillmonster_sub, atkillmonster_sub_pre);
+	addHookPre(script, buildin_killmonster_sub_strip, buildin_killmonster_sub_strip_pre);
+	addHookPre(script, buildin_killmonster_sub, buildin_killmonster_sub_pre);
+	addHookPre(script, buildin_killmonsterall_sub_strip, buildin_killmonsterall_sub_strip_pre);
+	addHookPre(script, buildin_killmonsterall_sub, buildin_killmonsterall_sub_pre);
+	addHookPre(skill, not_ok, skillnotok_pre);
 	
-	addHookPost( "battle->check_target", battle_check_target_post );
-	addHookPost( "clif->getareachar_unit", clif_getareachar_unit_post );
+	addHookPost(battle, check_target, battle_check_target_post);
+	addHookPost(clif, getareachar_unit, clif_getareachar_unit_post);
 }
 
 HPExport void server_online (void) {
