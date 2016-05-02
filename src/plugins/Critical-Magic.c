@@ -84,11 +84,11 @@ int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 	return 0;
 }
 
-void magic_critical_attack(int *attack_type, struct block_list **src_, struct block_list **dsrc, struct block_list **bl_, uint16 *skill_id_, uint16 *skill_lv_, int64 *tick_, int *flag_, int *type_, struct Damage **dmg, int64 *damage_) {
-	uint16 skill_id = *skill_id_;
-	uint16 skill_lv = *skill_lv_;
-	int64 tick = *tick_;
-	int64 damage = *damage_;
+void magic_critical_attack(int **attack_type, struct block_list **src_, struct block_list **dsrc, struct block_list **bl_, uint16 **skill_id_, uint16 **skill_lv_, int64 **tick_, int **flag_, int **type_, struct Damage **dmg, int64 **damage_) {
+	uint16 skill_id = **skill_id_;
+	uint16 skill_lv = **skill_lv_;
+	int64 tick = **tick_;
+	int64 damage = **damage_;
 	struct map_session_data *sd;
 	struct status_data *tstatus;
 	struct block_list *src = *src_, *bl = *bl_;
@@ -98,12 +98,11 @@ void magic_critical_attack(int *attack_type, struct block_list **src_, struct bl
 	if ( src && (src->type == BL_PC || (battle->get_master(src))->type == BL_PC) ){
 		int m_cri = 0;
 		int random = rand()%100;
-		if(sd==NULL)
+		if (sd == NULL)
 			m_cri = cap_value(map->id2sd((battle->get_master(src))->id)->battle_status.cri/10,1,100);
 		else
 			m_cri = cap_value(sd->battle_status.cri/10,1,100);
-		if( random < m_cri )
-		{
+		if (random < m_cri) {
 			struct mob_data *md=NULL;
 			struct tmp_data *tmpd=NULL;
 			int i=0, d_=200;

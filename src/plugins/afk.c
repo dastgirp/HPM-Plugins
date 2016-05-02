@@ -32,13 +32,14 @@ prontera	mapflag	noafk
 #include "common/timer.h"
 #include "common/mapindex.h"
 #include "map/battle.h"
+#include "map/channel.h"
 #include "map/clif.h"
+#include "map/map.h"
+#include "map/npc.h"
+#include "map/pc.h"
 #include "map/script.h"
 #include "map/skill.h"
-#include "map/pc.h"
-#include "map/map.h"
 #include "map/status.h"
-#include "map/channel.h"
 
 #include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
@@ -112,7 +113,8 @@ int afk_timeout_return(const char *key)
 	return 0;
 }
 
-void parse_noafk_mapflag(const char **name, char **w3, char **w4, const char **start, const char **buffer, const char **filepath, int **retval){
+void parse_noafk_mapflag(const char **name, char **w3, char **w4, const char **start, const char **buffer, const char **filepath, int **retval)
+{
 	int16 m = map->mapname2mapid(*name);
 	if (!strcmpi(*w3, "noafk")) {
 		struct plugin_mapflag *mf_data;
@@ -130,7 +132,7 @@ void parse_noafk_mapflag(const char **name, char **w3, char **w4, const char **s
 
 /* Server Startup */
 HPExport void plugin_init (void){
-	addAtcommand("afk",afk);
+	addAtcommand("afk", afk);
 	addHookPre(npc, parse_unknown_mapflag, parse_noafk_mapflag);
 }
 
