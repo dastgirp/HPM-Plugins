@@ -40,6 +40,7 @@ prontera	mapflag	noafk
 #include "map/status.h"
 #include "map/channel.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
@@ -111,13 +112,12 @@ int afk_timeout_return(const char *key)
 	return 0;
 }
 
-void parse_noafk_mapflag(const char *name, char *w3, char *w4, const char* start, const char* buffer, const char* filepath, int *retval){
-	int16 m = map->mapname2mapid(name);
-	if (!strcmpi(w3,"noafk")){
+void parse_noafk_mapflag(const char **name, char **w3, char **w4, const char **start, const char **buffer, const char **filepath, int **retval){
+	int16 m = map->mapname2mapid(*name);
+	if (!strcmpi(*w3, "noafk")) {
 		struct plugin_mapflag *mf_data;
-		if ( !( mf_data = getFromMAPD(&map->list[m], 0) ) )
-		{
-			CREATE(mf_data,struct plugin_mapflag,1);
+		if (!( mf_data = getFromMAPD(&map->list[m], 0))) {
+			CREATE(mf_data, struct plugin_mapflag, 1);
 			mf_data->noafk = 1;
 			addToMAPD(&map->list[m], mf_data, 0, true);
 		}
@@ -131,7 +131,7 @@ void parse_noafk_mapflag(const char *name, char *w3, char *w4, const char* start
 /* Server Startup */
 HPExport void plugin_init (void){
 	addAtcommand("afk",afk);
-	addHookPre("npc->parse_unknown_mapflag",parse_noafk_mapflag);
+	addHookPre(npc, parse_unknown_mapflag, parse_noafk_mapflag);
 }
 
 HPExport void server_preinit (void) {

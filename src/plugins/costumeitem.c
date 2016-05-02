@@ -22,6 +22,7 @@
 #include "map/mob.h"
 #include "map/pc.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 #define cap_value(a, min, max) (((a) >= (max)) ? (max) : ((a) <= (min)) ? (min) : (a))
@@ -110,8 +111,10 @@ int alternate_item(int index){
 	}
 }
 
-void script_stop_costume(struct map_session_data *sd, struct item_data *data, int oid)
+void script_stop_costume(struct map_session_data **sd_, struct item_data **data_, int *oid)
 {
+	struct item_data *data = *data_;
+	struct map_session_data *sd = *sd_;
 	if (data->equip <= EQP_HEAD_MID){
 		int alternate = alternate_item(data->equip);
 		if (alternate != -1){
@@ -205,19 +208,20 @@ int pc_checkcombo_mine(struct map_session_data *sd, struct item_data *data ) {
 	return success;
 }
 
-int HPM_map_reqnickdb(struct map_session_data * sd, int *char_id) {
+int HPM_map_reqnickdb(struct map_session_data **sd, int *char_id) {
 
-	if( !sd ) return 0;
+	if (*sd == NULL)
+		return 0;
 
-	if( reserved_costume_id && reserved_costume_id == *char_id ) {
+	if (reserved_costume_id && reserved_costume_id == *char_id) {
 		clif->solved_charname(sd->fd, *char_id, "Costume");
 		hookStop();
 	}
 	return 1;
 }
 
-int HPM_pc_equippoint(int retVal, struct map_session_data *sd, int *nn) { 
-	int char_id = 0, n = *nn;
+int HPM_pc_equippoint(int retVal, struct map_session_data *sd, int n) { 
+	int char_id = 0;
 
 	if (!sd || !retVal)	// If the original function returned zero, we don't need to process it anymore
 		return retVal;
@@ -350,11 +354,11 @@ HPExport void plugin_init (void) {
 	pc->checkcombo = pc_checkcombo_mine;
 	
 	//Hook
-	addHookPre("script->run_item_equip_script",script_stop_costume);
-	addHookPre("script->run_item_unequip_script",script_stop_costume);
-	addHookPre("script->run_use_script",script_stop_costume);
-	addHookPre("map->reqnickdb",HPM_map_reqnickdb);
-	addHookPost("pc->equippoint",HPM_pc_equippoint);
+	addHookPre(script, run_item_equip_script, script_stop_costume);
+	addHookPre(script, run_item_unequip_script, script_stop_costume);
+	addHookPre(script, run_use_script, script_stop_costume);
+	addHookPre(map, reqnickdb, HPM_map_reqnickdb);
+	addHookPost(pc, equippoint, HPM_pc_equippoint);
 	
 	//atCommand
 	addAtcommand("costumeitem",costumeitem);

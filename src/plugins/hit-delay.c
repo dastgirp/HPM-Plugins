@@ -39,6 +39,7 @@ v1.3b- Some Crash Fixes.
 #include "map/map.h"
 #include "map/battle.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
@@ -61,36 +62,36 @@ struct warp_delay_tick {
 	enum bl_type who_hit;
 };
 
-void pc_damage_received(struct map_session_data *sd,struct block_list *src,unsigned int hp, unsigned int sp){
+void pc_damage_received(struct map_session_data **sd, struct block_list **src, unsigned int hp, unsigned int sp){
 	struct warp_delay_tick *delay_data;
-	if( !(delay_data = getFromMSD(sd,0)) ) {
+	if (!(delay_data = getFromMSD(*sd,0))) {
 		CREATE(delay_data,struct warp_delay_tick,1);
 		delay_data->last_hit = timer->gettick();
 		delay_data->who_hit = BL_NUL;
-		addToMSD(sd,delay_data,0,true);
+		addToMSD(*sd,delay_data,0,true);
 	}
 	delay_data->last_hit = timer->gettick();
-	if (src)
-		delay_data->who_hit = src->type;
+	if (*src)
+		delay_data->who_hit = (*src)->type;
 	else
 		delay_data->who_hit = BL_NUL;
 	return;
 	
 }
-int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int *x, int *y, clr_type *clrtype) {
+int pc_setpos_delay(struct map_session_data **sd, unsigned short *map_index, int *x, int *y, clr_type *clrtype) {
 	int16 m;
 	struct warp_delay_tick *delay_data;
 	unsigned short mapindex_ = *map_index;
 	int64 temp_delay;
 
-	if (!sd)
+	if (*sd == NULL)
 		return 0;
 
 	if( !mapindex_ || !mapindex_id2name(mapindex_) || ( m = map->mapindex2mapid(mapindex_) ) == -1 ) {
 		ShowDebug("pc_setpos: Passed mapindex(%d) is invalid!\n", mapindex_);
 		return 1;
 	}
-	if( !(delay_data = getFromMSD(sd,0)) ) {
+	if( !(delay_data = getFromMSD(*sd,0)) ) {
 		return 0;
 	}
 	switch(delay_data->who_hit){
@@ -116,10 +117,10 @@ int pc_setpos_delay(struct map_session_data* sd, unsigned short *map_index, int 
 			temp_delay = warp_delay_others;
 			break;
 	}
-	if (sd->status.hp && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
+	if ((*sd)->status.hp && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
 		char output[50];
 		sprintf(output,"Please Wait %d second before warping.",(int)((temp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
-		clif->message(sd->fd,output);
+		clif->message((*sd)->fd,output);
 		hookStop();
 	}
 	return 0;
@@ -194,8 +195,8 @@ void go_warp_delay_merc_setting(const char *val) {
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addHookPre("pc->setpos",pc_setpos_delay);
-	addHookPre("pc->damage",pc_damage_received);
+	addHookPre(pc, setpos, pc_setpos_delay);
+	addHookPre(pc, damage, pc_damage_received);
 }
 
 HPExport void server_preinit (void) {

@@ -16,6 +16,7 @@
 #include "map/map.h"
 #include "map/mob.h"
 #include "map/pc.h"
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 
@@ -128,9 +129,9 @@ ACMD(monster_nde)
 	return true;
 }
 
-int mob_dead_nde(struct mob_data *md, struct block_list *src, int *type) {
+int mob_dead_nde(struct mob_data **md, struct block_list **src, int *type) {
 	struct tmp_data *tmpd;
-	tmpd = getFromMOBDATA(md,0);
+	tmpd = getFromMOBDATA(*md, 0);
 	if (tmpd != NULL)
 		if (tmpd->no_drop_exp)
 			*type = 3;
@@ -142,7 +143,7 @@ HPExport void plugin_init (void)
 {
 	addAtcommand("monster_nde",monster_nde);
 	
-	addHookPre("mob->dead",mob_dead_nde);
+	addHookPre(mob, dead, mob_dead_nde);
 }
 
 HPExport void server_online (void) {

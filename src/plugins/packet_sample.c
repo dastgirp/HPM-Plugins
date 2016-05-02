@@ -21,6 +21,7 @@
 #include "map/chrif.h"
 #include "map/map.h"
 #include "map/pc.h"
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 

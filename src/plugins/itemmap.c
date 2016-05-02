@@ -28,6 +28,7 @@ v 1.0 Initial Release
 #include "map/pet.h"
 #include "map/script.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {

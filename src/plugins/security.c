@@ -25,6 +25,7 @@
 #include "map/pc.h"
 #include "map/storage.h"
 #include "map/trade.h"
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 
@@ -56,10 +57,10 @@ enum S_Options {	//Security Options
 	S_CANT_LEAVE_GUILD = 0x1000,		// Cannot Leave Guild
 };
 
-int pc_cant_drop(struct map_session_data *sd,int *n,int *amount) {	// Can't Drop Items
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_DROP || security_opt(sd)&S_CANT_DELETE){
-			clif->message(sd->fd,"Security is on. You cannot drop item.");
+int pc_cant_drop(struct map_session_data **sd, int *n, int *amount) {	// Can't Drop Items
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_DROP || security_opt(*sd)&S_CANT_DELETE){
+			clif->message((*sd)->fd,"Security is on. You cannot drop item.");
 			hookStop();
 			return 0;
 		}
@@ -67,19 +68,19 @@ int pc_cant_drop(struct map_session_data *sd,int *n,int *amount) {	// Can't Drop
 	return 1;	
 }
 
-void cant_trade(struct map_session_data *sd, struct map_session_data *target_sd){	// Can't receive/send Trade Requests
-	if (sd == NULL || target_sd == NULL)
+void cant_trade(struct map_session_data **sd, struct map_session_data **target_sd){	// Can't receive/send Trade Requests
+	if (*sd == NULL || *target_sd == NULL)
 		return;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_TRADE_S){	//Cannot Send
-			clif->message(sd->fd,"Security is on. You cannot initiate Trade.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_TRADE_S){	//Cannot Send
+			clif->message((*sd)->fd,"Security is on. You cannot initiate Trade.");
 			hookStop();
 			return;
 		}
 	}
-	if (is_secure(target_sd)){	// Cannot Receive
-		if (security_opt(target_sd)&S_CANT_TRADE_R){
-			clif->message(sd->fd,"Target Player Security is on, Player cannot receive Trade Requests.");
+	if (is_secure(*target_sd)){	// Cannot Receive
+		if (security_opt(*target_sd)&S_CANT_TRADE_R){
+			clif->message((*sd)->fd,"Target Player Security is on, Player cannot receive Trade Requests.");
 			hookStop();
 			return;
 		}
@@ -87,12 +88,12 @@ void cant_trade(struct map_session_data *sd, struct map_session_data *target_sd)
 	return;
 }
 
-int gstorage_cant_open(struct map_session_data* sd){
+int gstorage_cant_open(struct map_session_data **sd){
 	if (sd==NULL)
 		return 2;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_OPEN_GS){
-			clif->message(sd->fd,"Security is on. You cannot open gStorage.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_OPEN_GS){
+			clif->message((*sd)->fd,"Security is on. You cannot open gStorage.");
 			hookStop();
 			return 1;
 		}
@@ -100,12 +101,12 @@ int gstorage_cant_open(struct map_session_data* sd){
 	return 0;
 }
 
-int gstorage_cant_add(struct map_session_data* sd, struct guild_storage* stor, struct item* item_data, int *amount) {
-	if (sd==NULL)
+int gstorage_cant_add(struct map_session_data **sd, struct guild_storage **stor, struct item **item_data, int *amount) {
+	if (*sd == NULL)
 		return 1;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_ADD_GS){
-			clif->message(sd->fd,"Security is on. You cannot add item to gStorage.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_ADD_GS){
+			clif->message((*sd)->fd,"Security is on. You cannot add item to gStorage.");
 			hookStop();
 			return 1;
 		}
@@ -113,12 +114,12 @@ int gstorage_cant_add(struct map_session_data* sd, struct guild_storage* stor, s
 	return 0;
 }
 
-int gstorage_cant_take(struct map_session_data* sd, int *index, int *amount) {
-	if (sd==NULL)
+int gstorage_cant_take(struct map_session_data **sd, int *index, int *amount) {
+	if (*sd == NULL)
 		return 0;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_TAKE_GS){
-			clif->message(sd->fd,"Security is on. You cannot take item from gStorage.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_TAKE_GS){
+			clif->message((*sd)->fd,"Security is on. You cannot take item from gStorage.");
 			hookStop();
 			return 0;
 		}
@@ -126,12 +127,12 @@ int gstorage_cant_take(struct map_session_data* sd, int *index, int *amount) {
 	return 1;
 }
 
-int pc_restrict_items(struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type *log_type){
-	if (sd==NULL)
+int pc_restrict_items(struct map_session_data **sd, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type){
+	if (*sd == NULL)
 		return 1;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_DELETE){
-			clif->message(sd->fd,"Security is on. You cannot delete item.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_DELETE){
+			clif->message((*sd)->fd,"Security is on. You cannot delete item.");
 			hookStop();
 			return 1;
 		}
@@ -139,12 +140,12 @@ int pc_restrict_items(struct map_session_data *sd,int *n,int *amount,int *type, 
 	return 0;
 }
 
-int npc_cant_sell(struct map_session_data* sd, int *n, unsigned short* item_list) {
-	if (sd==NULL)
+int npc_cant_sell(struct map_session_data **sd, int *n, unsigned short *item_list) {
+	if (*sd == NULL)
 		return 1;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_SELL){
-			clif->message(sd->fd,"Security is on. You cannot sell item.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_SELL){
+			clif->message((*sd)->fd,"Security is on. You cannot sell item.");
 			hookStop();
 			return 1;
 		}
@@ -152,12 +153,12 @@ int npc_cant_sell(struct map_session_data* sd, int *n, unsigned short* item_list
 	return 0;
 }
 
-int npc_cant_buy(struct map_session_data* sd, int *n, unsigned short* item_list) {
-	if (sd==NULL)
+int npc_cant_buy(struct map_session_data **sd, int *n, unsigned short* item_list) {
+	if (*sd == NULL)
 		return 1;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_BUY){
-			clif->message(sd->fd,"Security is on. You cannot buy item.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_BUY){
+			clif->message((*sd)->fd,"Security is on. You cannot buy item.");
 			hookStop();
 			return 1;
 		}
@@ -165,12 +166,12 @@ int npc_cant_buy(struct map_session_data* sd, int *n, unsigned short* item_list)
 	return 0;
 }
 
-void open_vending(struct map_session_data* sd, int *num){
-	if (sd==NULL)
+void open_vending(struct map_session_data **sd, int *num){
+	if (*sd == NULL)
 		return;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_VEND){
-			clif->message(sd->fd,"Security is on. You cannot vend.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_VEND){
+			clif->message((*sd)->fd,"Security is on. You cannot vend.");
 			sd->state.prevend = sd->state.workinprogress = 0;
 			hookStop();
 			return;
@@ -179,20 +180,20 @@ void open_vending(struct map_session_data* sd, int *num){
 	return;
 }
 
-int guild_invite_permission(struct map_session_data *sd, struct map_session_data *tsd) {
-	if (sd==NULL || tsd == NULL)
+int guild_invite_permission(struct map_session_data **sd, struct map_session_data **tsd) {
+	if (*sd == NULL || *tsd == NULL)
 		return 0;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_SEND_GINVITE){
-			clif->message(sd->fd,"Security is on. You cannot send Guild Invite.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_SEND_GINVITE){
+			clif->message((*sd)->fd,"Security is on. You cannot send Guild Invite.");
 			hookStop();
 			return 0;
 		}
 	}
 	
-	if (is_secure(tsd)){
-		if (security_opt(tsd)&S_CANT_RECEIVE_GINVITE){
-			clif->message(sd->fd,"Target Player Security is on, Player cannot receive Guild Invites.");
+	if (is_secure(*tsd)){
+		if (security_opt(*tsd)&S_CANT_RECEIVE_GINVITE){
+			clif->message((*sd)->fd,"Target Player Security is on, Player cannot receive Guild Invites.");
 			hookStop();
 			return 0;
 		}
@@ -200,12 +201,12 @@ int guild_invite_permission(struct map_session_data *sd, struct map_session_data
 	return 0;
 }
 
-int guild_leave_permission(struct map_session_data* sd, int *guild_id, int *account_id, int *char_id, const char* mes) {
-	if (sd==NULL)
+int guild_leave_permission(struct map_session_data **sd, int *guild_id, int *account_id, int *char_id, const char **mes) {
+	if (*sd == NULL)
 		return 0;
-	if (is_secure(sd)){
-		if (security_opt(sd)&S_CANT_LEAVE_GUILD){
-			clif->message(sd->fd,"Security is on. You cannot leave Guild.");
+	if (is_secure(*sd)){
+		if (security_opt(*sd)&S_CANT_LEAVE_GUILD){
+			clif->message((*sd)->fd,"Security is on. You cannot leave Guild.");
 			hookStop();
 			return 0;
 		}
@@ -216,18 +217,18 @@ int guild_leave_permission(struct map_session_data* sd, int *guild_id, int *acco
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addHookPre("pc->dropitem",pc_cant_drop);
-	addHookPre("trade->request",cant_trade);
-	addHookPre("gstorage->open",gstorage_cant_open);
-	addHookPre("gstorage->additem",gstorage_cant_add);
-	addHookPre("gstorage->get",gstorage_cant_take);
-	addHookPre("gstorage->gettocart",gstorage_cant_take);
-	addHookPre("pc->delitem",pc_restrict_items);
-	addHookPre("npc->selllist",npc_cant_sell);
-	addHookPre("npc->buylist",npc_cant_buy);
-	addHookPre("clif->openvendingreq",open_vending);
-	addHookPre("guild->invite",guild_invite_permission);
-	addHookPre("guild->leave",guild_leave_permission);
+	addHookPre(pc, dropitem, pc_cant_drop);
+	addHookPre(trade, request, cant_trade);
+	addHookPre(gstorage, open, gstorage_cant_open);
+	addHookPre(gstorage, additem, gstorage_cant_add);
+	addHookPre(gstorage, get, gstorage_cant_take);
+	addHookPre(gstorage, gettocart, gstorage_cant_take);
+	addHookPre(pc, delitem, pc_restrict_items);
+	addHookPre(npc, selllist, npc_cant_sell);
+	addHookPre(npc, buylist, npc_cant_buy);
+	addHookPre(clif, openvendingreq, open_vending);
+	addHookPre(guild, invite, guild_invite_permission);
+	addHookPre(guild, leave, guild_leave_permission);
 }
 
 HPExport void server_online (void) {

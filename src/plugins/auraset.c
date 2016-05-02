@@ -25,6 +25,7 @@
 #include "map/mob.h"
 #include "map/map.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {	//[Dastgir/Hercules]
@@ -153,7 +154,7 @@ bool clif_spawn_AuraPost(bool retVal, struct block_list *bl){	//[Dastgir/Hercule
 	return true;
 }
 
-void clif_getareachar_unit_AuraPost(struct map_session_data* sd, struct block_list *bl) {	//[Dastgir/Hercules]
+void clif_getareachar_unit_AuraPost(struct map_session_data *sd, struct block_list *bl) {	//[Dastgir/Hercules]
 	
 	struct view_data *vd;
 
@@ -210,12 +211,14 @@ void clif_getareachar_char(struct block_list *bl, short flag)
 	);
 }
 
-int status_change_start_postAura(int retVal,struct block_list *src, struct block_list *bl, enum sc_type *type_, int *rate, int *val1, int *val2, int *val3, int *val4, int *tick, int *flag) {	//[Dastgir/Hercules]
+// [Dastgir/Hercules]
+int status_change_start_postAura(int retVal, struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag)
+{
 	struct map_session_data *sd = NULL;
-	enum sc_type type = *type_;
-	struct hide_data* data;
+	struct hide_data *data;
 
-	if (retVal == 0 || bl->type != BL_PC){ return retVal; }
+	if (retVal == 0 || bl->type != BL_PC)
+		return retVal;
 
 	sd = BL_CAST(BL_PC, bl);
 	data = hd_search(sd);
@@ -228,22 +231,22 @@ int status_change_start_postAura(int retVal,struct block_list *src, struct block
 	return 1;
 }
 
-int status_change_end_preAura(struct block_list* bl, enum sc_type *type_, int *tid_, const char* file, int *line) {	//[Dastgir/Hercules]
+int status_change_end_preAura(struct block_list **bl, enum sc_type *type_, int *tid_, const char **file, int *line) {	// [Dastgir/Hercules]
 	struct map_session_data *sd;
 	struct status_change *sc;
 	struct status_change_entry *sce;
 	enum sc_type type = *type_;
 	struct hide_data* data;
 	int tid = *tid_;
-	if (bl == NULL)
+	if (*bl == NULL)
 		return 0;
 	
-	sc = status->get_sc(bl);
+	sc = status->get_sc(*bl);
 	
 	if (type < 0 || type >= SC_MAX || !sc || !(sce = sc->data[type]))
 		return 0;
 
-	sd = BL_CAST(BL_PC, bl);
+	sd = BL_CAST(BL_PC, *bl);
 	
 	if (sce->timer != tid && tid != INVALID_TIMER && sce->timer != INVALID_TIMER)
 		return 0;
@@ -259,19 +262,19 @@ int status_change_end_preAura(struct block_list* bl, enum sc_type *type_, int *t
 }
 
 void clif_sendauraself(struct map_session_data *sd){
-	clif_sendaurastoone(sd,sd);
+	clif_sendaurastoone(sd, sd);
 }
 
 /* run when server starts */
 HPExport void plugin_init(void) {	//[Dastgir/Hercules]
 	addAtcommand("aura", aura);
 	addScriptCommand("aura", "i??", aura);
-	addHookPre("status->change_end_", status_change_end_preAura);
+	addHookPre(status, change_end_, status_change_end_preAura);
 	
-	addHookPost("clif->spawn", clif_spawn_AuraPost);
-	addHookPost("clif->getareachar_unit", clif_getareachar_unit_AuraPost);
-	addHookPost("status->change_start", status_change_start_postAura);
-	addHookPost("clif->refresh",clif_sendauraself);
+	addHookPost(clif, spawn, clif_spawn_AuraPost);
+	addHookPost(clif, getareachar_unit, clif_getareachar_unit_AuraPost);
+	addHookPost(status, change_start, status_change_start_postAura);
+	addHookPost(clif, refresh, clif_sendauraself);
 }
 
 HPExport void server_online (void) {

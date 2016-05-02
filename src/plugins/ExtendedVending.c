@@ -51,6 +51,7 @@ idnum2itemresnametable.txt
 #include "map/status.h"
 #include "map/searchstore.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo =
@@ -210,25 +211,25 @@ int ev_return_bc(const char *key)
 }
 
 //Clif Edits
-void clif_parse_SelectArrow_pre(int *fd,struct map_session_data *sd)
+void clif_parse_SelectArrow_pre(int *fd,struct map_session_data **sd)
 {
-	if (pc_istrading(sd)) {
+	if (pc_istrading(*sd)) {
 	//Make it fail to avoid shop exploits where you sell something different than you see.
-		clif->skill_fail(sd,sd->ud.skill_id,USESKILL_FAIL_LEVEL,0);
-		clif_menuskill_clear(sd);
+		clif->skill_fail(*sd,(*sd)->ud.skill_id,USESKILL_FAIL_LEVEL,0);
+		clif_menuskill_clear(*sd);
 		return;
 	}
-	switch( sd->menuskill_id ) {
+	switch( (*sd)->menuskill_id ) {
 		case MC_VENDING: // Extended Vending system 
-			skill_vending_ev(sd,RFIFOW(*fd,2));
-			clif_menuskill_clear(sd);
+			skill_vending_ev(*sd, RFIFOW(*fd,2));
+			clif_menuskill_clear(*sd);
 			hookStop();
 			break;
 	}
 	return;
 }
 
-void clif_parse_OpenVending_pre(int *fd, struct map_session_data* sd) {
+void clif_parse_OpenVending_pre(int *fd, struct map_session_data **sd_) {
 	int fd2 = *fd;
 	short len = (short)RFIFOW(fd2,2) - 85;
 	const char* mes_orig = (const char*)RFIFOP(fd2,4);
@@ -237,8 +238,9 @@ void clif_parse_OpenVending_pre(int *fd, struct map_session_data* sd) {
 	char message[1024];
 	struct player_data* ssd;
 	struct item_data *item;
+	struct map_session_data *sd = *sd_;
 	
-	if ( !( ssd = getFromMSD(sd,0) ) ) {
+	if (!( ssd = getFromMSD(sd,0))) {
 		CREATE( ssd, struct player_data, 1 );
 		ssd->vend_loot = 0;
 		ssd->vend_lvl = 0;
@@ -345,14 +347,14 @@ void itemdb_read_post(int retVal) {
 	return;
 }
 //Skill.c
-int skill_castend_nodamage_id_pre(struct block_list *src, struct block_list *bl, uint16 *skill_id2, uint16 *skill_lv2, int64 *tick2, int *flag2){
+int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **bl_, uint16 *skill_id2, uint16 *skill_lv2, int64 *tick2, int *flag2){
 	uint16 skill_id = *skill_id2;
 	uint16 skill_lv = *skill_lv2;
-	//int16 tick = *tick2;
-	//int flag = *flag2;
 	struct map_session_data *sd;
 	struct player_data* ssd;
-	if (skill_id > 0 && !skill_lv) return 0;	// celest
+	struct block_list *src = *src_, *bl = *bl_;
+	if (skill_id > 0 && !skill_lv)
+		return 0;	// celest
 
 
 	nullpo_retr(1, src);
@@ -430,29 +432,29 @@ int skill_castend_nodamage_id_pre(struct block_list *src, struct block_list *bl,
 	return 1;
 }
 
-void vending_list_pre(struct map_session_data* sd, unsigned int *id2) {
+void vending_list_pre(struct map_session_data **sd, unsigned int *id2) {
 	unsigned int id = *id2;
-	struct map_session_data* vsd;
-	struct player_data* ssd;
+	struct map_session_data *vsd;
+	struct player_data *ssd;
 	char output[1024];
 	int vend_loot = 0;
-	nullpo_retv(sd);
+	nullpo_retv(*sd);
 
-	if ( (vsd = map->id2sd(id)) == NULL )
+	if ((vsd = map->id2sd(id)) == NULL)
 		return;
-	if ( !vsd->state.vending )
+	if (!vsd->state.vending)
 		return; // not vending
-	ssd = getFromMSD(vsd,0);
-	if ( ssd ) {
+	ssd = getFromMSD(vsd, 0);
+	if (ssd) {
 		vend_loot = ssd->vend_loot;
 	}
     
-	if ( !pc_can_give_items(sd) || !pc_can_give_items(vsd) ) { //check if both GMs are allowed to trade
+	if ( !pc_can_give_items(*sd) || !pc_can_give_items(vsd) ) { //check if both GMs are allowed to trade
 		// GM is not allowed to trade
-		if (sd->lang_id >= atcommand->max_message_table)
-			clif->message(sd->fd, atcommand->msg_table[0][246]);
+		if ((*sd)->lang_id >= atcommand->max_message_table)
+			clif->message((*sd)->fd, atcommand->msg_table[0][246]);
 		else
-			clif->message(sd->fd, atcommand->msg_table[sd->lang_id][246]);
+			clif->message((*sd)->fd, atcommand->msg_table[(*sd)->lang_id][246]);
 		return;
 	} 
 
@@ -462,7 +464,7 @@ void vending_list_pre(struct map_session_data* sd, unsigned int *id2) {
 	}
 }
 
-void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned int *uid2, const uint8* data, int *count2) {
+void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8* data, int *count2) {
 	int aid = *aid2;
 	unsigned int uid = *uid2;
 	int count = *count2;
@@ -471,25 +473,26 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 	struct s_vending vend[MAX_VENDING]; // against duplicate packets
 	struct map_session_data* vsd = map->id2sd(aid);
 	struct player_data* ssd;
+	struct map_session_data *sd = *sd_;
 	int vend_loot = 0;
 
 	nullpo_retv(sd);
-	if ( vsd == NULL || !vsd->state.vending || vsd->bl.id == sd->bl.id )
+	if (vsd == NULL || !vsd->state.vending || vsd->bl.id == sd->bl.id)
 		return; // invalid shop
 	
-	ssd = getFromMSD(vsd,0);
+	ssd = getFromMSD(vsd, 0);
 	if (ssd)
 		vend_loot = ssd->vend_loot;
 	
 	if (vend_loot)
 		hookStop();
 	if ( vsd->vender_id != uid ) { // shop has changed
-		clif->buyvending(sd, 0, 0, 6);  // store information was incorrect
+		clif->buyvending(*sd, 0, 0, 6);  // store information was incorrect
 		return;
 	}
 
-	if ( !searchstore->queryremote(sd, aid) &&
-		( sd->bl.m != vsd->bl.m || !check_distance_bl(&sd->bl, &vsd->bl, AREA_SIZE) ) )
+	if (!searchstore->queryremote(sd, aid) &&
+		(*sd->bl.m != vsd->bl.m || !check_distance_bl(&sd->bl, &vsd->bl, AREA_SIZE)))
 		return; // shop too far away
 
 	searchstore->clearremote(sd);
@@ -716,14 +719,14 @@ void vending_purchasereq_mod(struct map_session_data* sd, int *aid2, unsigned in
 	}
 }
 
-void pc_autotrade_prepare_pre(struct map_session_data *sd) {
+void pc_autotrade_prepare_pre(struct map_session_data **sd) {
 	struct player_data *ssd;
-	ssd = getFromMSD(sd,0);
+	ssd = getFromMSD(*sd, 0);
 	if (ssd){
 		if (SQL_ERROR == SQL->Query(map->mysql_handle, "INSERT INTO `evs_info` (`vend_loot`,`vend_lvl`,`char_id`) VALUES ('%d','%d','%d')ON DUPLICATE KEY UPDATE `vend_lvl`='%d', `vend_loot`='%d'",
 										ssd->vend_loot,
 										ssd->vend_lvl,
-										sd->status.char_id,
+										*sd->status.char_id,
 										ssd->vend_lvl,
 										ssd->vend_loot
 										))
@@ -731,17 +734,17 @@ void pc_autotrade_prepare_pre(struct map_session_data *sd) {
 	}
 }
 
-void pc_autotrade_populate_pre(struct map_session_data *sd) {
+void pc_autotrade_populate_pre(struct map_session_data **sd) {
 	struct player_data *ssd;
 	char *mdata = NULL;
 	
-	if ( !( ssd = getFromMSD(sd,0) ) ) {
-		CREATE( ssd, struct player_data, 1 );
+	if (!( ssd = getFromMSD(*sd,0))) {
+		CREATE(ssd, struct player_data, 1);
 		ssd->vend_loot = 0;
 		ssd->vend_lvl = 0;
-		addToMSD( sd, ssd, 0, true );
+		addToMSD(*sd, ssd, 0, true);
 	}
-	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'",sd->status.char_id))
+	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'", *sd->status.char_id))
 		Sql_ShowDebug(map->mysql_handle);
 
 	while( SQL_SUCCESS == SQL->NextRow(map->mysql_handle) ) {
@@ -754,14 +757,14 @@ void pc_autotrade_populate_pre(struct map_session_data *sd) {
 
 HPExport void plugin_init (void){
 	
-	addHookPre("clif->pSelectArrow",clif_parse_SelectArrow_pre);
-	addHookPre("clif->pOpenVending",clif_parse_OpenVending_pre);
-	addHookPost("itemdb->read",itemdb_read_post);
-	addHookPre("skill->castend_nodamage_id",skill_castend_nodamage_id_pre);
-	addHookPre("vending->list",vending_list_pre);
-	addHookPre("vending->purchase",vending_purchasereq_mod);
-	addHookPre("pc->autotrade_prepare",pc_autotrade_prepare_pre);
-	addHookPre("pc->autotrade_populate",pc_autotrade_populate_pre);
+	addHookPre(clif, pSelectArrow, clif_parse_SelectArrow_pre);
+	addHookPre(clif, pOpenVending, clif_parse_OpenVending_pre);
+	addHookPre(skill, castend_nodamage_id, skill_castend_nodamage_id_pre);
+	addHookPre(vending, list, vending_list_pre);
+	addHookPre(vending, purchase, vending_purchasereq_mod);
+	addHookPre(pc, autotrade_prepare, pc_autotrade_prepare_pre);
+	addHookPre(pc, autotrade_populate, pc_autotrade_populate_pre);
+	addHookPost(itemdb, read, itemdb_read_post);
 	if (SQL_ERROR == SQL->Query(map->mysql_handle, "CREATE TABLE IF NOT EXISTS `evs_info` (`char_id` int(10) NOT NULL,`vend_loot` int(6) NOT NULL,`vend_lvl` int(5) NOT NULL, PRIMARY KEY(`char_id`))")){
 		Sql_ShowDebug(map->mysql_handle);
 	}

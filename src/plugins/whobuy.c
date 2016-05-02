@@ -21,6 +21,7 @@ v 1.0 Initial Release
 #include "map/script.h"
 #include "common/mapindex.h"
 #include "common/nullpo.h"
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 

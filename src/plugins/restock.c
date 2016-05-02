@@ -30,6 +30,7 @@
 #include "map/itemdb.h"
 #include "map/guild.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {
@@ -41,20 +42,20 @@ HPExport struct hplugin_info pinfo = {
 
 int restock_misc_itemid;
 
-int pc_restock_misc_pre(struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type* log_type){
+int pc_restock_misc_pre(struct map_session_data **sd, int *n, int *amount, int *type, short *reason, e_log_pick_type* log_type){
 	int index = *n;
-	if (sd == NULL)
+	if (*sd == NULL)
 		return 1;
 	restock_misc_itemid = 0;
-	if(sd->status.inventory[index].nameid > 0){
-		restock_misc_itemid = sd->status.inventory[index].nameid;
+	if ((*sd)->status.inventory[index].nameid > 0){
+		restock_misc_itemid = (*sd)->status.inventory[index].nameid;
 	}
 	return 0;
 }
-int pc_restock_misc_post(int retVal, struct map_session_data *sd,int *n,int *amount,int *type, short *reason, e_log_pick_type* log_type){
+int pc_restock_misc_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type){
 	if (retVal == 1)
 		return retVal;
-	if (restock_misc_itemid && pc->search_inventory(sd,restock_misc_itemid) == -1){
+	if (restock_misc_itemid && pc->search_inventory(sd, restock_misc_itemid) == -1){
 		pc_setglobalreg(sd,script->add_str("restkid"), restock_misc_itemid );
 		npc->event(sd, "Restock::OnRestock", 0);
 	}
@@ -150,8 +151,8 @@ BUILDIN(restock_item){
 }
 
 HPExport void plugin_init(void) {
-	addHookPre("pc->delitem", pc_restock_misc_pre);
-	addHookPost("pc->delitem", pc_restock_misc_post);
+	addHookPre(pc, delitem, pc_restock_misc_pre);
+	addHookPost(pc, delitem, pc_restock_misc_post);
 	addScriptCommand("restock_item","iii",restock_item);
 }
 

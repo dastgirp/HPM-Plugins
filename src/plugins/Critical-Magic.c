@@ -33,6 +33,7 @@ v1.0b - Fix Bug of double drop
 #include "map/mob.h"
 #include "map/npc.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo =
@@ -83,13 +84,14 @@ int skill_mcri_kill_delay(int tid, int64 tick, int id, intptr_t data)
 	return 0;
 }
 
-void magic_critical_attack(int *attack_type, struct block_list* src, struct block_list *dsrc, struct block_list *bl, uint16 *skill_id_, uint16 *skill_lv_, int64 *tick_, int *flag_, int *type_, struct Damage *dmg, int64 *damage_) {
+void magic_critical_attack(int *attack_type, struct block_list **src_, struct block_list **dsrc, struct block_list **bl_, uint16 *skill_id_, uint16 *skill_lv_, int64 *tick_, int *flag_, int *type_, struct Damage **dmg, int64 *damage_) {
 	uint16 skill_id = *skill_id_;
 	uint16 skill_lv = *skill_lv_;
 	int64 tick = *tick_;
 	int64 damage = *damage_;
 	struct map_session_data *sd;
 	struct status_data *tstatus;
+	struct block_list *src = *src_, *bl = *bl_;
 	
 	sd = BL_CAST(BL_PC, src);
 	tstatus = status->get_status_data(bl);
@@ -164,7 +166,7 @@ int critical_color_return(const char *key)
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addHookPre("skill->attack_display_unknown",magic_critical_attack);
+	addHookPre(skill, attack_display_unknown, magic_critical_attack);
 }
 
 HPExport void server_preinit (void) {

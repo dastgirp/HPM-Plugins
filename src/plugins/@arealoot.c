@@ -36,6 +36,7 @@ Autoloots item in x by x Range
 #include "map/skill.h"
 #include "map/itemdb.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
@@ -79,8 +80,10 @@ ACMD(arealoot) {
 }
 
 
-int arealoot_item(struct map_session_data *sd,struct flooritem_data *fitem){
+int arealoot_item(struct map_session_data **sd_, struct flooritem_data **fitem_){
 	struct area_p_data *data;
+	struct map_session_data *sd = *sd_;
+	struct flooritem_data **fitem = *fitem_;
 	data = adb_search(sd);
 	if (data->arealoot && data->in_process==false){
 		data->in_process = true;
@@ -115,7 +118,7 @@ int arealoot_range_return(const char *key)
 /* run when server starts */
 HPExport void plugin_init (void) {
     addAtcommand("arealoot",arealoot);
-	addHookPre("pc->takeitem",arealoot_item);
+	addHookPre(pc, takeitem, arealoot_item);
 }
 
 HPExport void server_online (void) {

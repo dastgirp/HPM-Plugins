@@ -18,6 +18,7 @@
 #include "map/pc.h"
 #include "map/script.h"
 #include "map/unit.h"
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 #define OPTION_AUTOATTACK 0x10000000
