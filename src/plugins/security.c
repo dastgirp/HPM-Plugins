@@ -140,7 +140,8 @@ int pc_restrict_items(struct map_session_data **sd, int *n, int *amount, int *ty
 	return 0;
 }
 
-int npc_cant_sell(struct map_session_data **sd, int *n, unsigned short *item_list) {
+int npc_cant_sell(struct map_session_data **sd, struct itemlist **item_list)
+{
 	if (*sd == NULL)
 		return 1;
 	if (is_secure(*sd)){
@@ -153,7 +154,7 @@ int npc_cant_sell(struct map_session_data **sd, int *n, unsigned short *item_lis
 	return 0;
 }
 
-int npc_cant_buy(struct map_session_data **sd, int *n, unsigned short* item_list) {
+int npc_cant_buy(struct map_session_data **sd, struct itemlist **item_list) {
 	if (*sd == NULL)
 		return 1;
 	if (is_secure(*sd)){
@@ -172,7 +173,7 @@ void open_vending(struct map_session_data **sd, int *num){
 	if (is_secure(*sd)){
 		if (security_opt(*sd)&S_CANT_VEND){
 			clif->message((*sd)->fd,"Security is on. You cannot vend.");
-			sd->state.prevend = sd->state.workinprogress = 0;
+			(*sd)->state.prevend = (*sd)->state.workinprogress = 0;
 			hookStop();
 			return;
 		}

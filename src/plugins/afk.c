@@ -113,7 +113,7 @@ int afk_timeout_return(const char *key)
 	return 0;
 }
 
-void parse_noafk_mapflag(const char **name, char **w3, char **w4, const char **start, const char **buffer, const char **filepath, int **retval)
+void parse_noafk_mapflag(const char *name, const char **w3, const char **w4, const char **start, const char **buffer, const char **filepath, int **retval)
 {
 	int16 m = map->mapname2mapid(*name);
 	if (!strcmpi(*w3, "noafk")) {

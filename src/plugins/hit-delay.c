@@ -62,7 +62,7 @@ struct warp_delay_tick {
 	enum bl_type who_hit;
 };
 
-void pc_damage_received(struct map_session_data **sd, struct block_list **src, unsigned int hp, unsigned int sp){
+void pc_damage_received(struct map_session_data **sd, struct block_list **src, unsigned int *hp, unsigned int *sp){
 	struct warp_delay_tick *delay_data;
 	if (!(delay_data = getFromMSD(*sd,0))) {
 		CREATE(delay_data,struct warp_delay_tick,1);
