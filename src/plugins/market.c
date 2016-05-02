@@ -400,7 +400,7 @@ int map_quit_pre( struct map_session_data **sd ) {
 	return 0;
 }
 
-int atkillmonster_sub_pre( struct block_list **bl, va_list **ap ) {
+int atkillmonster_sub_pre( struct block_list **bl, va_list *ap ) {
 	struct mob_data *md = (TBL_MOB*)(*bl);
 	struct monster_data *mmd;
 
@@ -411,7 +411,7 @@ int atkillmonster_sub_pre( struct block_list **bl, va_list **ap ) {
 	return 0;
 }
 
-int buildin_killmonster_sub_strip_pre( struct block_list **bl, va_list **ap ) {
+int buildin_killmonster_sub_strip_pre( struct block_list **bl, va_list *ap ) {
 	struct mob_data *md = (TBL_MOB*)(*bl);
 	struct monster_data *mmd;
 
@@ -422,7 +422,7 @@ int buildin_killmonster_sub_strip_pre( struct block_list **bl, va_list **ap ) {
 	return 0;
 }
 
-int buildin_killmonster_sub_pre( struct block_list **bl, va_list **ap ) {
+int buildin_killmonster_sub_pre( struct block_list **bl, va_list *ap ) {
 	struct mob_data *md = (TBL_MOB*)(*bl);
 	struct monster_data *mmd;
 
@@ -433,7 +433,7 @@ int buildin_killmonster_sub_pre( struct block_list **bl, va_list **ap ) {
 	return 0;
 }
 
-int buildin_killmonsterall_sub_strip_pre( struct block_list **bl, va_list **ap ) {
+int buildin_killmonsterall_sub_strip_pre( struct block_list **bl, va_list *ap ) {
 	struct mob_data *md = (TBL_MOB*)(*bl);
 	struct monster_data *mmd;
 
@@ -444,7 +444,7 @@ int buildin_killmonsterall_sub_strip_pre( struct block_list **bl, va_list **ap )
 	return 0;
 }
 
-int buildin_killmonsterall_sub_pre( struct block_list **bl, va_list **ap ) {
+int buildin_killmonsterall_sub_pre( struct block_list **bl, va_list *ap ) {
 	struct mob_data *md = (TBL_MOB*)(*bl);
 	struct monster_data *mmd;
 
