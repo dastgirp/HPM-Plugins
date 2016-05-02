@@ -83,7 +83,7 @@ ACMD(arealoot) {
 int arealoot_item(struct map_session_data **sd_, struct flooritem_data **fitem_){
 	struct area_p_data *data;
 	struct map_session_data *sd = *sd_;
-	struct flooritem_data **fitem = *fitem_;
+	struct flooritem_data *fitem = *fitem_;
 	data = adb_search(sd);
 	if (data->arealoot && data->in_process==false){
 		data->in_process = true;
