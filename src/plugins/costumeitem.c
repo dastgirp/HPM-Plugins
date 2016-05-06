@@ -208,16 +208,16 @@ int pc_checkcombo_mine(struct map_session_data *sd, struct item_data *data ) {
 	return success;
 }
 
-int HPM_map_reqnickdb(struct map_session_data **sd, int *char_id) {
+void HPM_map_reqnickdb(struct map_session_data **sd, int *char_id) {
 
 	if (*sd == NULL)
-		return 0;
+		return;
 
 	if (reserved_costume_id && reserved_costume_id == *char_id) {
-		clif->solved_charname(sd->fd, *char_id, "Costume");
+		clif->solved_charname((*sd)->fd, *char_id, "Costume");
 		hookStop();
 	}
-	return 1;
+	return;
 }
 
 int HPM_pc_equippoint(int retVal, struct map_session_data *sd, int n) { 
