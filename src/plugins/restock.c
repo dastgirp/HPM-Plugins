@@ -97,6 +97,8 @@ BUILDIN(restock_item){
 					clif->additem(sd, 0, 0, flag);
 					pc_setglobalreg(sd,script->add_str("restkid1"), gstorage2->items[i].nameid );
 					pc_setglobalreg(sd,script->add_str("restkid2"), rqu );
+					gstorage->close(sd);
+					gstorage2->lock = 0;
 					script_pushint(st, 1);
 					break;
 				}
@@ -112,14 +114,9 @@ BUILDIN(restock_item){
 		}
 		j = stor->storage_amount;
 		if (sd->state.storage_flag){
-			if (sd->state.storage_flag==1){
-				sd->state.storage_flag = 0;
-				storage->close(sd);
-			}
-			else{
-				sd->state.storage_flag = 0;
-				gstorage->close(sd);
-			}
+			
+			sd->state.storage_flag = 0;
+			storage->close(sd);
 		}
 		sd->state.storage_flag = 1;
 		for (i = 0; i < j; ++i) {
@@ -132,6 +129,8 @@ BUILDIN(restock_item){
 					clif->additem(sd, 0, 0, flag);
 					pc_setglobalreg(sd,script->add_str("restkid1"), stor->items[i].nameid );
 					pc_setglobalreg(sd,script->add_str("restkid2"), rqu );
+					sd->state.storage_flag = 0;
+					storage->close(sd);
 					script_pushint(st, 1);
 					break;
 				}
@@ -140,10 +139,6 @@ BUILDIN(restock_item){
 		sd->state.storage_flag = 0;
 		storage->close(sd);
 
-	}
-	else {
-		script_pushint(st, 0);
-		return true;
 	}
 	script_pushint(st,0);
 	
