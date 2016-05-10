@@ -342,7 +342,7 @@ static bool itemdb_read_vendingdb(char* fields[], int columns, int current)
 }
 
 //ItemDB.c
-void itemdb_read_post(int retVal) {
+void itemdb_read_post() {
 	sv->readdb(map->db_path, "item_vending.txt", ',', 1, 1, ARRAYLENGTH(ext_vend), itemdb_read_vendingdb);
 	return;
 }
@@ -460,11 +460,11 @@ void vending_list_pre(struct map_session_data **sd, unsigned int *id2) {
 
 	if ( bc_extended_vending == 1 && vend_loot ) {
 		sprintf(output,"You've opened %s's shop. Sale is carried out: %s",vsd->status.name, itemdb_jname(vend_loot));
-		clif->messagecolor_self(sd->fd,COLOR_WHITE,output);
+		clif->messagecolor_self((*sd)->fd,COLOR_WHITE,output);
 	}
 }
 
-void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8* data, int *count2) {
+void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8 **data_, int *count2) {
 	int aid = *aid2;
 	unsigned int uid = *uid2;
 	int count = *count2;
@@ -475,6 +475,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	struct player_data* ssd;
 	struct map_session_data *sd = *sd_;
 	int vend_loot = 0;
+	const uint8 *data = *data_;
 
 	nullpo_retv(sd);
 	if (vsd == NULL || !vsd->state.vending || vsd->bl.id == sd->bl.id)
@@ -487,12 +488,12 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	if (vend_loot)
 		hookStop();
 	if ( vsd->vender_id != uid ) { // shop has changed
-		clif->buyvending(*sd, 0, 0, 6);  // store information was incorrect
+		clif->buyvending(sd, 0, 0, 6);  // store information was incorrect
 		return;
 	}
 
 	if (!searchstore->queryremote(sd, aid) &&
-		(*sd->bl.m != vsd->bl.m || !check_distance_bl(&sd->bl, &vsd->bl, AREA_SIZE)))
+		(sd->bl.m != vsd->bl.m || !check_distance_bl(&sd->bl, &vsd->bl, AREA_SIZE)))
 		return; // shop too far away
 
 	searchstore->clearremote(sd);
@@ -726,7 +727,7 @@ void pc_autotrade_prepare_pre(struct map_session_data **sd) {
 		if (SQL_ERROR == SQL->Query(map->mysql_handle, "INSERT INTO `evs_info` (`vend_loot`,`vend_lvl`,`char_id`) VALUES ('%d','%d','%d')ON DUPLICATE KEY UPDATE `vend_lvl`='%d', `vend_loot`='%d'",
 										ssd->vend_loot,
 										ssd->vend_lvl,
-										*sd->status.char_id,
+										*(sd)->status.char_id,
 										ssd->vend_lvl,
 										ssd->vend_loot
 										))
@@ -744,7 +745,7 @@ void pc_autotrade_populate_pre(struct map_session_data **sd) {
 		ssd->vend_lvl = 0;
 		addToMSD(*sd, ssd, 0, true);
 	}
-	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'", *sd->status.char_id))
+	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'", *(sd)->status.char_id))
 		Sql_ShowDebug(map->mysql_handle);
 
 	while( SQL_SUCCESS == SQL->NextRow(map->mysql_handle) ) {
