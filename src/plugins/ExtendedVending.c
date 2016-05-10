@@ -342,7 +342,7 @@ static bool itemdb_read_vendingdb(char* fields[], int columns, int current)
 }
 
 //ItemDB.c
-void itemdb_read_post(int retVal) {
+void itemdb_read_post() {
 	sv->readdb(map->db_path, "item_vending.txt", ',', 1, 1, ARRAYLENGTH(ext_vend), itemdb_read_vendingdb);
 	return;
 }
@@ -464,7 +464,7 @@ void vending_list_pre(struct map_session_data **sd, unsigned int *id2) {
 	}
 }
 
-void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8* data, int *count2) {
+void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8 **data_, int *count2) {
 	int aid = *aid2;
 	unsigned int uid = *uid2;
 	int count = *count2;
@@ -475,6 +475,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	struct player_data* ssd;
 	struct map_session_data *sd = *sd_;
 	int vend_loot = 0;
+	const uint8 *data = *data_;
 
 	nullpo_retv(sd);
 	if (vsd == NULL || !vsd->state.vending || vsd->bl.id == sd->bl.id)
