@@ -342,7 +342,8 @@ static bool itemdb_read_vendingdb(char* fields[], int columns, int current)
 }
 
 //ItemDB.c
-void itemdb_read_post() {
+void itemdb_read_post(bool minimal) {
+	if (minimal) return;
 	sv->readdb(map->db_path, "item_vending.txt", ',', 1, 1, ARRAYLENGTH(ext_vend), itemdb_read_vendingdb);
 	return;
 }
@@ -727,7 +728,7 @@ void pc_autotrade_prepare_pre(struct map_session_data **sd) {
 		if (SQL_ERROR == SQL->Query(map->mysql_handle, "INSERT INTO `evs_info` (`vend_loot`,`vend_lvl`,`char_id`) VALUES ('%d','%d','%d')ON DUPLICATE KEY UPDATE `vend_lvl`='%d', `vend_loot`='%d'",
 										ssd->vend_loot,
 										ssd->vend_lvl,
-										*(sd)->status.char_id,
+										(*sd)->status.char_id,
 										ssd->vend_lvl,
 										ssd->vend_loot
 										))
@@ -745,7 +746,7 @@ void pc_autotrade_populate_pre(struct map_session_data **sd) {
 		ssd->vend_lvl = 0;
 		addToMSD(*sd, ssd, 0, true);
 	}
-	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'", *(sd)->status.char_id))
+	if (SQL_ERROR == SQL->Query(map->mysql_handle, "SELECT `vend_loot`,`vend_lvl` FROM `evs_info` WHERE `char_id` = '%d'", (*sd)->status.char_id))
 		Sql_ShowDebug(map->mysql_handle);
 
 	while( SQL_SUCCESS == SQL->NextRow(map->mysql_handle) ) {
