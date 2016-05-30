@@ -114,11 +114,11 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
 	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
 	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
-	if (effect1 >= 0)
+	if (effect1 > 0)
 		clif->specialeffect_single(&sd->bl, effect1, dsd->fd);
-	if (effect2 >= 0)
+	if (effect2 > 0)
 		clif->specialeffect_single(&sd->bl, effect2, dsd->fd);
-	if (effect3 >= 0)
+	if (effect3 > 0)
 		clif->specialeffect_single(&sd->bl, effect3, dsd->fd);
 }
 
@@ -133,11 +133,11 @@ void clif_sendauras(struct map_session_data *sd, enum send_target type,bool is_h
 	effect1 = pc_readglobalreg(sd, script->add_str("USERAURA"));
 	effect2 = pc_readglobalreg(sd, script->add_str("USERAURA1"));
 	effect3 = pc_readglobalreg(sd, script->add_str("USERAURA2"));
-	if (effect1 >= 0)
+	if (effect1 > 0)
 		clif->specialeffect(&sd->bl, effect1, type);
-	if (effect2 >= 0)
+	if (effect2 > 0)
 		clif->specialeffect(&sd->bl, effect2, type);
-	if (effect3 >= 0)
+	if (effect3 > 0)
 		clif->specialeffect(&sd->bl, effect3, type);
 }
 
