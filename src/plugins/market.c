@@ -393,7 +393,8 @@ int battle_check_target_post(int retVal, struct block_list *src, struct block_li
 	return retVal;
 }
 
-bool chat_joinchat_pre(struct map_session_data *sd, int chatid, const char *pass) {
+bool chat_joinchat_pre(struct map_session_data **sd_, int *chatid, const char **pass) {
+	struct map_session_data *sd = *sd_;
 	struct chat_data* cd = (struct chat_data*)map->id2bl(*chatid);
 	if(cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chatID || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit) {
 		clif->joinchatfail(sd,0); // room full
@@ -426,9 +427,9 @@ void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *
 	return;
 }
 
-void clif_charnameack_pre(int fd, struct block_list *bl) {
-	if (bl->type == BL_MOB) {
-		TBL_MOB *md = (TBL_MOB*)bl;
+void clif_charnameack_pre(int *fd, struct block_list **bl) {
+	if ((*bl)->type == BL_MOB) {
+		TBL_MOB *md = (TBL_MOB*)(*bl);
 		if (md->guardian_data && md->guardian_data->g)
 			return;
 		else if (battle->bc->show_mob_info) {
@@ -440,11 +441,11 @@ void clif_charnameack_pre(int fd, struct block_list *bl) {
 				WBUFW(buf, 0) = 0x95;
 				WBUFL(buf,2) = md->bl.id;
 				memcpy(WBUFP(buf,6), md->name, NAME_LENGTH);
-				if (fd == 0)
+				if (*fd == 0)
 					clif->send(buf, 30, bl, AREA);
 				else {
-					WFIFOHEAD(fd, 30);
-					memcpy(WFIFOP(fd, 0), buf, 30);
+					WFIFOHEAD(*fd, 30);
+					memcpy(WFIFOP(*fd, 0), buf, 30);
 					WFIFOSET(*fd, 30);
 				}
 				hookStop();
@@ -454,25 +455,25 @@ void clif_charnameack_pre(int fd, struct block_list *bl) {
 	}
 }
 
-int map_quit_pre(struct map_session_data *sd) {
-	struct player_data *ssd = getFromMSD(sd,0);
+int map_quit_pre(struct map_session_data **sd) {
+	struct player_data *ssd = getFromMSD(*sd, 0);
 	if (ssd && ssd->market_clone_id)
 		status_kill(map->id2bl(ssd->market_clone_id));
 	return 0;
 }
 
-int killmonster_sub_pre(struct block_list *bl, va_list *ap) {
-	struct mob_data *md = (TBL_MOB*)bl;
+int killmonster_sub_pre(struct block_list **bl, va_list *ap) {
+	struct mob_data *md = BL_CAST(BL_MOB, bl);
 	struct monster_data *mmd = getFromMOBDATA(md, 0);
 	if (mmd)
 		hookStop();
 	return 0;
 }
 
-int skillnotok_pre(uint16 skill_id, struct map_session_data *sd) {
-	struct player_data *ssd = getFromMSD(sd,0);
-	if (ssd && ssd->market_clone_id && (skill_id == MC_VENDING || skill_id == ALL_BUYING_STORE)) {
-		clif->messagecolor_self(sd->fd, COLOR_RED, "You can't use vending while you already have a market clone.");
+int skillnotok_pre(uint16 *skill_id, struct map_session_data **sd) {
+	struct player_data *ssd = getFromMSD(*sd,0);
+	if (ssd && ssd->market_clone_id && ((*skill_id) == MC_VENDING || (*skill_id) == ALL_BUYING_STORE)) {
+		clif->messagecolor_self((*sd)->fd, COLOR_RED, "You can't use vending while you already have a market clone.");
 		hookStop();
 		return 1;
 	}

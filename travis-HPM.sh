@@ -89,6 +89,8 @@ case "$MODE" in
 		make plugin.autoattack -j3 || aborterror "Build failed(AutoAttack)."
 		#19-04-2016
 		make plugin.whobuy -j3 || aborterror "Build failed(WhoBuy)."
+		#15-06-2016
+		make plugin.CharmSystem -j3 || aborterror "Build failed(CharmSystem)."
 		#HPMHooking should be last
 		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
@@ -156,6 +158,8 @@ EOF
 		ARGS="--load-plugin autoattack $ARGS"
 		#19-04-2016
 		ARGS="--load-plugin whobuy $ARGS"
+		#15-06-2016
+		ARGS="--load-plugin CharmSystem $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
