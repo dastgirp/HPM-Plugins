@@ -58,7 +58,7 @@ case "$MODE" in
 		./configure $@ || aborterror "Configure error, aborting build."
 		make sql -j3 || aborterror "Build failed(CORE)."
 		make plugin.script_mapquit -j3 || aborterror "Build failed(MapQuit)."
-		make plugin.Critical-Magic -j3 || aborterror "Build failed(CriticalMagicAttack)."
+		make plugin.critical_magic -j3 || aborterror "Build failed(CriticalMagicAttack)."
 		make plugin.afk -j3 || aborterror "Build failed(Afk)."
 		make plugin.auraset -j3 || aborterror "Build failed(AuraSet)."
 		make plugin.autonext -j3 || aborterror "Build failed(AutoNext)."
@@ -90,7 +90,7 @@ case "$MODE" in
 		#19-04-2016
 		make plugin.whobuy -j3 || aborterror "Build failed(WhoBuy)."
 		#15-06-2016
-		make plugin.CharmSystem -j3 || aborterror "Build failed(CharmSystem)."
+		make plugin.charm -j3 || aborterror "Build failed(charm)."
 		#HPMHooking should be last
 		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
@@ -127,7 +127,7 @@ EOF
 		ARGS="--load-script npc/dev/test.txt "
 		ARGS="--load-plugin HPMHooking $ARGS"
 		# Load All Custom Plugins
-		ARGS="--load-plugin Critical-Magic $ARGS"
+		ARGS="--load-plugin critical_magic $ARGS"
 		ARGS="--load-plugin afk $ARGS"
 		ARGS="--load-plugin auraset $ARGS"
 		ARGS="--load-plugin autonext $ARGS"
@@ -159,7 +159,7 @@ EOF
 		#19-04-2016
 		ARGS="--load-plugin whobuy $ARGS"
 		#15-06-2016
-		ARGS="--load-plugin CharmSystem $ARGS"
+		ARGS="--load-plugin charm $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
