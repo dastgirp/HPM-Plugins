@@ -57,6 +57,8 @@ struct hide_data {
 
 #define MAX_AURA 3
 #define AURA_VARIABLE "USERAURA"
+// OUPUT_LENGTH should be Length Of (AURA_VARIABLE + Digits in MAX_AURA + 1)
+#define OUTPUT_LENGTH 8+1+1
 
 struct hide_data* hd_search(struct map_session_data* sd)
 {
@@ -77,7 +79,7 @@ BUILDIN(aura)
 {
 	int aura[MAX_AURA] = { -1 };
 	int i;
-	char output[12];
+	char output[OUTPUT_LENGTH];
 	struct map_session_data *sd = script->rid2sd(st);
 
 	if (sd == NULL) {
@@ -116,7 +118,7 @@ ACMD(aura)
 {
 	int aura[3] = { -1 };
 	int i;
-	char output[12];
+	char output[OUTPUT_LENGTH];
 
 	if (!message || !*message || sscanf(message, "%d %d %d", &aura[0], &aura[1], &aura[2]) < 1){
 		clif->message(fd, "Please, enter at least an option (usage: @aura <aura1> {<aura2> <aura3>}).");
@@ -140,7 +142,7 @@ ACMD(aura)
 void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *dsd)
 {
 	int effect, i;
-	char output[12];
+	char output[OUTPUT_LENGTH];
 
 	if (pc_ishiding(sd))
 		return;
@@ -158,7 +160,7 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 void clif_sendauras(struct map_session_data *sd, enum send_target type, bool is_hidden)
 {
 	int effect, i;
-	char output[12];
+	char output[OUTPUT_LENGTH];
 
 	if (pc_ishiding(sd) && is_hidden==true)
 		return;
@@ -310,7 +312,7 @@ void clif_refresh_post(struct map_session_data *sd)
 
 HPExport void plugin_init(void)
 {
-	char output[MAX_AURA] = "i";
+	char output[MAX_AURA+1] = "i";
 	int i;
 	for (i = 1; i < MAX_AURA; ++i)
 		sprintf(output, "%s?", output);
