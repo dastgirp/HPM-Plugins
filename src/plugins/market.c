@@ -218,7 +218,7 @@ ACMD(market){
 		clif->message(fd, "You can't create a Market clone while you are dead.");
 		return false;
 	}
-	if (sd->chatID) {
+	if (sd->chat_id) {
 		clif->message(fd, "You can't create a Market clone while you already open a chatroom.");
 		return false;
 	}
@@ -393,10 +393,10 @@ int battle_check_target_post(int retVal, struct block_list *src, struct block_li
 	return retVal;
 }
 
-bool chat_joinchat_pre(struct map_session_data **sd_, int *chatid, const char **pass) {
+bool chat_joinchat_pre(struct map_session_data **sd_, int *chat_id, const char **pass) {
 	struct map_session_data *sd = *sd_;
-	struct chat_data* cd = (struct chat_data*)map->id2bl(*chatid);
-	if(cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chatID || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit) {
+	struct chat_data* cd = (struct chat_data*)map->id2bl(*chat_id);
+	if(cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chat_id || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit) {
 		clif->joinchatfail(sd,0); // room full
 		hookStop();
 		return false;
@@ -442,7 +442,7 @@ void clif_charnameack_pre(int *fd, struct block_list **bl) {
 				WBUFL(buf,2) = md->bl.id;
 				memcpy(WBUFP(buf,6), md->name, NAME_LENGTH);
 				if (*fd == 0)
-					clif->send(buf, 30, bl, AREA);
+					clif->send(buf, 30, *bl, AREA);
 				else {
 					WFIFOHEAD(*fd, 30);
 					memcpy(WFIFOP(*fd, 0), buf, 30);
@@ -462,8 +462,8 @@ int map_quit_pre(struct map_session_data **sd) {
 	return 0;
 }
 
-int killmonster_sub_pre(struct block_list **bl, va_list *ap) {
-	struct mob_data *md = BL_CAST(BL_MOB, bl);
+int killmonster_sub_pre(struct block_list **bl, va_list ap) {
+	struct mob_data *md = BL_CAST(BL_MOB, *bl);
 	struct monster_data *mmd = getFromMOBDATA(md, 0);
 	if (mmd)
 		hookStop();

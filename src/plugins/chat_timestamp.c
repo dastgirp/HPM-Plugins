@@ -7,11 +7,11 @@
 //===== Description: =========================================
 //= Will add Timestamp to Party/Guild Chats
 //===== Changelog: ===========================================
-//= v1.0 - Initial Conversion
+//= v1.0 - Initial Release.
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
-#include "common/ragemu.h"
+#include "common/hercules.h"
 
 #include <stdio.h>
 #include <stdlib.h>
