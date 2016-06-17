@@ -1,6 +1,7 @@
 //===== Hercules Plugin ======================================
 //= Charms
 //===== By: ==================================================
+//= Dastgir
 //= AnnieRuru
 //= original by digitalhamster
 //===== Current Version: =====================================
@@ -23,12 +24,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "common/conf.h"
+#include "common/memmgr.h"
+#include "common/nullpo.h"
+
 #include "map/pc.h"
 #include "map/script.h"
 #include "map/status.h"
 #include "map/itemdb.h"
-#include "common/memmgr.h"
-#include "common/nullpo.h"
 
 #include "HPMHooking.h"
 #include "common/HPMDataCheck.h"
@@ -45,14 +49,14 @@ struct charm_item_data {
 	bool charm_stack;
 };
 
-struct player_data { // this stupid player variable is needed to prevent item dup
+struct player_data { // To Prevent Item Dup
 	bool recalculate;
 };
 
-void itemdb_readdb_additional_fields_pre(int *itemid, config_setting_t **it_, int *n_, const char **source) {
+void itemdb_readdb_additional_fields_pre(int *itemid, struct config_setting_t **it_, int *n_, const char **source) {
 	struct item_data *idata = itemdb->load(*itemid);
 	struct charm_item_data *cidata = getFromITEMDATA(idata, 0);
-	config_setting_t *tt, *it = *it_;
+	struct config_setting_t *tt, *it = *it_;
 	if (idata->type != IT_ETC)
 		return;
 	if (!cidata) {
@@ -148,7 +152,8 @@ int pc_additem_post(int retVal, struct map_session_data *sd, struct item *item_d
 
 int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type) {
 	struct charm_item_data *cidata = NULL;
-	struct player_data *ssd = NULL, *sd = *sd_;
+	struct player_data *ssd = NULL;
+	struct map_session_data *sd = *sd_;
 	nullpo_retr(1, sd);
 	if (sd->status.inventory[*n].nameid == 0 || *amount <= 0 || sd->status.inventory[*n].amount < *amount || sd->inventory_data[*n] == NULL) {
 		hookStop();
