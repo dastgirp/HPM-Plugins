@@ -91,6 +91,8 @@ case "$MODE" in
 		make plugin.whobuy -j3 || aborterror "Build failed(WhoBuy)."
 		#15-06-2016
 		make plugin.charm -j3 || aborterror "Build failed(charm)."
+		#17-06-2016
+		make plugin.chat_timestamp -j3 || aborterror "Build failed(ChatTimestamp)"
 		#HPMHooking should be last
 		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
@@ -160,6 +162,8 @@ EOF
 		ARGS="--load-plugin whobuy $ARGS"
 		#15-06-2016
 		ARGS="--load-plugin charm $ARGS"
+		#17-06-2016
+		ARGS="--load-plugin chat_timestamp $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
