@@ -1,12 +1,18 @@
-/*
-=============================================
-@arealoot
-Converted by: Dastgir
-Original Made by: Streusel
-================================================
-v1.0 Initial Release
-Autoloots item in x by x Range
-*/
+//===== Hercules Plugin ======================================
+//= AreaLoot
+//===== By: ==================================================
+//= Dastgir/Hercules
+//= original by Streusel
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Picking an item from ground will loot all nearby items
+//===== Additional Comments: =================================
+//= Add 'arealoot_range: 4' to have areloot range of 4x4 cell
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -40,32 +46,33 @@ Autoloots item in x by x Range
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
-	"@arealoot",			// Plugin name
-	SERVER_TYPE_MAP,	// Which server types this plugin works with?
-	"1.0",				// Plugin version
-	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
+	"@arealoot",
+	SERVER_TYPE_MAP,
+	"1.0",
+	HPM_VERSION,
 };
 
-int arealoot_range = 3;		//x BY x Range
+int arealoot_range = 3;   // AxA Range
 
 struct area_p_data {
-	bool arealoot;
-	bool in_process;
+	bool arealoot;        // is Arealoot on?
+	bool in_process;      // Currently Looting from ground?
 };
 
 struct area_p_data* adb_search(struct map_session_data* sd){
 	struct area_p_data *data;
-	if( !(data = getFromMSD(sd,0)) ) {
-		CREATE(data,struct area_p_data,1);
-		addToMSD(sd,data,0,true);
+	if ((data = getFromMSD(sd,0)) == NULL) {
+		CREATE(data, struct area_p_data, 1);
+		addToMSD(sd, data, 0, true);
 	}
 	return data;
 }
 
-/*==========================================
+/**
  * @arealoot
- *------------------------------------------*/
-ACMD(arealoot) {
+ */
+ACMD(arealoot)
+{
 	struct area_p_data *data;
 	data = adb_search(sd);
 	if (data->arealoot) {
@@ -80,12 +87,13 @@ ACMD(arealoot) {
 }
 
 
-int arealoot_item(struct map_session_data **sd_, struct flooritem_data **fitem_){
+int pc_takeitem_pre(struct map_session_data **sd_, struct flooritem_data **fitem_)
+{
 	struct area_p_data *data;
 	struct map_session_data *sd = *sd_;
 	struct flooritem_data *fitem = *fitem_;
 	data = adb_search(sd);
-	if (data->arealoot && data->in_process==false){
+	if (data->arealoot && data->in_process==false) {
 		data->in_process = true;
 		map->foreachinrange(skill->greed, &fitem->bl, arealoot_range, BL_ITEM, &sd->bl);
 		hookStop();
@@ -95,10 +103,11 @@ int arealoot_item(struct map_session_data **sd_, struct flooritem_data **fitem_)
 	return 1;
 }
 
-void arealoot_range_setting(const char *key, const char *val) {
+void arealoot_range_setting(const char *key, const char *val)
+{
 	int value = atoi(val);
-	if (strcmpi(key,"arealoot_range") == 0){		//1 to 9 Range.
-		if (value < 1 || value > 10){
+	if (strcmpi(key,"arealoot_range") == 0) {  //1 to 9 Range.
+		if (value < 1 || value > 10) {
 			ShowError("'arealoot_range' is set to %d,(Min:1,Max:10)", value);
 			return;
 		}
@@ -118,7 +127,7 @@ int arealoot_range_return(const char *key)
 /* run when server starts */
 HPExport void plugin_init (void) {
     addAtcommand("arealoot",arealoot);
-	addHookPre(pc, takeitem, arealoot_item);
+	addHookPre(pc, takeitem, pc_takeitem_pre);
 }
 
 HPExport void server_online (void) {
@@ -126,5 +135,5 @@ HPExport void server_online (void) {
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("arealoot_range",arealoot_range_setting,arealoot_range_return);
+	addBattleConf("arealoot_range", arealoot_range_setting, arealoot_range_return);
 }

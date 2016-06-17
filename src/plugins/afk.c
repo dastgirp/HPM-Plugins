@@ -1,23 +1,26 @@
-/*
-	By Dastgir/Hercules
-
-Changelog:
-v1.0 - Initial Conversion
-v1.1 - Dead Person cannot @afk.
-v1.2 - Added afk_timeout option(Battle_Config too...) Yippy...
-v1.3 - Added noafk mapflag :D
-v1.4 - Compatible with new Hercules.
-
-Battle Config Adjustment:
-You can add "afk_timeout: seconds" in any of the files in conf/battle/ to make it work(so you don't have to recompile everytime you want to change timeout seconds)
-
-MapFlags:
-Add mapflag just like you add other mapflags,
-e.g:
-prontera	mapflag	noafk
-^ Add Above to any script, and it will make prontera to be noafk zone.
-*/
-
+//===== Hercules Plugin ======================================
+//= @afk
+//===== By: ==================================================
+//= Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.4
+//===== Description: =========================================
+//= Will change your look to contain afk bubble without
+//= needing a player to be online
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//= v1.1 - Dead Person cannot @afk.
+//= v1.2 - Added afk_timeout option and battle_config for it
+//= v1.3 - Added noafk mapflag.
+//= v1.4 - Compatible with new Hercules.
+//===== Additional Comments: =================================
+//= AFK Timeout Setting(BattleConf):
+//= 	afk_timeout: TimeInSeconds
+//= noafk Mapflag:
+//= 	prontera	mapflag	noafk
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -46,33 +49,31 @@ prontera	mapflag	noafk
 
 HPExport struct hplugin_info pinfo =
 {
-	"@afk",			// Plugin name
-	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.4",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"@afk",
+	SERVER_TYPE_MAP,
+	"1.4",
+	HPM_VERSION,
 };
 
-int afk_timeout = 0;
+int afk_timeout = 0;  // @afk Timeout
 
 struct plugin_mapflag {
-	unsigned noafk : 1;
+	unsigned noafk : 1; // No Detect NoMapFlag
 };
 
-ACMD(afk){
-	/*
-	MapFlag Restriction
-	*/
+ACMD(afk)
+{
+	// MapFlag Restriction
 	struct plugin_mapflag *mf_data = getFromMAPD(&map->list[sd->bl.m], 0);
-	if (mf_data && mf_data->noafk)
-	{
+	if (mf_data && mf_data->noafk) {
 		clif->message(fd, "@afk is forbidden in this map.");
 		return true;
 	}
-	if( pc_isdead(sd) ) {
+	if (pc_isdead(sd)) {
 		clif->message(fd, "Cannot use @afk While dead.");
 		return true;
 	}
-	if(DIFF_TICK(timer->gettick(),sd->canlog_tick) < battle->bc->prevent_logout) {
+	if (DIFF_TICK(timer->gettick(),sd->canlog_tick) < battle->bc->prevent_logout) {
 		clif->message(fd, "Failed to use @afk, please try again later.");
 		return true;
 	}
@@ -83,8 +84,7 @@ ACMD(afk){
 	clif->sitting(&sd->bl);
 	clif->changelook(&sd->bl,LOOK_HEAD_TOP,471);
 	clif->specialeffect(&sd->bl, 234,AREA);
-	if( afk_timeout )
-	{
+	if (afk_timeout) {
 		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout*1000,0);
 	}
 	channel->quit(sd); //Quit from Channels.
@@ -92,11 +92,12 @@ ACMD(afk){
 	return true;
 }
 
-void afk_timeout_adjust(const char *key, const char *val) {	//In Seconds
+void afk_timeout_adjust(const char *key, const char *val)
+{
 	int value = config_switch(val);
-	if (strcmpi(key,"afk_timeout") == 0){
-		if (value < 0){
-			ShowDebug("Received Invalid Setting for afk_timeout(%d), defaulting to 0\n",value);
+	if (strcmpi(key,"afk_timeout") == 0) {
+		if (value < 0) {
+			ShowDebug("Received Invalid Setting for afk_timeout(%d), defaulting to 0\n", value);
 			return;
 		}
 		afk_timeout = value;
@@ -116,9 +117,9 @@ int afk_timeout_return(const char *key)
 void parse_noafk_mapflag(const char **name, const char **w3, const char **w4, const char **start, const char **buffer, const char **filepath, int **retval)
 {
 	int16 m = map->mapname2mapid(*name);
-	if (!strcmpi(*w3, "noafk")) {
+	if (strcmpi(*w3, "noafk") == 0) {
 		struct plugin_mapflag *mf_data;
-		if (!( mf_data = getFromMAPD(&map->list[m], 0))) {
+		if ((mf_data = getFromMAPD(&map->list[m], 0)) == NULL) {
 			CREATE(mf_data, struct plugin_mapflag, 1);
 			mf_data->noafk = 1;
 			addToMAPD(&map->list[m], mf_data, 0, true);
@@ -130,7 +131,6 @@ void parse_noafk_mapflag(const char **name, const char **w3, const char **w4, co
 	return;
 }
 
-/* Server Startup */
 HPExport void plugin_init (void){
 	addAtcommand("afk", afk);
 	addHookPre(npc, parse_unknown_mapflag, parse_noafk_mapflag);
