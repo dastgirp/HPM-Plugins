@@ -78,7 +78,7 @@ BUILDIN(aura)
 	int aura[MAX_AURA] = { -1 };
 	int i;
 	char output[12];
-	map_session_data *sd = script->rid2sd(st);
+	struct map_session_data *sd = script->rid2sd(st);
 
 	if (sd == NULL) {
 		script_pushint(st, 0);
@@ -139,7 +139,7 @@ ACMD(aura)
 
 void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *dsd)
 {
-	int effect;
+	int effect, i;
 	char output[12];
 
 	if (pc_ishiding(sd))
@@ -155,9 +155,9 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 	return;
 }
 
-void clif_sendauras(struct map_session_data *sd, enum send_target type,bool is_hidden)
+void clif_sendauras(struct map_session_data *sd, enum send_target type, bool is_hidden)
 {
-	int effect;
+	int effect, i;
 	char output[12];
 
 	if (pc_ishiding(sd) && is_hidden==true)
@@ -200,7 +200,7 @@ void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *
 		return;
 
 	if (bl->type == BL_PC) {
-		map_session_data *tsd = BL_CAST(BL_PC, bl);
+		struct map_session_data *tsd = BL_CAST(BL_PC, bl);
 		clif_sendaurastoone(tsd, sd);
 		return;
 	}
@@ -311,6 +311,7 @@ void clif_refresh_post(struct map_session_data *sd)
 HPExport void plugin_init(void)
 {
 	char output[MAX_AURA] = "i";
+	int i;
 	for (i = 1; i < MAX_AURA; ++i)
 		sprintf(output, "%s?", output);
 	
