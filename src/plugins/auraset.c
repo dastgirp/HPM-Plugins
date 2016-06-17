@@ -179,7 +179,7 @@ bool clif_spawn_post(bool retVal, struct block_list *bl)
 	struct view_data *vd;
 	vd = status->get_viewdata(bl);
 	if (retVal == false)
-		return false;
+		return retVal;
 	if (vd->class_ == INVISIBLE_CLASS)
 		return true; // Doesn't need to be spawned, so everything is alright
 	
@@ -264,7 +264,7 @@ int status_change_start_post(int retVal, struct block_list *src, struct block_li
 		clif->clearunit_area(&sd->bl, 0);
 		clif_getareachar_char(&sd->bl, 0);
 	}
-	return 1;
+	return retVal;
 }
 
 // [Dastgir/Hercules]
