@@ -53,7 +53,8 @@ struct player_data { // To Prevent Item Dup
 	bool recalculate;
 };
 
-void itemdb_readdb_additional_fields_pre(int *itemid, struct config_setting_t **it_, int *n_, const char **source) {
+void itemdb_readdb_additional_fields_pre(int *itemid, struct config_setting_t **it_, int *n_, const char **source)
+{
 	struct item_data *idata = itemdb->load(*itemid);
 	struct charm_item_data *cidata = getFromITEMDATA(idata, 0);
 	struct config_setting_t *tt, *it = *it_;
@@ -72,15 +73,18 @@ void itemdb_readdb_additional_fields_pre(int *itemid, struct config_setting_t **
 	return;
 }
 
-int itemdb_isstackable_pre(int *nameid) {
+int itemdb_isstackable_pre(int *nameid)
+{
 	struct item_data *idata = itemdb->search(*nameid);
 	struct charm_item_data *cidata;
 	nullpo_ret(idata);
 	if (idata->type != IT_ETC)
 		return 1;
 	cidata = getFromITEMDATA(idata, 0);
-	if (!cidata)
+
+	if (cidata == NULL)
 		return 1;
+
 	if (cidata->charm_stack == true) {
 		hookStop();
 		return 1;
@@ -92,13 +96,16 @@ int itemdb_isstackable_pre(int *nameid) {
 	return 1;
 }
 
-int itemdb_isstackable2_pre(struct item_data **data) {
+int itemdb_isstackable2_pre(struct item_data **data)
+{
 	struct charm_item_data *cidata = NULL;
 	nullpo_ret(*data);
+
 	if ((*data)->type != IT_ETC)
 		return 1;
+
 	cidata = getFromITEMDATA(*data, 0);
-	if(!cidata)
+	if (cidata == NULL)
 		return 1;
 	if (cidata->charm_stack == true) {
 		hookStop();
@@ -112,17 +119,20 @@ int itemdb_isstackable2_pre(struct item_data **data) {
 }
 
 // TODO: Maybe should add those job/level/upper flag restriction like I did on eathena ? hmm ... but hercules omit those fields ... using default
-void status_calc_pc_additional_pre(struct map_session_data **sd_, enum e_status_calc_opt *opt) {
+void status_calc_pc_additional_pre(struct map_session_data **sd_, enum e_status_calc_opt *opt)
+{
 	int i = 0;
 	struct charm_item_data *cidata = NULL;
 	struct map_session_data *sd = *sd_;
 	for (i = 0; i < MAX_INVENTORY; ++i) {
-		if (!sd->inventory_data[i])
+		if (sd->inventory_data[i] == NULL)
 			continue;
 		if (sd->inventory_data[i]->type != IT_ETC)
 			continue;
+
 		cidata = getFromITEMDATA(sd->inventory_data[i], 0);
-		if (!cidata)
+
+		if (cidata == NULL)
 			continue;
 		if (cidata->charm == false)
 			continue;
@@ -133,24 +143,29 @@ void status_calc_pc_additional_pre(struct map_session_data **sd_, enum e_status_
 	return;
 }
 
-int pc_additem_post(int retVal, struct map_session_data *sd, struct item *item_data ,int amount, e_log_pick_type log_type) {
+int pc_additem_post(int retVal, struct map_session_data *sd, struct item *item_data ,int amount, e_log_pick_type log_type)
+{
 	struct item_data *idata = itemdb->search(item_data->nameid);
 	struct charm_item_data *cidata = NULL;
+
 	if (retVal != 0)
 		return retVal;
+
 	if (idata->type != IT_ETC)
 		return retVal;
+
 	cidata = getFromITEMDATA(idata, 0);
-	if (!cidata)
+
+	if (cidata == NULL)
 		return retVal;
 	if (cidata->charm == true) {
-//		ShowDebug("run recalculation");
 		status_calc_pc(sd, SCO_NONE);
 	}
 	return retVal;
 }
 
-int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type) {
+int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type)
+{
 	struct charm_item_data *cidata = NULL;
 	struct player_data *ssd = NULL;
 	struct map_session_data *sd = *sd_;
@@ -162,11 +177,11 @@ int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type
 	if (sd->inventory_data[*n]->type != IT_ETC)
 		return 0;
 	cidata = getFromITEMDATA(sd->inventory_data[*n], 0);
-	if (!cidata)
+	if (cidata == NULL)
 		return 0;
 	if (cidata->charm == true) {
 		ssd = getFromMSD(sd, 0);
-		if (!ssd) {
+		if (ssd == NULL) {
 			CREATE(ssd, struct player_data, 1);
 			ssd->recalculate = 1;
 			addToMSD(sd, ssd, 0, true);
@@ -176,11 +191,12 @@ int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type
 	}
 	return 0;
 }
+
 // maybe I should've just overload this function ...
-int pc_delitem_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type) {
+int pc_delitem_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type)
+{
 	struct player_data *ssd = getFromMSD(sd, 0);
 	if (ssd && ssd->recalculate == 1) {
-//		ShowDebug("run recalculation");
 		status_calc_pc(sd, SCO_NONE);
 		ssd->recalculate = 0;
 	}

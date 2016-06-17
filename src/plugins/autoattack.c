@@ -1,12 +1,22 @@
-/*
-	By Ossi (http://herc.ws/board/topic/3165-autoattack/)
-	Updated by Dastgir/Hercules
-*/
+//===== Hercules Plugin ======================================
+//= @autoattack
+//===== By: ==================================================
+//= Dastgir/Hercules
+//= original by Ossi (http://herc.ws/board/topic/3165-autoattack/)
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Automatically Searches and Attacks nearby monsters.
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 
 #include "common/hercules.h"
 
 #include <stdio.h>
-#include <stdlib.h> // for rand()
+#include <stdlib.h>
 #include <string.h>
 
 #include "common/HPMi.h"
@@ -24,17 +34,18 @@
 #define OPTION_AUTOATTACK 0x10000000
 
 HPExport struct hplugin_info pinfo = {
-	"autoattack",		// Plugin  name
-	SERVER_TYPE_MAP,	// Which server types this plugin works with?
-	"1.7",				// Plugin version
-	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
+	"autoattack",
+	SERVER_TYPE_MAP,
+	"1.0",
+	HPM_VERSION,
 };
 
-static int buildin_autoattack_sub(struct block_list *bl,va_list ap)
+static int buildin_autoattack_sub(struct block_list *bl, va_list ap)
 {
 	int *target_id = va_arg(ap,int *);
-	if (*target_id != 0)	// Return first encountered person
+	if (*target_id != 0)  // Only First Encoutered object is returned.
 		return 1;
+
 	*target_id = bl->id;
 	return 1;
 }
@@ -42,7 +53,7 @@ static int buildin_autoattack_sub(struct block_list *bl,va_list ap)
 void autoattack_motion(struct map_session_data* sd)
 {
 	int i, target_id;
-	for (i = 0; i <= 9; i++) {
+	for (i = 0; i <= 9; ++i) {
 		target_id = 0;
 		map->foreachinarea(buildin_autoattack_sub, sd->bl.m, sd->bl.x-i, sd->bl.y-i, sd->bl.x+i, sd->bl.y+i, BL_MOB, &target_id);
 		if (target_id) {
@@ -50,7 +61,7 @@ void autoattack_motion(struct map_session_data* sd)
 			break;			
 		}
 	}
-	if (!target_id)
+	if (target_id == 0)
 		unit->walktoxy(&sd->bl, sd->bl.x+(rand()%2==0?-1:1)*(rand()%10), sd->bl.y+(rand()%2==0?-1:1)*(rand()%10),0);
 	return;
 }
@@ -84,7 +95,6 @@ ACMD(autoattack)
 	return true;
 }
 
-/* Server Startup */
 HPExport void plugin_init (void)
 { 
 	addAtcommand("autoattack", autoattack);

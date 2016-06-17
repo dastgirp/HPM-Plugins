@@ -1,8 +1,18 @@
-/*
-	By Shikazu
-	Edited by Dastgir/Hercules
-*/
-
+//===== Hercules Plugin ======================================
+//= autonext
+//===== By: ==================================================
+//= Dastgir/Hercules
+//= original by Shikazu
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Clears the NPC dialog box and acts as if next button has
+//= been pressed
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -24,34 +34,29 @@
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
-	"AutoNext Script Command",		// Plugin name
-	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"autonext",
+	SERVER_TYPE_MAP,
+	"1.0",
+	HPM_VERSION,
 };
 
 BUILDIN(autonext) 
 {
-	TBL_PC* sd;
-	int timeout;
+	map_session_data *sd;
+	int timeout = script_getnum(st, 2);
 	
 	sd = script->rid2sd(st);
-	if( sd == NULL )
+	if (sd == NULL)
 		return true;
+
 #ifdef SECURE_NPCTIMEOUT
 	sd->npc_idle_type = NPCT_WAIT;
 #endif
-	//script_detach_rid(st);
 
-	timeout=script_getnum(st,2);
-
-	if(st->sleep.tick == 0)
-	{
+	if(st->sleep.tick == 0) {
 		st->state = RERUNLINE;
 		st->sleep.tick = timeout;
-	}
-	else
-	{// sleep time is over
+	} else { // sleep time is over
 		st->state = RUN;
 		st->sleep.tick = 0;
 	}
@@ -60,12 +65,12 @@ BUILDIN(autonext)
 	return true;
 }
 
-/* Server Startup */
 HPExport void plugin_init (void) 
 {
-	addScriptCommand("autonext","i",autonext);
+	addScriptCommand("autonext", "i", autonext);
 }
 
-HPExport void server_online (void) {
+HPExport void server_online (void)
+{
 	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }

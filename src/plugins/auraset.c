@@ -3,10 +3,9 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.4a
+//= 1.5
 //===== Description: =========================================
-//= Will change your look to contain afk bubble without
-//= needing a player to be online
+//= Set's an effect for infinite duration
 //===== Changelog: ===========================================
 //= v1.0 - Initial Conversion
 //= v1.1 - Dead Person cannot @afk.
@@ -14,11 +13,6 @@
 //= v1.3 - Added noafk mapflag.
 //= v1.4 - Compatible with new Hercules.
 //= v1.5 - Added MAX_AURA option(ability to have x Aura's)
-//===== Additional Comments: =================================
-//= AFK Timeout Setting(BattleConf):
-//= 	afk_timeout: TimeInSeconds
-//= noafk Mapflag:
-//= 	prontera	mapflag	noafk
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
@@ -180,7 +174,7 @@ void clif_sendauras(struct map_session_data *sd, enum send_target type,bool is_h
 }
 
 // [Dastgir/Hercules]
-bool clif_spawn_AuraPost(bool retVal, struct block_list *bl)
+bool clif_spawn_post(bool retVal, struct block_list *bl)
 {
 	struct view_data *vd;
 	vd = status->get_viewdata(bl);
@@ -196,7 +190,7 @@ bool clif_spawn_AuraPost(bool retVal, struct block_list *bl)
 }
 
 // [Dastgir/Hercules]
-void clif_getareachar_unit_AuraPost(struct map_session_data *sd, struct block_list *bl)
+void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *bl)
 {
 	
 	struct view_data *vd;
@@ -251,7 +245,7 @@ void clif_getareachar_char(struct block_list *bl, short flag)
 }
 
 // [Dastgir/Hercules]
-int status_change_start_postAura(int retVal, struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag)
+int status_change_start_post(int retVal, struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag)
 {
 	struct map_session_data *sd = NULL;
 	struct hide_data *data;
@@ -274,7 +268,7 @@ int status_change_start_postAura(int retVal, struct block_list *src, struct bloc
 }
 
 // [Dastgir/Hercules]
-int status_change_end_preAura(struct block_list **bl, enum sc_type *type_, int *tid_, const char **file, int *line)
+int status_change_end_pre(struct block_list **bl, enum sc_type *type_, int *tid_, const char **file, int *line)
 {
 	struct map_session_data *sd;
 	struct status_change *sc;
@@ -308,7 +302,7 @@ int status_change_end_preAura(struct block_list **bl, enum sc_type *type_, int *
 	return 1;
 }
 
-void clif_sendauraself(struct map_session_data *sd)
+void clif_refresh_post(struct map_session_data *sd)
 {
 	clif_sendaurastoone(sd, sd);
 }
@@ -316,14 +310,18 @@ void clif_sendauraself(struct map_session_data *sd)
 
 HPExport void plugin_init(void)
 {
-	addAtcommand("aura", aura);
-	addScriptCommand("aura", "i??", aura);
-	addHookPre(status, change_end_, status_change_end_preAura);
+	char output[MAX_AURA] = "i";
+	for (i = 1; i < MAX_AURA; ++i)
+		sprintf(output, "%s?", output);
 	
-	addHookPost(clif, spawn, clif_spawn_AuraPost);
-	addHookPost(clif, getareachar_unit, clif_getareachar_unit_AuraPost);
-	addHookPost(status, change_start, status_change_start_postAura);
-	addHookPost(clif, refresh, clif_sendauraself);
+	addAtcommand("aura", aura);
+	addScriptCommand("aura", output, aura);
+
+	addHookPre(status, change_end_, status_change_end_pre);	
+	addHookPost(clif, spawn, clif_spawn_post);
+	addHookPost(clif, getareachar_unit, clif_getareachar_unit_post);
+	addHookPost(clif, refresh, clif_refresh_post);
+	addHookPost(status, change_start, status_change_start_post);
 }
 
 HPExport void server_online (void) {
