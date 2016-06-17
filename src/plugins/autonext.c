@@ -42,7 +42,7 @@ HPExport struct hplugin_info pinfo = {
 
 BUILDIN(autonext) 
 {
-	map_session_data *sd;
+	struct map_session_data *sd;
 	int timeout = script_getnum(st, 2);
 	
 	sd = script->rid2sd(st);

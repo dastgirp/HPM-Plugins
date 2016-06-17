@@ -346,7 +346,7 @@ ACMD(costumeitem)
 BUILDIN(costume)
 {
 	int i = -1, num, ep;
-	map_session_data *sd;
+	struct map_session_data *sd;
 
 	num = script_getnum(st,2); // Equip Slot
 	sd = script->rid2sd(st);
