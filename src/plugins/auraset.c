@@ -13,6 +13,7 @@
 //= v1.2 - Added afk_timeout option and battle_config for it
 //= v1.3 - Added noafk mapflag.
 //= v1.4 - Compatible with new Hercules.
+//= v1.5 - Added MAX_AURA option(ability to have x Aura's)
 //===== Additional Comments: =================================
 //= AFK Timeout Setting(BattleConf):
 //= 	afk_timeout: TimeInSeconds
@@ -52,7 +53,7 @@
 HPExport struct hplugin_info pinfo = {   // [Dastgir/Hercules]
 	"AuraSet",
 	SERVER_TYPE_MAP,
-	"1.4a",
+	"1.5",
 	HPM_VERSION,
 };
 
