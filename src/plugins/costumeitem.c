@@ -138,15 +138,13 @@ void script_stop_costume(struct map_session_data **sd_, struct item_data **data_
 {
 	struct item_data *data = *data_;
 	struct map_session_data *sd = *sd_;
-	if (data->equip <= EQP_HEAD_MID) {
-		int alternate = alternate_item(data->equip);
-		if (alternate != -1) {
-			int equip_index = pc->checkequip(sd, alternate);
-			if (equip_index < 0 || !sd->inventory_data[equip_index])
-				return;
-			if (sd->inventory_data[equip_index]->nameid == data->nameid)
-				hookStop();
-		}
+	int alternate = alternate_item(data->equip);
+	if (alternate != -1) {
+		int equip_index = pc->checkequip(sd, alternate);
+		if (equip_index < 0 || !sd->inventory_data[equip_index])
+			return;
+		if (sd->inventory_data[equip_index]->nameid == data->nameid)
+			hookStop();
 	}
 }
 
