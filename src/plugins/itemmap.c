@@ -172,13 +172,13 @@ BUILDIN(getitem_map)
 /*==========================================
  *
  * 0 = @itemmap <item id/name> {<amount>}
- * 1 = @itemmap1 <item id/name> <amount>, <party name>
- * 2 = @itemmap2 <item id/name> <amount>, <guild name>
+ * 1 = @itemmap_p <item id/name> <amount>, <party name>
+ * 2 = @itemmap_g <item id/name> <amount>, <guild name>
  * [Xantara]
  *------------------------------------------*/
-ACMD(itemmap) {
+bool itemmap(const int fd, struct map_session_data* sd, const char* command, const char* message, struct AtCommandInfo *info, int get_type) {
 	char item_name[100], party_name[NAME_LENGTH], guild_name[NAME_LENGTH];
-	int amount, get_type = 0, get_count, i, m;
+	int amount, get_count, i, m;
 	struct item it;
 	struct item_data *item_data;
 	struct party_data *p;
@@ -186,44 +186,36 @@ ACMD(itemmap) {
 	struct s_mapiterator *iter = NULL;
 	struct map_session_data *pl_sd = NULL;
 
-	if (!sd) return false;
+	if (sd == NULL)
+		return false;
 	
 	memset(item_name, '\0', sizeof(item_name));
 	memset(party_name, '\0', sizeof(party_name));
 	memset(guild_name, '\0', sizeof(guild_name));
 
-	if (!strcmpi(info->command,"itemmap_p"))
-		get_type = 1;
-	else if (!strcmpi(info->command, "itemmap_g"))
-		get_type = 2;
-
-	if ( (!message || !*message) ||
-		( get_type == 0 &&
+	if ((!message || !*message) ||
+		(get_type == 0 &&
 		(sscanf(message, "\"%99[^\"]\" %d", item_name, &amount) < 1) &&
-		(sscanf(message, "%99s %d", item_name, &amount) < 1) )
-	) {
-		clif->message(fd, "Please, enter an item name/id (usage: @itemmap <item name or ID> {amount}).");
-		return false;
+		(sscanf(message, "%99s %d", item_name, &amount) < 1))) {
+			clif->message(fd, "Please, enter an item name/id (usage: @itemmap <item name or ID> {amount}).");
+			return false;
 	}
-	if ( (!message || !*message) ||
-		( get_type == 1 &&
+	if ((!message || !*message) ||
+		(get_type == 1 &&
 		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, party_name) < 2) &&
-		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, party_name) < 2) )
-	) {
-		clif->message(fd, "Please, enter an item name/id (usage: @itemmap_p <item id/name> <amount> <party name>).");
-		return false;
+		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, party_name) < 2))) {
+			clif->message(fd, "Please, enter an item name/id (usage: @itemmap_p <item id/name> <amount> <party name>).");
+			return false;
 	}
-	if ( (!message || !*message) ||
-		( get_type == 2 &&
+	if ((!message || !*message) ||
+		(get_type == 2 &&
 		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2) &&
-		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, guild_name) < 2) )
-	) {
+		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, guild_name) < 2))) {
 		clif->message(fd, "Please, enter an item name/id (usage: @itemmap_g <item id/name> <amount> <guild name>).");
 		return false;
 	}
 	if ((item_data = itemdb->search_name(item_name)) == NULL &&
-	    (item_data = itemdb->exists(atoi(item_name))) == NULL)
-	{
+	    (item_data = itemdb->exists(atoi(item_name))) == NULL) {
 		clif->message(fd,"Invalid item ID or name."); // Invalid item ID or name.
 		return false;
 	}
@@ -244,8 +236,7 @@ ACMD(itemmap) {
 	switch(get_type)
 	{
 		case 1:
-			if( (p = party->searchname(party_name)) == NULL )
-			{
+			if ((p = party->searchname(party_name)) == NULL){
 				clif->message(fd,"Incorrect name/ID, or no one from the specified party is online."); // Incorrect name or ID, or no one from the party is online.
 				return false;
 			}
@@ -254,12 +245,11 @@ ACMD(itemmap) {
 					pc_getitem_map(p->data[i].sd,it,amount,get_count,LOG_TYPE_COMMAND);
 			break;
 		case 2:
-			if( (g = guild->searchname(guild_name)) == NULL )
-			{
+			if ((g = guild->searchname(guild_name)) == NULL) {
 				clif->message(fd,"Incorrect name/ID, or no one from the specified guild is online."); // Incorrect name/ID, or no one from the guild is online.
 				return false;
 			}
-			for( i=0; i < g->max_member; i++ )
+			for (i=0; i < g->max_member; i++)
 				if( g->member[i].sd && m == g->member[i].sd->bl.m )
 					pc_getitem_map(g->member[i].sd,it,amount,get_count,LOG_TYPE_COMMAND);
 			break;
@@ -278,12 +268,22 @@ ACMD(itemmap) {
 	return true;
 }
 
+ACMD(itemmap) {
+	return itemmap(fd, sd, command, message, info, 0);
+}
+ACMD(itemmap_p) {
+	return itemmap(fd, sd, command, message, info, 1);
+}
+ACMD(itemmap_g) {
+	return itemmap(fd, sd, command, message, info, 2);
+}
+
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addAtcommand("itemmap",itemmap);	// All
-	addAtcommand("itemmap_p",itemmap);	// Party
-	addAtcommand("itemmap_g",itemmap);	// Guild
+	addAtcommand("itemmap", itemmap);	// All
+	addAtcommand("itemmap_p", itemmap_p);	// Party
+	addAtcommand("itemmap_g", itemmap_g);	// Guild
 
 	addScriptCommand("getitem_map","iis??",getitem_map);
 }
