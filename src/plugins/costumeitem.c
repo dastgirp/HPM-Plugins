@@ -5,7 +5,7 @@
 //= Mhalicot
 //= Mr. [Hercules/Ind]
 //===== Current Version: =====================================
-//= 3.5a
+//= 3.6
 //===== Description: =========================================
 //= Converts an ordinary equipable to Costume Item
 //===== Changelog: ===========================================
@@ -25,6 +25,8 @@
 //= v3.5  - Updated Costume with new Hercules,
 //=          some other changes. [Dastgir]
 //= v3.5a - Attributes are no longer given. [Dastgir]
+//= v3.6  - Headgears occupying more than 1 slot will not give
+//=         Attributes
 //===== Additional Comments: =================================
 //= Reserved Costume ID(BattleConf):
 //= (Should not conflict with CharID)
@@ -108,30 +110,28 @@ uint32 MakeDWord(uint16 word0, uint16 word1)
 
 int alternate_item(int index)
 {
-	switch(index) {
-		case EQP_HEAD_LOW:
-			return EQP_COSTUME_HEAD_LOW;
-		case EQP_HEAD_TOP:
-			return EQP_COSTUME_HEAD_TOP;
-		case EQP_HEAD_MID:
-			return EQP_COSTUME_HEAD_MID;
-		case EQP_HAND_R:
-			return EQP_SHADOW_WEAPON;
-		case EQP_HAND_L:
-			return EQP_SHADOW_SHIELD;
-		case EQP_ARMOR:
-			return EQP_SHADOW_ARMOR;
-		case EQP_SHOES:
-			return EQP_SHADOW_SHOES;
-		case EQP_GARMENT:
-			return EQP_COSTUME_GARMENT;
-		case EQP_ACC_L:
-			return EQP_SHADOW_ACC_L;
-		case EQP_ACC_R:
-			return EQP_SHADOW_ACC_R;
-		default:
-			return -1;
-	}
+	if (index&EQP_HEAD_LOW)
+		return EQP_COSTUME_HEAD_LOW;
+	else if (index&EQP_HEAD_TOP)
+		return EQP_COSTUME_HEAD_TOP;
+	else if (index&EQP_HEAD_MID)
+		return EQP_COSTUME_HEAD_MID;
+	else if (index&EQP_HAND_R)
+		return EQP_SHADOW_WEAPON;
+	else if (index&EQP_HAND_L)
+		return EQP_SHADOW_SHIELD;
+	else if (index&EQP_ARMOR)
+		return EQP_SHADOW_ARMOR;
+	else if (index&EQP_SHOES)
+		return EQP_SHADOW_SHOES;
+	else if (index&EQP_GARMENT)
+		return EQP_COSTUME_GARMENT;
+	else if (index&EQP_ACC_L)
+		return EQP_SHADOW_ACC_L;
+	else if (index&EQP_ACC_R)
+		return EQP_SHADOW_ACC_R;
+	else
+		return -1;
 }
 
 void script_stop_costume(struct map_session_data **sd_, struct item_data **data_, int *oid)
