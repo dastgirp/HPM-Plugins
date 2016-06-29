@@ -1,0 +1,321 @@
+/*
+CREATE TABLE IF NOT EXISTS `rebirth_system` (
+  `char_id` int(11) NOT NULL default '0',
+  `name` varchar(24) NOT NULL DEFAULT 'NULL',
+  `rebirth_no` mediumint(6) NOT NULL default '0',
+  `master_rebirth` mediumint(6)  NOT NULL default '0',
+  PRIMARY KEY  (`char_id`)
+) ENGINE=MyISAM;
+
+---------------------------------------------------------
+--			By Dastgir								-----
+--			Version 1.5								-----
+---------------------------------------------------------
+*/
+iz_int,57,30,5	script	Rebirth System	4_M_LGTGRAND,{
+function deleteItem;		// Deletes Required Items
+function CheckItemNeed;		// Shows the Required Items
+function getItemReward;		// Gives the Reward
+
+	mes "^11E6D0[Rebirth System]^000000";
+	mes strcharinfo(0)+", How may I help you?";
+	switch( select( "^777777~ Ranking:~ Rebirth:~ Information:~ Reset Stat:~ Cancel"+((getgmlevel()>=.GMLevel)?":~ Reset Ranking":"")+"^000000" ) ) {
+		case 1:
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			mes "Rankings:";
+			query_sql "SELECT `name`,`rebirth_no`,`master_rebirth` FROM `rebirth_system` ORDER BY `master_rebirth` DESC, `rebirth_no` DESC LIMIT "+.list,@name$,@rebirth_no,@master_rebirth;
+			if(getarraysize(@name$)==0){mes "^F20808 No Records Found ^000000"; close;}
+			mes "Format:";
+			mes "^0814F2[Character Name]^000000 - ^B308F2[Rebirths]^000000 - ^B303F2[Master_Rebirth]^000000";
+			for (.@i=0; .@i < getarraysize(@name$); .@i++){
+				mes (.@i+1) +".) ^0814F2["+ @name$[.@i] +"]^000000 - ^B308F2["+ @rebirth_no[.@i] +"]^000000 - ^B303F2["+ @master_rebirth[.@i] +"]^000000";
+			}
+			deletearray @name$[0],.list; deletearray @rebirth_no[0],.list; deletearray @master_rebirth[0],.list;
+			close;
+		case 2:
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			if (.MasterRebirth>0 && rebirth_no >= .MasterRebirth){
+				mes "You can Do Master Rebirth too.";
+				mes "Master rebirth allows you to earn some more powerful items.";
+				mes "On doing Master Rebirth, you will lose "+ .MasterRebirth +" Rebirths";
+				if (.MaxRebirth[1]){ mes "You can do "+ .MaxRebirth[1] +" Master Rebirths Only"; }
+				@rebirth_type = select("Do Standard Rebirth:Do Master Rebirth");
+				next;
+				mes "^11E6D0[Rebirth System]^000000";
+			}else{
+				@rebirth_type = 1;
+			}
+			if ((@rebirth_type==1 && .MaxRebirth[0] > 0 && rebirth_no >= .MaxRebirth[0]) || (@rebirth_type==2 && .MaxRebirth[1] > 0 && master_rebirth >= .MaxRebirth[1]) ){
+				mes "You have Reached the Maximum Number of "+ ( (@rebirth_type==2)?"Master":"" ) +" Rebirths("+ ( (@rebirth_type==2)?master_rebirth:rebirth_no ) +")";
+				close;
+			}
+			.@eac = eaclass();
+			.@can_rebirth = false;
+			for (.@i=0; .@i<getarraysize(.add_jobs); .@i++){
+				if (Class==.add_jobs[.@i]){
+					.@can_rebirth = true;
+					break;
+				}
+			}
+			if (!.@can_rebirth){
+				.@can_rebirth = true;
+				setarray .@jobcheck[0],EAJL_2,EAJL_2_1,EAJL_2_2,EAJL_UPPER,EAJL_BABY,EAJL_THIRD;
+				for (.@i = 0; .@i < getarraysize(.@jobcheck); .@i++)
+					if ((.job_rebirth&.@jobcheck[.@i])){
+						if (!(.@eac&.@jobcheck[.@i])){
+							if ((.@i == 1 || .@i == 2) && .@pass == true)
+								continue;
+							.@can_rebirth = false;
+							break;
+						}
+						if (.@i == 0)
+							.@pass = true;
+					}
+						
+			}
+			if( NextJobExp || NextBaseExp ) {
+				mes "You must be Max BaselLevel/Joblevel to Rebirth.";
+				close;
+			}else if( !.@can_rebirth ){
+				if (.job_rebirth&EAJL_BABY)
+					.@job$ = "Baby ";
+				if (.job_rebirth&EAJL_THIRD)
+					.@job$ = .@job$+"Third";
+				else if (.job_rebirth&EAJL_2_1 || .job_rebirth&EAJL_2_2)
+					.@job$ = .@job$+"Second";
+				else if (.job_rebirth&EAJL_UPPER)
+					.@job$ = .@job$+"1-1";
+				mes "You need to be "+ ((.job_rebirth&EAJL_UPPER)?"Trans":"") +" "+ .@job$ +" Job";
+				close;
+			}
+
+			mes "Items need :";
+			CheckItemNeed(@rebirth_type);
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			deleteItem(@rebirth_type);
+			break;
+		case 3:
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			switch(.reset_opt){
+				case 1:
+				case 2:
+					mes "Your BaseLevel,JobLevel"+ ((.reset_opt==1)?",Skills,StatPoints And Status":" And SkillPoints") +" will be Reset.";
+					break;
+				case 3:	
+				case 4:				
+					mes "You will be Changed to "+ ((.reset_opt==3)?"Base":"Job") +"Level 1 with JobLevel and Skills/Status Unaffected";
+					break;
+			}
+			if (.job_rebirth&EAJL_BABY)
+				.@job$ = "Baby ";
+			if (.job_rebirth&EAJL_THIRD)
+				.@job$ = .@job$+"Third";
+			else if (.job_rebirth&EAJL_2_1 || .job_rebirth&EAJL_2_2)
+				.@job$ = .@job$+"Second";
+			else if (.job_rebirth&EAJL_UPPER)
+				.@job$ = .@job$+"1-1";
+			mes "You Should be "+ ((.job_rebirth&EAJL_UPPER)?"Trans":"") +" "+ .@job$ +" Job to be able to Rebirth.";
+			if (.job_rebirth&EAJL_UPPER)
+				.@trans = 1;
+			if (.StatusN){ mes "You Get "+ .StatusN +" Extra Status point for every Rebirth"; }
+			if (.ResetJob==2 || (.ResetJob==1 && !.@trans) || .@can_rebirth){ mes "You will become Novice Upon rebirth"; }
+			else if ((.ResetJob==1 && .@trans) || (.ResetJob==3)){ mes "You will become High Novice Upon rebirth"; }
+			else{ mes "Your Job will not change upon rebirth"; }
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			mes "For Rebirth, you may need some items.";
+			CheckItemNeed(1,1);
+			if (.MasterRebirth > 0){
+				next;
+				mes "^11E6D0[Rebirth System]^000000";
+				mes "Upon Reaching "+ .MasterRebirth +" Rebirths, you can do Master Rebirth";
+				if (.MaxRebirth[1]){ mes "You can do "+ .MaxRebirth[1] +" Master Rebirths Only"; }
+				if (.StatusM){ mes "You Get "+ ((.StatusM)-(.StatusN * .MasterRebirth)) +" Extra Status point than Normal Rebirth for every Master Rebirth"; }
+				mes "Master Rebirth Allows you to earn some powerful items.";
+				next;
+				mes "^11E6D0[Rebirth System]^000000";
+				mes "For Master Rebirth, you may need some items.";
+				CheckItemNeed(2,1);
+			}
+			close;
+		case 4:
+			mes "[Reset Stats]";
+			mes "Reset Stats: "+ .ResetStat +"z";
+			mes "Continue?";
+			if (select("~ Yes, Reset Stat", "No, I don't want to reset") == 2)
+				close;
+			next;
+			mes "[Reset Stats]";
+			if (Zeny < .ResetStat) {
+				mes "Sorry, you don't have enough Zeny.";
+				close;
+			}
+			Zeny -= .ResetStat;
+			resetstatus;
+			StatusPoint = StatusPoint + (.StatusM * master_rebirth) + (.StatusN * rebirth_no);
+			mes "There you go!";
+			close;
+		case 5:
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			mes "Bye.";
+			close;
+		case 6:
+			next;
+			mes "^11E6D0[Rebirth System]^000000";
+			mes "Are you sure you want to reset Ranking?";
+			mes "Once done, Action cannot be reverted.";
+			if (select("Yes, Reset the Ranking:No, Let me think again.")==2){
+				next;
+				mes "^11E6D0[Rebirth System]^000000";
+				mes "Thank you for using my service.";
+				close;
+			}
+			next;
+			query_sql "TRUNCATE TABLE `rebirth_system`";
+			query_sql "DELETE FROM `char_reg_num_db` WHERE `key`='rebirth_no' OR `key`='master_rebirth'";
+			query_sql "SELECT `account_id` from `char` where `online`=1", .@account_id;
+			for (.@i=0; .@i < getarraysize(.@account_id); .@i++){
+				if (attachrid(.@account_id[.@i])){
+					if (rebirth_no){ rebirth_no = 0; }
+					if (master_rebirth){ master_rebirth = 0; }
+				}
+			}
+			deletearray .@account_id[0],getarraysize(.@account_id);
+			mes "^11E6D0[Rebirth System]^000000";
+			mes "Ranker Reset.";
+			close;
+			
+	}
+	if (@rebirth_type==1){rebirth_no += 1;}
+	else{master_rebirth += 1; rebirth_no = rebirth_no - .MasterRebirth; }
+	switch(.ResetJob){
+		case 1: 
+			if (!Upper){
+				jobchange Job_Novice; break;
+			}
+		case 3: jobchange Job_Novice_High; break;
+		case 2: jobchange Job_Novice; break;
+		default: break;
+	
+	}
+	resetlvl(.reset_opt);
+	if (.reset_ss&1){resetstatus;}
+	if (.reset_ss&2){resetskill;}
+	query_sql "INSERT INTO `rebirth_system` (`char_id`,`name`,`rebirth_no`,`master_rebirth`) VALUES ("+getcharid(0)+",'"+strcharinfo(0)+"',"+rebirth_no+","+master_rebirth+") ON DUPLICATE KEY UPDATE `rebirth_no`="+rebirth_no+", `master_rebirth`="+master_rebirth+" ";
+	getItemReward(@rebirth_type);
+	if (.StatusN || .StatusM){
+		StatusPoint = StatusPoint + (.StatusM * master_rebirth) + (.StatusN * rebirth_no);
+	}
+	mes "^11E6D0[Rebirth System]^000000";
+	mes "You have taken Rebirth.";
+	if (@rebirth_type==1){
+		announce "[ Rebirth system ] : "+ strcharinfo(0) +" rebirth for the "+ rebirth_no +" time !", 0;
+	}else{
+		announce "[ Rebirth system ] : "+ strcharinfo(0) +" has done Master rebirth for "+ master_rebirth +" time !", 0;
+	}
+	close;
+
+function deleteItem {
+	for (.@i=0 ; .@i < .size_item; .@i += 3 ){
+		if ( !( getarg(0)&(.item_req[.@i+2]) ) ){continue;}
+		delitem .item_req[.@i], ( .item_req[ .@i+1 ] );
+	}
+	return;
+}
+
+function CheckItemNeed {
+	if ( Weight > 20000 ) {
+		mes "You must reduce your weight to 2000 to do Rebirth.";
+		close;
+	}
+	.@error = 0;
+	for (.@i=0 ; .@i < .size_item; .@i += 3 ){
+		if ( !( getarg(0)&(.item_req[.@i+2]) ) ){continue;}
+		if ( countitem( .item_req[.@i] ) < .item_req[ .@i+1 ] ) {
+			mes "You Require [^ff0000"+countitem( .item_req[.@i] )+" / "+ .item_req[.@i+1] +"^000000] ^112FD9"+getitemname( .item_req[.@i] )+"^000000";
+			.@error = 1;
+		}else{
+			mes "You Require [^00ff00"+countitem( .item_req[.@i] )+" / "+ .item_req[.@i+1] +"^000000] ^112FD9"+getitemname( .item_req[.@i] )+"^000000";
+		}
+	}
+	if (.@error && !getarg(1,0)){close;}
+	
+	return;
+}
+
+function getItemReward {
+	for (.@i=0 ; .@i < .size_reward; .@i += 4 ){
+		if ( !( getarg(0)&( .reward[.@i+3] ) ) ) {continue;}
+		if (rand(1,10000) <= .reward[.@i+2]){
+			mes "You Got "+.reward[.@i+1]+" "+getitemname(.reward[.@i])+" ";
+			getitem .reward[.@i], .reward[ .@i+1 ];
+		}
+	}
+	next;
+	return;
+}
+
+OnInit:
+	// item required <item ID>, <number> , <1=NormalRebirth,2=MasterRebirth,3=ForBorthRebirths>
+	setarray .item_req, 501, 5, 3,
+						502, 2, 3,
+						503, 3, 3;
+	.size_item = getarraysize( .item_req );
+	// rewards <item ID>, <quantity>,<chance(10000=100%)>,<1=NormalRebirth,2=MasterRebirth,3=PriceForBothRebirths>
+    // recalculates the chance and gives the next reward if chance is met.
+	setarray .reward, 504,	1,	10000,	1,
+					  7227,	5,	10000,	2,
+					  502,	5,	10000,	3,
+					  601,	1,	10,		3;
+	.size_reward = getarraysize( .reward );	//Do not Change This
+	.list = 10;		//Show Top x in Ranking
+	/*
+		EAJL_2_1: 2-1 Class
+		EAJL_2_2: 2-2 Class
+		EAJL_2: All Second Class
+		EAJL_UPPER: All Trans Class
+		EAJL_BABY: All Baby Class
+		EAJL_THIRD: All Third Class
+		Full List:
+			EAJL_2_1|EAJL_UPPER: Trans 2-1 Class
+			EAJL_2_2|EAJL_UPPER: Trans 2-2 Class
+			EAJL_2|EAJL_UPPER: Trans Second Class
+			
+			EAJL_BABY|EAJL_2: All Second Baby Class
+			(Same for 2_1/2_2/Upper as mentioned above)
+			
+			EAJL_THIRD|EAJL_2_1: 3-1 Class
+			EAJL_THIRD|EAJL_2_2: 3-2 Class
+			
+			EAJL_THIRD|EAJL_2_1|EAJL_UPPER: Trans 3-1 Class
+			EAJL_THIRD|EAJL_2_2|EAJL_UPPER: Trans 3-2 Class
+			EAJL_THIRD|EAJL_2|EAJL_UPPER: Trans 3rd Class
+			
+			EAJL_THIRD|EAJL_2_1|EAJL_UPPER|EAJL_BABY: Baby Trans 3-1 Class
+			... You can have any Combination of classes ...
+			
+			
+	*/
+	.job_rebirth = EAJL_THIRD|EAJL_2|EAJL_UPPER;							
+	setarray .add_jobs[0],Job_Gunslinger,				// Additional Jobs, who can rebirth
+						  Job_Soul_Linker,
+						  Job_Star_Gladiator,
+						  Job_Taekwon;
+	.ResetStat = 10000;									// Zeny needed for Resetting Stat
+	.reset_opt = 3;										// (1=Reset Base and JobLevel to 1(0 skill points and all stats to 1),2=Reset Base and JobLevel to 1(SkillPoint=0, While Skills and stats are not affected),3=Reset BaseLevel to 1, 4=Reset Job Level to 1)
+	.reset_ss = 3;										// (1=Reset Status, 2=Reset Skills, 3 = Reset Status and Skills).
+	setarray .MaxRebirth[0],0,0;						// Maximum Number of Normal Rebirth/Master Rebirth.(0=Unlimited) 
+	.ResetJob = 0;										// 0=Don't Change Job, Just Reset Level,1=Reset Job to Novice/Novice_High depending upon the job, 2=Force Reset to Novice, 3=Force Reset to Novice_High
+	.MasterRebirth = 10;								// Number of rebirths require to do Master Rebirth. (0 to disable)
+	.StatusN = 300;										// Status Point to Give at Every Normal Rebirth.
+	.StatusM = (.StatusN * .MasterRebirth) + 200;		// Status Point to Give at Every Master Rebirth. (Don't Change initial part)
+	.GMLevel = 99;										// Minimum GM Level to Reset the Ranking.
+	
+	query_sql "CREATE TABLE IF NOT EXISTS `rebirth_system` (  `char_id` int(11) NOT NULL default '0',  `name` varchar(24) NOT NULL DEFAULT 'NULL',  `rebirth_no` mediumint(6) NOT NULL default '0',  `master_rebirth` mediumint(6)  NOT NULL default '0',  PRIMARY KEY  (`char_id`)) ENGINE=MyISAM";
+	end;
+}
