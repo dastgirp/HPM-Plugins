@@ -94,6 +94,8 @@ case "$MODE" in
 		#17-06-2016
 		make plugin.chat_timestamp -j3 || aborterror "Build failed(ChatTimestamp)"
 		make plugin.fcp_bypass -j3 || aborterror "Build failed(Fcp Bypass)"
+		#29-06-2016
+		make plugin.sellitem2 -j3 || aborterror "Build failed(sellitem2)"
 		#HPMHooking should be last
 		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
 		;;
@@ -166,6 +168,8 @@ EOF
 		#17-06-2016
 		ARGS="--load-plugin chat_timestamp $ARGS"
 		ARGS="--load-plugin fcp_bypass $ARGS"
+		#29-06-2016
+		ARGS="--load-plugin sellitem2 $ARGS"
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
