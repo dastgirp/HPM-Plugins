@@ -1,6 +1,7 @@
 #!/bin/bash
 
 MODE="$1"
+search_dir="src/plugins"
 shift
 
 function foo {
@@ -57,47 +58,16 @@ case "$MODE" in
 		(cd tools && ./validateinterfaces.py silent) || aborterror "Interface validation error."
 		./configure $@ || aborterror "Configure error, aborting build."
 		make sql -j3 || aborterror "Build failed(CORE)."
-		make plugin.script_mapquit -j3 || aborterror "Build failed(MapQuit)."
-		make plugin.critical_magic -j3 || aborterror "Build failed(CriticalMagicAttack)."
-		make plugin.afk -j3 || aborterror "Build failed(Afk)."
-		make plugin.auraset -j3 || aborterror "Build failed(AuraSet)."
-		make plugin.autonext -j3 || aborterror "Build failed(AutoNext)."
-		make plugin.dispbottom2 -j3 || aborterror "Build failed(DispBottom2)."
-		make plugin.hit-delay -j3 || aborterror "Build failed(WarpHitDelay)."
-		make plugin.mapmoblist -j3 || aborterror "Build failed(MapMobList)."
-		make plugin.npc-duplicate -j3 || aborterror "Build failed(NpcDuplicate)."
-		make plugin.restock -j3 || aborterror "Build failed(restock)."
-		make plugin.storeit -j3 || aborterror "Build failed(storeit)."
-		#24-08-2015
-		make plugin.itemmap -j3 || aborterror "Build failed(itemmap)."
-		make plugin.monster_nodropexp -j3 || aborterror "Build failed(monster_nde)."
-		#28-08-2015
-		make plugin.security -j3 || aborterror "Build failed(Security)."
-		#10-09-2015
-		make plugin.@arealoot -j3 || aborterror "Build failed(AreaLoot)."
-		make plugin.whosell -j3 || aborterror "Build failed(WhoSell)."
-		#06-10-2015
-		make plugin.market -j3 || aborterror "Build failed(Market)."
-		#12-10-2015
-		make plugin.costumeitem -j3 || aborterror "Build failed(CostumeItem)."
-		make plugin.ExtendedVending -j3 || aborterror "Build failed(ExtendedVending)."
-		#06-11-2015
-		make plugin.storeequip -j3 || aborterror "Build failed(StoreEquip)."
-		#11-12-2015
-		make plugin.packet_sample -j3 || aborterror "Build failed(PacketSample)."
-		#15-01-2016
-		make plugin.autoattack -j3 || aborterror "Build failed(AutoAttack)."
-		#19-04-2016
-		make plugin.whobuy -j3 || aborterror "Build failed(WhoBuy)."
-		#15-06-2016
-		make plugin.charm -j3 || aborterror "Build failed(charm)."
-		#17-06-2016
-		make plugin.chat_timestamp -j3 || aborterror "Build failed(ChatTimestamp)"
-		make plugin.fcp_bypass -j3 || aborterror "Build failed(Fcp Bypass)"
-		#29-06-2016
-		make plugin.sellitem2 -j3 || aborterror "Build failed(sellitem2)"
-		#HPMHooking should be last
-		make plugin.HPMHooking -j3 || aborterror "Build failed(HPMHook)."
+		for entry in "$search_dir"/*.c
+		do
+			filewpath=$entry
+			fnameext=`basename $filewpath`
+			fname="${fnameext%.*}"
+			if [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ]
+			then
+				make plugin.$fname -j3 || aborterror "Build Failed($fnameext)"
+			fi
+		done
 		;;
 	test)
 		cat >> conf/import/login_conf.txt << EOF
@@ -132,44 +102,16 @@ EOF
 		ARGS="--load-script npc/dev/test.txt "
 		ARGS="--load-plugin HPMHooking $ARGS"
 		# Load All Custom Plugins
-		ARGS="--load-plugin critical_magic $ARGS"
-		ARGS="--load-plugin afk $ARGS"
-		ARGS="--load-plugin auraset $ARGS"
-		ARGS="--load-plugin autonext $ARGS"
-		ARGS="--load-plugin dispbottom2 $ARGS"
-		ARGS="--load-plugin hit-delay $ARGS"
-		ARGS="--load-plugin mapmoblist $ARGS"
-		ARGS="--load-plugin npc-duplicate $ARGS"
-		ARGS="--load-plugin restock $ARGS"
-		ARGS="--load-plugin storeit $ARGS"
-		# 24-08-2015
-		ARGS="--load-plugin itemmap $ARGS"
-		ARGS="--load-plugin monster_nodropexp $ARGS"
-		# 28-08-2015
-		ARGS="--load-plugin security $ARGS"
-		# 10-09-2015
-		ARGS="--load-plugin @arealoot $ARGS"
-		ARGS="--load-plugin whosell $ARGS"
-		# 06-10-2015
-		ARGS="--load-plugin market $ARGS"
-		# 12-10-2015
-		ARGS="--load-plugin costumeitem $ARGS"
-		ARGS="--load-plugin ExtendedVending $ARGS"
-		# 06-11-2015
-		ARGS="--load-plugin storeequip $ARGS"
-		# 11-12-2015
-		ARGS="--load-plugin packet_sample $ARGS"
-		#15-01-2016
-		ARGS="--load-plugin autoattack $ARGS"
-		#19-04-2016
-		ARGS="--load-plugin whobuy $ARGS"
-		#15-06-2016
-		ARGS="--load-plugin charm $ARGS"
-		#17-06-2016
-		ARGS="--load-plugin chat_timestamp $ARGS"
-		ARGS="--load-plugin fcp_bypass $ARGS"
-		#29-06-2016
-		ARGS="--load-plugin sellitem2 $ARGS"
+		for entry in "$search_dir"/*.c
+		do
+			filewpath=$entry
+			fnameext=`basename $filewpath`
+			fname="${fnameext%.*}"
+			if [ $fname != 'HPMHooking' ] && [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ]
+			then
+				ARGS="--load-plugin $fname $ARGS"
+			fi
+		done
 		# Scripts
 		# 28-08-2015
 		ARGS="--load-script NPC/Restock.txt $ARGS"
@@ -177,7 +119,7 @@ EOF
 		# 29-06-2016
 		ARGS="--load-script NPC/RebirthSystem.txt $ARGS"
 		# Hercules
-		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
+		ARGS="$ARGS --load-script npc/dev/ci_test.txt"
 		echo "Running Hercules with command line: ./map-server --run-once $ARGS"
 		./map-server --run-once $ARGS 2>runlog.txt
 		export errcode=$?
