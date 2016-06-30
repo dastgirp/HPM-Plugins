@@ -33,10 +33,10 @@
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
-	"movespeed", // Plugin name
-	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.1",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"movespeed",
+	SERVER_TYPE_MAP,
+	"1.2",
+	HPM_VERSION,
 };
 
 struct mapflag_data {
@@ -97,4 +97,8 @@ HPExport void plugin_init (void) {
 	addHookPre(npc, parse_unknown_mapflag, npc_parse_unknown_mapflag_pre);
 	addHookPost(status, calc_speed, status_calc_speed_post);
 	addHookPre(map, flags_init, map_flags_init_pre);
+}
+
+HPExport void server_online (void) {
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }

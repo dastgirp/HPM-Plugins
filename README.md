@@ -60,6 +60,8 @@ Initial:<br/>
 * sellitem2<br/>
 <br/>
 30-06-2016:<br/>
-* movespeed<br />
+* movespeed<br/>
+* noinvitation (Friend)<br/>
+* fixedaspd<br/>
 
 Support Topic: http://hercules.ws/board/topic/8202-plugin-collections/
