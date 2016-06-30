@@ -16,7 +16,7 @@
 //= use mf_notrade, mf_partylock, mf_guildlock
 //============================================================
 
-#include "common/ragemu.h"
+#include "common/hercules.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
