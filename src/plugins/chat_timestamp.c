@@ -32,6 +32,12 @@
 #include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
+/**
+ * Enables TimeStamp in Player Messages.
+ * This Options Enables Timestamp everywhere a player can send message to.
+ **/
+// #define PLAYER_MESSAGE_TIMESTAMP
+
 HPExport struct hplugin_info pinfo =
 {
 	"Chat TimeStamp",
@@ -39,6 +45,34 @@ HPExport struct hplugin_info pinfo =
 	"1.0",
 	HPM_VERSION,
 };
+
+const char *clif_process_chat_message_post(const char *retVal, struct map_session_data *sd, const struct packet_chat_message *packet, char *out_buf, int out_buflen)
+{
+	char prefix[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
+	time_t t;
+	int textlen = 0;
+	
+	nullpo_ret(sd);
+
+	if (retVal == NULL)
+		return NULL;
+#if PACKETVER >= 20151001
+	// Packet doesn't include a NUL terminator
+	textlen = packet->packet_len - 4;
+#else // PACKETVER < 20151001
+	// Packet includes a NUL terminator
+	textlen = packet->packet_len - 4 - 1;
+#endif // PACKETVER > 20151001
+	safestrncpy(out_buf, retVal, textlen+1); // [!] packet->message is not necessarily NUL terminated
+	
+	t = time(NULL);
+	strftime(prefix, 10, "[%H:%M] ", localtime(&t));
+	
+	strcat(prefix, out_buf);
+	
+	retVal = prefix;
+	return retVal;
+}
 
 int guild_send_message_pre(struct map_session_data **sd, const char **mes)
 {
@@ -63,13 +97,14 @@ int guild_send_message_pre(struct map_session_data **sd, const char **mes)
 int party_send_message_pre(struct map_session_data **sd, const char **mes)
 {
 	char prefix[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
+	time_t t;
 
 	nullpo_ret(*sd);
 
 	if ((*sd)->status.party_id == 0)
 		return 0;
 	
-	time_t t = time(NULL);
+	t = time(NULL);
 	strftime(prefix, 10, "[%H:%M] ", localtime(&t));
 	
 	strcat(prefix, *mes);
@@ -80,8 +115,12 @@ int party_send_message_pre(struct map_session_data **sd, const char **mes)
 
 HPExport void plugin_init (void)
 {
+#ifndef PLAYER_MESSAGE_TIMESTAMP
 	addHookPre(party, send_message, party_send_message_pre);
 	addHookPre(guild, send_message, guild_send_message_pre);
+#else
+	addHookPost(clif, process_chat_message_pre, clif_process_chat_message_pre);
+#endif
 }
 
 HPExport void server_online (void)
