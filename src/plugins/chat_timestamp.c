@@ -43,13 +43,14 @@ HPExport struct hplugin_info pinfo =
 int guild_send_message_pre(struct map_session_data **sd, const char **mes)
 {
 	char prefix[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
+	time_t t;
 
 	nullpo_ret(*sd);
 
 	if ((*sd)->status.guild_id == 0)
 		return 0;
 	
-	time_t t = time(NULL);
+	t = time(NULL);
 	strftime(prefix, 10, "[%H:%M] ", localtime(&t));
 	
 	strcat(prefix, *mes);
@@ -85,5 +86,5 @@ HPExport void plugin_init (void)
 
 HPExport void server_online (void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
