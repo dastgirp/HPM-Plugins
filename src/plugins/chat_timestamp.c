@@ -119,7 +119,7 @@ HPExport void plugin_init (void)
 	addHookPre(party, send_message, party_send_message_pre);
 	addHookPre(guild, send_message, guild_send_message_pre);
 #else
-	addHookPost(clif, process_chat_message_pre, clif_process_chat_message_pre);
+	addHookPost(clif, process_chat_message, clif_process_chat_message_post);
 #endif
 }
 
