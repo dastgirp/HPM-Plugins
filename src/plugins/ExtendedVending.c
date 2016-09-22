@@ -661,7 +661,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 		pc->additem(sd, &vsd->status.cart[idx], amount, LOG_TYPE_VENDING);
 		vsd->vending[vend_list[i]].amount -= amount;
 		pc->cart_delitem(vsd, idx, amount, 0, LOG_TYPE_VENDING);
-		clif->vendingreport(vsd, idx, amount);
+		clif->vendingreport(vsd, idx, amount, (int)z);
 
 		//print buyer's name
 		if ( battle->bc->buyer_name ) {
