@@ -397,7 +397,7 @@ BUILDIN(costume)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("reserved_costume_id", costume_id,costume_id_return);
+	addBattleConf("reserved_costume_id", costume_id,costume_id_return, false);
 }
 
 /* Server Startup */

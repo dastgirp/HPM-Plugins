@@ -773,11 +773,11 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("extended_vending",ev_bc, ev_return_bc);
-	addBattleConf("show_item_vending",ev_bc, ev_return_bc);
-	addBattleConf("ex_vending_info",ev_bc, ev_return_bc);
-	addBattleConf("item_zeny",ev_bc, ev_return_bc);
-	addBattleConf("item_cash",ev_bc, ev_return_bc);
+	addBattleConf("extended_vending",ev_bc, ev_return_bc, false);
+	addBattleConf("show_item_vending",ev_bc, ev_return_bc, false);
+	addBattleConf("ex_vending_info",ev_bc, ev_return_bc, false);
+	addBattleConf("item_zeny",ev_bc, ev_return_bc, false);
+	addBattleConf("item_cash",ev_bc, ev_return_bc, false);
 }
 
 HPExport void server_online (void) {

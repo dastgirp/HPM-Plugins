@@ -135,5 +135,5 @@ HPExport void server_online (void) {
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("arealoot_range", arealoot_range_setting, arealoot_range_return);
+	addBattleConf("arealoot_range", arealoot_range_setting, arealoot_range_return, false);
 }

@@ -223,12 +223,12 @@ HPExport void plugin_init (void)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("warp_delay",go_warp_delay_bc, go_warp_delay_return_bc);
-	addBattleConf("warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc);
-	addBattleConf("warp_delay_pet",go_warp_delay_bc, go_warp_delay_return_bc);
-	addBattleConf("warp_delay_homun",go_warp_delay_bc, go_warp_delay_return_bc);
-	addBattleConf("warp_delay_merc",go_warp_delay_bc, go_warp_delay_return_bc);
-	addBattleConf("warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc);
+	addBattleConf("warp_delay",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("warp_delay_pet",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("warp_delay_homun",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("warp_delay_merc",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc, false);
 }
 
 HPExport void server_online (void)

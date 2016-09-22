@@ -137,7 +137,7 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("afk_timeout",afk_timeout_adjust,afk_timeout_return);
+	addBattleConf("afk_timeout",afk_timeout_adjust,afk_timeout_return, false);
 }
 
 HPExport void server_online (void) {

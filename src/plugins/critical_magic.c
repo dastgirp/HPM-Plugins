@@ -175,7 +175,7 @@ HPExport void plugin_init (void)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("magic_critical_color",critical_color, critical_color_return);
+	addBattleConf("magic_critical_color",critical_color, critical_color_return, false);
 }
 
 HPExport void server_online (void)
