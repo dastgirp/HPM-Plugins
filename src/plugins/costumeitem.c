@@ -27,10 +27,12 @@
 //= v3.5a - Attributes are no longer given. [Dastgir]
 //= v3.6  - Headgears occupying more than 1 slot will not give
 //=         Attributes
+//= v3.7  - Added Battle config to disable class restriction.
 //===== Additional Comments: =================================
 //= Reserved Costume ID(BattleConf):
 //= (Should not conflict with CharID)
 //= 	reserved_costume_id: ID
+//=     disable_costume_job_check: 1/0
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
@@ -73,17 +75,22 @@ static inline void status_cpy(struct status_data* a, const struct status_data* b
 
 // Costume System
 int reserved_costume_id = INT_MAX-100; // Very High Number
+int disable_job_check = 1;
 
-void costume_id(const char *key, const char *val)
+void battleConfCheck(const char *key, const char *val)
 {
 	if (strcmpi(key,"reserved_costume_id") == 0)
 		reserved_costume_id = atoi(val);
+	else if (strcmpi(key, "disable_costume_job_check")
+		disable_job_check = atoi(val);
 }
 
-int costume_id_return(const char *key)
+int battleConfReturn(const char *key)
 {
 	if (strcmpi(key,"reserved_costume_id") == 0)
 		return reserved_costume_id;
+	else if (strcmpi(key, "disable_costume_job_check") == 0)
+		return disable_job_check;
 
 	return 0;
 }
@@ -274,6 +281,120 @@ int pc_equippoint_post(int retVal, struct map_session_data *sd, int n)
 	return retVal;
 }
 
+bool isCostume(struct map_session_data *sd, int n) {
+	int char_id = 0;
+	if (reserved_costume_id &&
+		sd->status.inventory[n].card[0] == CARD0_CREATE &&
+		(char_id = MakeDWord(sd->status.inventory[n].card[2], sd->status.inventory[n].card[3])) == reserved_costume_id) {
+			return true;
+		}
+	return false;
+}
+
+int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
+{
+	struct item_data *item;
+	int ret = 0;
+	nullpo_ret(sd);
+
+	if (retVal == 1 || !disable_costume_job_check)
+		return retVal;
+	
+	item = sd->inventory_data[n];
+
+	if (item == NULL)
+		return 0;
+	
+	// Check Basic Conditions
+	if ((item->elv && sd->status.base_level < item->elv) ||
+		(item->elvmax && sd->status.base_level > item->elvmax) ||
+		(item->sex != 2 && sd->status.sex != item->sex)) {
+		return 0;
+	}
+	
+	if (item->equip & EQP_AMMO) {
+		if ( (sd->state.active && !pc_iscarton(sd)) // check if sc data is already loaded.
+			&& (sd->status.class_ == JOB_GENETIC_T || sd->status.class_ == JOB_GENETIC) ) {
+			return 0;
+		}
+		if (!pc_ismadogear(sd) && (sd->status.class_ == JOB_MECHANIC_T || sd->status.class_ == JOB_MECHANIC)) {
+			return 0;
+		}
+	}
+
+	if (sd->sc.count) {
+		if(item->equip & EQP_ARMS && item->type == IT_WEAPON && sd->sc.data[SC_NOEQUIPWEAPON]) // Also works with left-hand weapons [DracoRPG]
+			return 0;
+		if(item->equip & EQP_SHIELD && item->type == IT_ARMOR && sd->sc.data[SC_NOEQUIPSHIELD])
+			return 0;
+		if(item->equip & EQP_ARMOR && sd->sc.data[SC_NOEQUIPARMOR])
+			return 0;
+		if(item->equip & EQP_HEAD_TOP && sd->sc.data[SC_NOEQUIPHELM])
+			return 0;
+		if(item->equip & EQP_ACC && sd->sc.data[SC__STRIPACCESSARY])
+			return 0;
+		if(item->equip && sd->sc.data[SC_KYOUGAKU])
+			return 0;
+
+		if (sd->sc.data[SC_SOULLINK] && sd->sc.data[SC_SOULLINK]->val2 == SL_SUPERNOVICE) {
+			//Spirit of Super Novice equip bonuses. [Skotlex]
+			if (sd->status.base_level > 90 && item->equip & EQP_HELM)
+				return 1; //Can equip all helms
+
+			if (sd->status.base_level > 96 && item->equip & EQP_ARMS && item->type == IT_WEAPON)
+				switch(item->look) { //In weapons, the look determines type of weapon.
+					case W_DAGGER: //Level 4 Knives are equippable.. this means all knives, I'd guess?
+					case W_1HSWORD: //All 1H swords
+					case W_1HAXE: //All 1H Axes
+					case W_MACE: //All 1H Maces
+					case W_STAFF: //All 1H Staves
+						return 1;
+				}
+		}
+	}
+	
+	// Not Equippable
+	if (!(1ULL<<(sd->class_&MAPID_BASEMASK)&item->class_base[(sd->class_&JOBL_2_1)?1:((sd->class_&JOBL_2_2)?2:0)])) {
+		if (isCostume(sd, n)) {
+			ret = 1;
+		}
+	}
+	
+	//Not usable by upper class. [Inkfish]
+	while(1) {
+		if ( item->class_upper&ITEMUPPER_NORMAL && !(sd->class_&(JOBL_UPPER|JOBL_THIRD|JOBL_BABY)) ) break;
+		if ( item->class_upper&ITEMUPPER_UPPER  &&   sd->class_&(JOBL_UPPER|JOBL_THIRD)            ) break;
+		if ( item->class_upper&ITEMUPPER_BABY   &&   sd->class_&JOBL_BABY                          ) break;
+		if ( item->class_upper&ITEMUPPER_THIRD  &&   sd->class_&JOBL_THIRD                         ) break;
+		if (isCostume(sd, n)) {
+			ret = 1;
+		}
+	}
+	
+	
+	if (battle->bc->unequip_restricted_equipment & 1) {
+		int i;
+		for (i = 0; i < map->list[sd->bl.m].zone->disabled_items_count; i++)
+			if (map->list[sd->bl.m].zone->disabled_items[i] == sd->status.inventory[n].nameid)
+				ret = 0;
+	}
+
+	if (battle->bc->unequip_restricted_equipment & 2) {
+		if (!itemdb_isspecial( sd->status.inventory[n].card[0])) {
+			int i, slot;
+			for (slot = 0; slot < MAX_SLOTS; slot++)
+				for (i = 0; i < map->list[sd->bl.m].zone->disabled_items_count; i++)
+					if (map->list[sd->bl.m].zone->disabled_items[i] == sd->status.inventory[n].card[slot])
+						ret = 0;
+		}
+	}
+	
+	if (ret == 1) {
+		hookStop();
+	}
+	return ret;
+}
+
 ACMD(costumeitem)
 {
 	char item_name[100];
@@ -397,7 +518,7 @@ BUILDIN(costume)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("reserved_costume_id", costume_id,costume_id_return, false);
+	addBattleConf("reserved_costume_id", battleConfCheck ,battleConfReturn, false);
 }
 
 /* Server Startup */
@@ -411,6 +532,7 @@ HPExport void plugin_init (void) {
 	addHookPre(script, run_use_script, script_stop_costume);
 	addHookPre(map, reqnickdb, map_reqnickdb_pre);
 	addHookPost(pc, equippoint, pc_equippoint_post);
+	addHookPost(pc, isequip, pc_isequip_post);
 	
 	//atCommand
 	addAtcommand("costumeitem", costumeitem);
