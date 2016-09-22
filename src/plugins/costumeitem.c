@@ -28,11 +28,13 @@
 //= v3.6  - Headgears occupying more than 1 slot will not give
 //=         Attributes
 //= v3.7  - Added Battle config to disable class restriction.
+//= v3.8  - Added Option to not increment defense via costume.
 //===== Additional Comments: =================================
 //= Reserved Costume ID(BattleConf):
 //= (Should not conflict with CharID)
 //= 	reserved_costume_id: ID
 //=     disable_costume_job_check: 1/0
+//=     disable_costume_defense: 1/0
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
@@ -46,6 +48,7 @@
 #include "common/timer.h"
 #include "common/HPMi.h"
 #include "common/mmo.h"
+#include "common/nullpo.h"
 #include "map/itemdb.h"
 #include "map/battle.h"
 #include "map/script.h"
@@ -64,7 +67,7 @@
 HPExport struct hplugin_info pinfo = {
 	"costumeitem",
 	SERVER_TYPE_MAP,
-	"3.5a",
+	"3.8",
 	HPM_VERSION,
 };
 
@@ -75,14 +78,17 @@ static inline void status_cpy(struct status_data* a, const struct status_data* b
 
 // Costume System
 int reserved_costume_id = INT_MAX-100; // Very High Number
-int disable_job_check = 1;
+int disable_job_check = 1;				// Disable Class Restriction for equipping Costume
+int disable_costume_defense = 1;		// Do Not give defense while equipping costume
 
 void battleConfCheck(const char *key, const char *val)
 {
 	if (strcmpi(key,"reserved_costume_id") == 0)
 		reserved_costume_id = atoi(val);
-	else if (strcmpi(key, "disable_costume_job_check")
+	else if (strcmpi(key, "disable_costume_job_check") == 0)
 		disable_job_check = atoi(val);
+	else if (strcmpi(key, "disable_costume_defense") == 0)
+		disable_costume_defense = atoi(val);
 }
 
 int battleConfReturn(const char *key)
@@ -91,7 +97,8 @@ int battleConfReturn(const char *key)
 		return reserved_costume_id;
 	else if (strcmpi(key, "disable_costume_job_check") == 0)
 		return disable_job_check;
-
+	else if (strcmpi(key, "disable_costume_defense") == 0)
+		return disable_costume_defense;
 	return 0;
 }
 
@@ -297,7 +304,7 @@ int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
 	int ret = 0;
 	nullpo_ret(sd);
 
-	if (retVal == 1 || !disable_costume_job_check)
+	if (retVal == 1 || !disable_job_check)
 		return retVal;
 	
 	item = sd->inventory_data[n];
@@ -393,6 +400,49 @@ int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
 		hookStop();
 	}
 	return ret;
+}
+
+void status_calc_pc_additional_post(struct map_session_data* sd, enum e_status_calc_opt opt)
+{
+	int i;
+	if (sd == NULL)
+		return;
+	if (!disable_costume_defense)
+		return;
+	// Parse equipment.
+	for(i = 0;i < EQI_MAX; i++) {
+		int index = sd->equip_index[i];
+		int k;
+		if (index < 0)
+			continue;
+		if (i == EQI_AMMO) continue;
+		if (i == EQI_HAND_R && sd->equip_index[EQI_HAND_L] == index)
+			continue;
+		if (i == EQI_HEAD_MID && sd->equip_index[EQI_HEAD_LOW] == index)
+			continue;
+		if (i == EQI_HEAD_TOP && (sd->equip_index[EQI_HEAD_MID] == index || sd->equip_index[EQI_HEAD_LOW] == index))
+			continue;
+		if (i == EQI_COSTUME_MID && sd->equip_index[EQI_COSTUME_LOW] == index)
+			continue;
+		if (i == EQI_COSTUME_TOP && (sd->equip_index[EQI_COSTUME_MID] == index || sd->equip_index[EQI_COSTUME_LOW] == index))
+			continue;
+		if (sd->inventory_data[index] == NULL)
+			continue;
+
+		for (k = 0; k < map->list[sd->bl.m].zone->disabled_items_count; k++) {
+			if (map->list[sd->bl.m].zone->disabled_items[k] == sd->inventory_data[index]->nameid) {
+				break;
+			}
+		}
+
+		if (k < map->list[sd->bl.m].zone->disabled_items_count)
+			continue;
+
+		// Decrease the Defense.
+		sd->battle_status.def -= sd->inventory_data[index]->def;
+	}
+	/* Just used for Plugin to give bonuses. */
+	return;
 }
 
 ACMD(costumeitem)
@@ -519,6 +569,9 @@ BUILDIN(costume)
 HPExport void server_preinit (void)
 {
 	addBattleConf("reserved_costume_id", battleConfCheck ,battleConfReturn, false);
+	addBattleConf("disable_costume_job_check", battleConfCheck ,battleConfReturn, false);
+	addBattleConf("disable_costume_defense", battleConfCheck ,battleConfReturn, false);
+	
 }
 
 /* Server Startup */
@@ -533,6 +586,7 @@ HPExport void plugin_init (void) {
 	addHookPre(map, reqnickdb, map_reqnickdb_pre);
 	addHookPost(pc, equippoint, pc_equippoint_post);
 	addHookPost(pc, isequip, pc_isequip_post);
+	addHookPost(status, calc_pc_additional, status_calc_pc_additional_post);
 	
 	//atCommand
 	addAtcommand("costumeitem", costumeitem);
