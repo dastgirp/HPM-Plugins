@@ -439,7 +439,8 @@ void status_calc_pc_additional_post(struct map_session_data* sd, enum e_status_c
 			continue;
 
 		// Decrease the Defense.
-		sd->battle_status.def -= sd->inventory_data[index]->def;
+		if (isCostume(sd, index))
+			sd->battle_status.def -= sd->inventory_data[index]->def;
 	}
 	/* Just used for Plugin to give bonuses. */
 	return;
