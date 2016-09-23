@@ -36,17 +36,13 @@ HPExport struct hplugin_info pinfo = {
 ACMD(storeit) {
 
 	int i;
-	
-	if (!sd) return false;
 
-	if (sd->npc_id)
-	{
+	if (sd->npc_id) {
 		clif->message(fd, "You cannot be talking to an NPC and use this command.");
 		return -1;
 	}
 
-	if (sd->state.storage_flag != 1)
-  	{	//Open storage.
+	if (sd->state.storage_flag != 1) {	//Open storage.
 		switch (storage->open(sd)) {
 		case 2: //Try again
 			clif->message(fd, "Run this command again..");
