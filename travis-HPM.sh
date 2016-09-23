@@ -174,7 +174,7 @@ EOF
 		do
 			filewpath=$entry
 			fnameext=`basename $filewpath`
-			SCRIPTS="--load-script $fnameext $SCRIPTS"
+			SCRIPTS="--load-script NPC/$fnameext $SCRIPTS"
 		done
 		echo "run all servers without HPM"
 		run_server ./login-server
