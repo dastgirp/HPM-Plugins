@@ -79,8 +79,8 @@ struct autotrade_data {
 };
 
 //Clif Edits
-void clif_vend_message(struct map_session_data *sd, const char* msg, unsigned long color);
-void clif_vend_message(struct map_session_data *sd, const char* msg, unsigned long color)
+void clif_vend_message(struct map_session_data *sd, const char* msg, uint32 color);
+void clif_vend_message(struct map_session_data *sd, const char* msg, uint32 color)
 {
 	int fd;
 	unsigned short len = strlen(msg) + 1;
@@ -615,7 +615,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 /**
  * Extended Vending system 
  **/
-	if ( (bc_extended_vending == 1) ) {
+	if (bc_extended_vending == 1) {
 		if ( vend_loot == bc_item_zeny || !vend_loot ) {
 		
 			//Logs (V)ending Zeny [Lupus]
