@@ -1,7 +1,28 @@
 #!/bin/bash
 
+# This file is part of Hercules.
+# http://herc.ws - http://github.com/HerculesWS/Hercules
+#
+# Copyright (C) 2014-2015  Hercules Dev Team
+#
+# Hercules is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Base Author: Haru @ http://herc.ws
+
 MODE="$1"
 search_dir="src/plugins"
+script_dir="NPC"
 shift
 
 function foo {
@@ -16,13 +37,31 @@ function usage {
 	echo "    $0 importdb <dbname> [dbuser] [dbpassword]"
 	echo "    $0 build [configure args]"
 	echo "    $0 test <dbname> [dbuser] [dbpassword]"
-	echo "    $0 getrepo"
+	echo "    $0 getplugins"
 	exit 1
 }
 
 function aborterror {
 	echo $@
 	exit 1
+}
+
+function run_server {
+	echo "Running: $1 --run-once $2"
+	$1 --run-once $2 2>runlog.txt
+	export errcode=$?
+	export teststr=$(cat runlog.txt)
+	if [[ -n "${teststr}" ]]; then
+		echo "Errors found in running server $1."
+		cat runlog.txt
+		aborterror "Errors found in running server $1."
+	else
+		echo "No errors found for server $1."
+	fi
+	if [ ${errcode} -ne 0 ]; then
+		echo "server $1 terminated with exit code ${errcode}"
+		aborterror "Test failed"
+	fi
 }
 
 case "$MODE" in
@@ -56,8 +95,10 @@ case "$MODE" in
 		;;
 	build)
 		(cd tools && ./validateinterfaces.py silent) || aborterror "Interface validation error."
-		./configure $@ || aborterror "Configure error, aborting build."
-		make sql -j3 || aborterror "Build failed(CORE)."
+		./configure $@ || (cat config.log && aborterror "Configure error, aborting build.")
+		make -j3 || aborterror "Build failed."
+		make plugins -j3 || aborterror "Build failed."
+		make plugin.script_mapquit -j3 || aborterror "Build failed."
 		for entry in "$search_dir"/*.c
 		do
 			filewpath=$entry
@@ -70,37 +111,52 @@ case "$MODE" in
 		done
 		;;
 	test)
-		cat >> conf/import/login_conf.txt << EOF
-ipban.sql.db_username: $DBUSER
-ipban.sql.db_password: $DBPASS
-ipban.sql.db_database: $DBNAME
-account.sql.db_username: $DBUSER
-account.sql.db_password: $DBPASS
-account.sql.db_database: $DBNAME
-account.sql.db_hostname: localhost
+		cat > conf/travis_sql_connection.conf << EOF
+sql_connection: {
+	//default_codepage: ""
+	//case_sensitive: false
+	db_hostname: "localhost"
+	db_username: "$DBUSER"
+	db_password: "$DBPASS"
+	db_database: "$DBNAME"
+	//codepage:""
+}
 EOF
-		[ $? -eq 0 ] || aborterror "Unable to import configuration, aborting tests."
-		cat >> conf/import/inter_conf.txt << EOF
-sql.db_username: $DBUSER
-sql.db_password: $DBPASS
-sql.db_database: $DBNAME
-sql.db_hostname: localhost
-char_server_id: $DBUSER
-char_server_pw: $DBPASS
-char_server_db: $DBNAME
-char_server_ip: localhost
-map_server_id: $DBUSER
-map_server_pw: $DBPASS
-map_server_db: $DBNAME
-map_server_ip: localhost
-log_db_id: $DBUSER
-log_db_pw: $DBPASS
-log_db_db: $DBNAME
-log_db_ip: localhost
+		[ $? -eq 0 ] || aborterror "Unable to write database configuration, aborting tests."
+		cat > conf/import/login-server.conf << EOF
+login_configuration: {
+	account: {
+		@include "conf/travis_sql_connection.conf"
+		ipban: {
+			@include "conf/travis_sql_connection.conf"
+		}
+	}
+}
 EOF
-		[ $? -eq 0 ] || aborterror "Unable to import configuration, aborting tests."
+		[ $? -eq 0 ] || aborterror "Unable to override login-server configuration, aborting tests."
+		cat > conf/import/char-server.conf << EOF
+char_configuration: {
+	@include "conf/travis_sql_connection.conf"
+}
+EOF
+		[ $? -eq 0 ] || aborterror "Unable to override char-server configuration, aborting tests."
+		cat > conf/import/map-server.conf << EOF
+map_configuration: {
+	@include "conf/travis_sql_connection.conf"
+}
+EOF
+		[ $? -eq 0 ] || aborterror "Unable to override map-server configuration, aborting tests."
+		cat > conf/import/inter-server.conf << EOF
+inter_configuration: {
+	log: {
+		@include "conf/travis_sql_connection.conf"
+	}
+}
+EOF
+		[ $? -eq 0 ] || aborterror "Unable to override inter-server configuration, aborting tests."
 		ARGS="--load-script npc/dev/test.txt "
-		ARGS="--load-plugin HPMHooking $ARGS"
+		ARGS="--load-plugin script_mapquit $ARGS --load-script npc/dev/ci_test.txt"
+		PLUGINS="--load-plugin HPMHooking --load-plugin sample"
 		# Load All Custom Plugins
 		for entry in "$search_dir"/*.c
 		do
@@ -109,42 +165,33 @@ EOF
 			fname="${fnameext%.*}"
 			if [ $fname != 'HPMHooking' ] && [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ]
 			then
-				ARGS="--load-plugin $fname $ARGS"
+				PLUGINS="--load-plugin $fname $PLUGINS"
 			fi
 		done
 		# Scripts
-		# 28-08-2015
-		ARGS="--load-script NPC/Restock.txt $ARGS"
-		ARGS="--load-script NPC/security.txt $ARGS"
-		# 29-06-2016
-		ARGS="--load-script NPC/RebirthSystem.txt $ARGS"
-		# Hercules
-		ARGS="$ARGS --load-script npc/dev/ci_test.txt"
-		echo "Running Hercules with command line: ./map-server --run-once $ARGS"
-		./map-server --run-once $ARGS 2>runlog.txt
-		export errcode=$?
-		export teststr=$(cat runlog.txt)
-		if [[ -n "${teststr}" ]]; then
-			echo "Sanitizer errors found."
-			cat runlog.txt
-			aborterror "Sanitize errors found."
-		else
-			echo "No sanitizer errors found."
-		fi
-		if [ ${errcode} -ne 0 ]; then
-			echo "server terminated with exit code ${errcode}"
-			aborterror "Test failed"
-		fi
+		SCRIPTS=""
+		for entry in "$script_dir"/*.txt
+		do
+			filewpath=$entry
+			fnameext=`basename $filewpath`
+			SCRIPTS="--load-script $fnameext $SCRIPTS"
+		done
+		echo "run all servers without HPM"
+		run_server ./login-server
+		run_server ./char-server
+		run_server ./map-server "$ARGS"
+		echo "run all servers with HPM"
+		run_server ./login-server "$PLUGINS"
+		run_server ./char-server "$PLUGINS"
+		run_server ./map-server "$ARGS $PLUGINS $SCRIPTS"
 		;;
-	getrepo)
+	getplugins)
 		echo "Cloning Hercules repository..."
-		# Clone Hercules Repository
+		# Nothing to clone right now, all relevant plugins are part of the repository.
 		git clone https://github.com/HerculesWS/Hercules.git tmp || aborterror "Unable to fetch Hercules repository"
 		echo "Moving tmp to root directory"
 		yes | cp -a tmp/* .
 		rm -rf tmp
-		#git reset --hard.
-		
 		;;
 	*)
 		usage
