@@ -69,7 +69,7 @@ const char *clif_process_chat_message_post(const char *retVal, struct map_sessio
 	strftime(prefix, 10, "[%H:%M] ", localtime(&t));
 	
 	strcat(prefix, out_buf);
-	safestrncpy((char *)retVal, prefix, sizeof(prefix));
+	safestrncpy((const char *)retVal, prefix, sizeof(prefix));
 	return retVal;
 }
 
