@@ -37,7 +37,7 @@ HPExport struct hplugin_info pinfo = {
 	HPM_VERSION,
 };
 
-void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, unsigned long color)
+void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, uint32 color)
 {
 	int fd;
 	unsigned short len = strlen(msg) + 1;
@@ -57,24 +57,24 @@ void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, unsi
 	WFIFOSET(fd, WFIFOW(fd,2));
 }
 
-BUILDIN(dispbottom2) // Format : dispbottom2("0xFF00FF","Message"{,"Player Name"});
+BUILDIN(dispbottom2) // Format : dispbottom2(0xFF00FF,"Message"{,"Player Name"});
 {
 	struct map_session_data *sd = script->rid2sd(st); // Player Data
 	const char *message;             // Message to Display
-	unsigned long color;             // Color to display
+	uint32 color;             // Color to display
 	message = script_getstr(st,3);
-	color = strtoul(script_getstr(st,2), NULL, 0);
+	color = script_getnum(st, 2);
 	if (script_hasdata(st,4)) {
 		const char* player;
 		struct map_session_data *tsd;
-		player = script_getstr(st,2);
+		player = script_getstr(st, 4);
 		tsd = map->nick2sd(player);
 		if (tsd != NULL)
-			clif_displaymessagecolor(tsd,message,color);
+			clif_displaymessagecolor(tsd, message, color);
 		return true;
 	}
 	if (sd != NULL)
-		clif_displaymessagecolor(sd,message,color);
+		clif_displaymessagecolor(sd, message, color);
 	return true;
 }
 

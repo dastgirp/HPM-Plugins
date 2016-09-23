@@ -46,9 +46,10 @@ HPExport struct hplugin_info pinfo =
 	HPM_VERSION,
 };
 
+char prefix_msg[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
+
 const char *clif_process_chat_message_post(const char *retVal, struct map_session_data *sd, const struct packet_chat_message *packet, char *out_buf, int out_buflen)
 {
-	char prefix[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
 	time_t t;
 	int textlen = 0;
 	
@@ -66,11 +67,10 @@ const char *clif_process_chat_message_post(const char *retVal, struct map_sessio
 	safestrncpy(out_buf, retVal, textlen+1); // [!] packet->message is not necessarily NUL terminated
 	
 	t = time(NULL);
-	strftime(prefix, 10, "[%H:%M] ", localtime(&t));
+	strftime(prefix_msg, 10, "[%H:%M] ", localtime(&t));
 	
-	strcat(prefix, out_buf);
-	
-	retVal = prefix;
+	strcat(prefix_msg, out_buf);
+	retVal = prefix_msg;
 	return retVal;
 }
 

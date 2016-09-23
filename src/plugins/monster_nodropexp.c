@@ -48,7 +48,7 @@ ACMD(monster_nde)
 	memset(monster, '\0', sizeof(monster));
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (!message || !*message) {
+	if (!*message) {
 		clif->message(fd, msg_fd(fd,80)); // Please specify a display name or monster name/id.
 		return false;
 	}

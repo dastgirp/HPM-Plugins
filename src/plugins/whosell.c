@@ -45,7 +45,7 @@ ACMD(whosell){
     struct item_data *item_data;
 	static char atcmd_output[CHAT_SIZE_MAX];
     if (!sd) return false;
-    if (!message || !*message) {
+    if (!*message) {
 	    clif->message(fd, "Use: @whosell <item_id> or @whosell <name>");
 	    return -1;
     }

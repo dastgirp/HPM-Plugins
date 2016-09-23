@@ -281,7 +281,9 @@ void clif_buylist_pre(struct map_session_data **sd_, struct npc_data **nd_) {
 #endif
 	
 	for (i = 0; i < shop_size; i++) {
+#if PACKETVER >= 20150226
 		int temp = 0;
+#endif
 		struct item_data* data = itemdb->search(shop[i].nameid);
 		WFIFOL(fd, offset+ 0+i*item_length) = shop[i].value;
 		WFIFOW(fd, offset+ 4+i*item_length) = 1;	// Amount(ToDo)
@@ -440,7 +442,7 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 
 void clif_parse_purchase(struct map_session_data* sd, int bl_id, const uint8* data, int n)
 {
-	int result;
+	int result = 0;
 	struct npc_data *nd = map->id2nd(bl_id);
 	struct npc_extra_data *nsd;
 
@@ -535,7 +537,7 @@ int npc_buysellsel_pre(struct map_session_data **sd_, int *id_, int *type_)
 
 	if (nd->subtype != SHOP && !(nd->subtype == SCRIPT && nd->u.scr.shop && nsd->items)) {
 		if (nd->subtype == SCRIPT )
-			ShowError("npc_buysellsel_pre: trader '%s'(%d:%d) has no shop list!\n", nd->exname, nsd->items, nd->subtype);
+			ShowError("npc_buysellsel_pre: trader '%s'(%d:%u) has no shop list!\n", nd->exname, nsd->items, nd->subtype);
 		else
 			ShowError("npc_buysellsel_pre: no such shop npc %d (%s)\n", id, nd->exname);
 

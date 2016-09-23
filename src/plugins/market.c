@@ -234,7 +234,7 @@ ACMD(market){
 		clif->message(fd, "You can't create a Market clone too near to an npc.");
 		return false;
 	}
-	if (!message || !*message) {
+	if (!*message) {
 		clif->message(fd, "Syntax: @market \"<Title>\" \"<Message>\" <Color>");
 		clif->message(fd, "The <Color> field is optional. Examples:-");
 		color_list(fd);
@@ -246,7 +246,8 @@ ACMD(market){
 //		return false;
 //	} no more f*cking sscanf
 	{ // say hello to the dirties string calculation ~ Hooray ~ !!
-		int i = 0, j = 0, l = strlen(message) +1;
+		int i = 0, j = 0;
+		size_t l = strlen(message) + 1;
 		char *temp = (char*)aMalloc(strlen(message) +1);
 		if (message[0] != '\"') {
 			clif->message(fd, "Remember the <Title> should start with a Quotation Mark -> \"");
