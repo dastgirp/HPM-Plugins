@@ -281,7 +281,9 @@ void clif_buylist_pre(struct map_session_data **sd_, struct npc_data **nd_) {
 #endif
 	
 	for (i = 0; i < shop_size; i++) {
+#if PACKETVER >= 20150226
 		int temp = 0;
+#endif
 		struct item_data* data = itemdb->search(shop[i].nameid);
 		WFIFOL(fd, offset+ 0+i*item_length) = shop[i].value;
 		WFIFOW(fd, offset+ 4+i*item_length) = 1;	// Amount(ToDo)
