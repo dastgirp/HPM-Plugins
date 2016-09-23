@@ -37,7 +37,7 @@ function usage {
 	echo "    $0 importdb <dbname> [dbuser] [dbpassword]"
 	echo "    $0 build [configure args]"
 	echo "    $0 test <dbname> [dbuser] [dbpassword]"
-	echo "    $0 getplugins"
+	echo "    $0 getrepo"
 	exit 1
 }
 
@@ -185,9 +185,9 @@ EOF
 		run_server ./char-server "$PLUGINS"
 		run_server ./map-server "$ARGS $PLUGINS $SCRIPTS"
 		;;
-	getplugins)
+	getrepo)
 		echo "Cloning Hercules repository..."
-		# Nothing to clone right now, all relevant plugins are part of the repository.
+		# Clone Hercules Repository
 		git clone https://github.com/HerculesWS/Hercules.git tmp || aborterror "Unable to fetch Hercules repository"
 		echo "Moving tmp to root directory"
 		yes | cp -a tmp/* .
