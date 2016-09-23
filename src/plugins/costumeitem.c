@@ -71,11 +71,6 @@ HPExport struct hplugin_info pinfo = {
 	HPM_VERSION,
 };
 
-static inline void status_cpy(struct status_data* a, const struct status_data* b)
-{
-	memcpy((void*)&a->max_hp, (const void*)&b->max_hp, sizeof(struct status_data)-(sizeof(a->hp)+sizeof(a->sp)));
-}
-
 // Costume System
 int reserved_costume_id = INT_MAX-100; // Very High Number
 int disable_job_check = 1;				// Disable Class Restriction for equipping Costume
