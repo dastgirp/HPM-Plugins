@@ -104,7 +104,7 @@ case "$MODE" in
 			filewpath=$entry
 			fnameext=`basename $filewpath`
 			fname="${fnameext%.*}"
-			if [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ]
+			if [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ] && [ $fname != 'script_mapquit' ]
 			then
 				make plugin.$fname -j3 || aborterror "Build Failed($fnameext)"
 			fi
@@ -163,7 +163,7 @@ EOF
 			filewpath=$entry
 			fnameext=`basename $filewpath`
 			fname="${fnameext%.*}"
-			if [ $fname != 'HPMHooking' ] && [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ]
+			if [ $fname != 'HPMHooking' ] && [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ] && [ $fname != 'script_mapquit' ]
 			then
 				PLUGINS="--load-plugin $fname $PLUGINS"
 			fi
