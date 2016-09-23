@@ -537,7 +537,7 @@ int npc_buysellsel_pre(struct map_session_data **sd_, int *id_, int *type_)
 
 	if (nd->subtype != SHOP && !(nd->subtype == SCRIPT && nd->u.scr.shop && nsd->items)) {
 		if (nd->subtype == SCRIPT )
-			ShowError("npc_buysellsel_pre: trader '%s'(%d:%d) has no shop list!\n", nd->exname, nsd->items, nd->subtype);
+			ShowError("npc_buysellsel_pre: trader '%s'(%d:%u) has no shop list!\n", nd->exname, nsd->items, nd->subtype);
 		else
 			ShowError("npc_buysellsel_pre: no such shop npc %d (%s)\n", id, nd->exname);
 

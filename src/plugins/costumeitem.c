@@ -448,9 +448,6 @@ ACMD(costumeitem)
 	struct item item_tmp;
 	struct item_data *item_data;
 
-	if (sd == NULL)
-		return false;
-
 	if (!*message || (
 		sscanf(message, "\"%99[^\"]\"", item_name) < 1 && 
 		sscanf(message, "%99s", item_name) < 1 )) {

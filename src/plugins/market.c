@@ -246,7 +246,8 @@ ACMD(market){
 //		return false;
 //	} no more f*cking sscanf
 	{ // say hello to the dirties string calculation ~ Hooray ~ !!
-		int i = 0, j = 0, l = strlen(message) +1;
+		int i = 0, j = 0;
+		size_t l = strlen(message) + 1;
 		char *temp = (char*)aMalloc(strlen(message) +1);
 		if (message[0] != '\"') {
 			clif->message(fd, "Remember the <Title> should start with a Quotation Mark -> \"");
