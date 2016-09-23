@@ -442,7 +442,7 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 
 void clif_parse_purchase(struct map_session_data* sd, int bl_id, const uint8* data, int n)
 {
-	int result;
+	int result = 0;
 	struct npc_data *nd = map->id2nd(bl_id);
 	struct npc_extra_data *nsd;
 
