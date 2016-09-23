@@ -456,7 +456,7 @@ ACMD(costumeitem)
 	if (sd == NULL)
 		return false;
 
-	if (!message || !*message || (
+	if (!*message || (
 		sscanf(message, "\"%99[^\"]\"", item_name) < 1 && 
 		sscanf(message, "%99s", item_name) < 1 )) {
  			clif->message(fd, "Please enter an item name or ID (usage: @costumeitem <item name/ID>).");

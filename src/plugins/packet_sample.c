@@ -50,7 +50,7 @@ bool map_sendtochar(void)
 
 ACMD(packet_test)
 {
-	if (!message || !*message) {
+	if (!*message) {
 		clif->message(fd, "Enter the Value");
 		return false;
 	}

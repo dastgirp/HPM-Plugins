@@ -234,7 +234,7 @@ ACMD(market){
 		clif->message(fd, "You can't create a Market clone too near to an npc.");
 		return false;
 	}
-	if (!message || !*message) {
+	if (!*message) {
 		clif->message(fd, "Syntax: @market \"<Title>\" \"<Message>\" <Color>");
 		clif->message(fd, "The <Color> field is optional. Examples:-");
 		color_list(fd);

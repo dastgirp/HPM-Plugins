@@ -193,21 +193,21 @@ bool itemmap(const int fd, struct map_session_data* sd, const char* command, con
 	memset(party_name, '\0', sizeof(party_name));
 	memset(guild_name, '\0', sizeof(guild_name));
 
-	if ((!message || !*message) ||
+	if ((!*message) ||
 		(get_type == 0 &&
 		(sscanf(message, "\"%99[^\"]\" %d", item_name, &amount) < 1) &&
 		(sscanf(message, "%99s %d", item_name, &amount) < 1))) {
 			clif->message(fd, "Please, enter an item name/id (usage: @itemmap <item name or ID> {amount}).");
 			return false;
 	}
-	if ((!message || !*message) ||
+	if ((!*message) ||
 		(get_type == 1 &&
 		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, party_name) < 2) &&
 		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, party_name) < 2))) {
 			clif->message(fd, "Please, enter an item name/id (usage: @itemmap_p <item id/name> <amount> <party name>).");
 			return false;
 	}
-	if ((!message || !*message) ||
+	if ((!*message) ||
 		(get_type == 2 &&
 		(sscanf(message, "\"%99[^\"]\" %d, %23[^\n]", item_name, &amount, guild_name) < 2) &&
 		(sscanf(message, "%99s %d %23[^\n]", item_name, &amount, guild_name) < 2))) {

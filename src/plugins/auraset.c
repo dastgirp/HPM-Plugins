@@ -120,7 +120,7 @@ ACMD(aura)
 	int i;
 	char output[OUTPUT_LENGTH];
 
-	if (!message || !*message || sscanf(message, "%d %d %d", &aura[0], &aura[1], &aura[2]) < 1){
+	if (!*message || sscanf(message, "%d %d %d", &aura[0], &aura[1], &aura[2]) < 1){
 		clif->message(fd, "Please, enter at least an option (usage: @aura <aura1> {<aura2> <aura3>}).");
 		return false;
 	}
