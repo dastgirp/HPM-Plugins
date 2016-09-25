@@ -285,6 +285,8 @@ int pc_equippoint_post(int retVal, struct map_session_data *sd, int n)
 
 bool isCostume(struct map_session_data *sd, int n) {
 	int char_id = 0;
+	if (sd == NULL || n < 0 || sd->status.inventory[n],nameid == 0)
+		return false;
 	if (reserved_costume_id &&
 		sd->status.inventory[n].card[0] == CARD0_CREATE &&
 		(char_id = MakeDWord(sd->status.inventory[n].card[2], sd->status.inventory[n].card[3])) == reserved_costume_id) {
@@ -364,15 +366,14 @@ int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
 	
 	//Not usable by upper class. [Inkfish]
 	while(1) {
-		if ( item->class_upper&ITEMUPPER_NORMAL && !(sd->class_&(JOBL_UPPER|JOBL_THIRD|JOBL_BABY)) ) break;
-		if ( item->class_upper&ITEMUPPER_UPPER  &&   sd->class_&(JOBL_UPPER|JOBL_THIRD)            ) break;
-		if ( item->class_upper&ITEMUPPER_BABY   &&   sd->class_&JOBL_BABY                          ) break;
-		if ( item->class_upper&ITEMUPPER_THIRD  &&   sd->class_&JOBL_THIRD                         ) break;
+		if (item->class_upper&ITEMUPPER_NORMAL && !(sd->class_&(JOBL_UPPER|JOBL_THIRD|JOBL_BABY))) break;
+		if (item->class_upper&ITEMUPPER_UPPER  &&   sd->class_&(JOBL_UPPER|JOBL_THIRD)           ) break;
+		if (item->class_upper&ITEMUPPER_BABY   &&   sd->class_&JOBL_BABY                         ) break;
+		if (item->class_upper&ITEMUPPER_THIRD  &&   sd->class_&JOBL_THIRD                        ) break;
 		if (isCostume(sd, n)) {
 			ret = 1;
 		}
 	}
-	
 	
 	if (battle->bc->unequip_restricted_equipment & 1) {
 		int i;
