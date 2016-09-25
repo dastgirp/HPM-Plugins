@@ -71,11 +71,6 @@ HPExport struct hplugin_info pinfo = {
 	HPM_VERSION,
 };
 
-static inline void status_cpy(struct status_data* a, const struct status_data* b)
-{
-	memcpy((void*)&a->max_hp, (const void*)&b->max_hp, sizeof(struct status_data)-(sizeof(a->hp)+sizeof(a->sp)));
-}
-
 // Costume System
 int reserved_costume_id = INT_MAX-100; // Very High Number
 int disable_job_check = 1;				// Disable Class Restriction for equipping Costume
@@ -453,10 +448,7 @@ ACMD(costumeitem)
 	struct item item_tmp;
 	struct item_data *item_data;
 
-	if (sd == NULL)
-		return false;
-
-	if (!message || !*message || (
+	if (!*message || (
 		sscanf(message, "\"%99[^\"]\"", item_name) < 1 && 
 		sscanf(message, "%99s", item_name) < 1 )) {
  			clif->message(fd, "Please enter an item name or ID (usage: @costumeitem <item name/ID>).");
@@ -599,4 +591,3 @@ HPExport void plugin_init (void) {
 HPExport void server_online (void) {
 	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
 }
-

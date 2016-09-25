@@ -55,7 +55,7 @@ ACMD(mapmoblist)
 	memset(mob_searched, 0, MAX_MOB_DB);
 	memset(mob_mvp, 0, MAX_MOB_DB);
 
-	if (message && *message) {
+	if (*message) {
 		// Player input map name, search mob list for that map
 		mapindex_ = mapindex->name2id(message);
 		if (!mapindex_) {

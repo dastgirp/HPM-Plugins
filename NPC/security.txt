@@ -2,7 +2,7 @@
 	By Dastgir/Hercules
 	Use Plugin too along with this script(Found in https://github.com/dastgir/HPM-Plugins)
 */
--	script	Security	-1,{
+-	script	Security	FAKE_NPC,{
 OnInit:
 	bindatcmd("security",strnpcinfo(0)+"::OnSecurity",0,99);
 	/* Config */

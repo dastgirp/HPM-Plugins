@@ -46,7 +46,7 @@ ACMD(whobuy)
 	nullpo_retr(-1, sd);
 	memset(item_name, '\0', sizeof(item_name));
 
-	if (!message || !*message || sscanf(message, "%99[^\n]", item_name) < 1) {
+	if (!*message || sscanf(message, "%99[^\n]", item_name) < 1) {
 		clif->message(fd, "Input item name or ID (use: @whobuy <name or ID>).");
 		return false;
 	}
