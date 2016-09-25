@@ -90,13 +90,6 @@ OnAtcommand:
 		query_sql "DELETE FROM `restock` WHERE `charid`="+getcharid(0)+" ";
 		dispbottom("All Restock Items Deleted.");
 		end;
-	} else if (!.@item_id){
-		dispbottom("Please Input Proper Item ID");
-		end;
-	}
-	if (getitemname(.@item_id) == "null") {
-		dispbottom "Proper Item ID Please";
-		end;
 	}
 	.@item_id = 0;
 	.@item_search$ = .@atcmd_parameters$[0];
@@ -113,6 +106,9 @@ OnAtcommand:
 	}
 	if (!.@item_id) {
 		dispbottom("No Item Selected.");
+	} else if (getitemname(.@item_id) == "null") {
+		dispbottom "Proper Item ID Please";
+		end;
 	}
 	if (!atoi(.@atcmd_parameters$[2]) || atoi(.@atcmd_parameters$[2]) > 2) {
 		dispbottom "Input Proper Type1 Please"; end;}
