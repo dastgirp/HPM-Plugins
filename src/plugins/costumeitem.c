@@ -355,25 +355,13 @@ int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
 		}
 	}
 	
-	// Not Equippable
-	if (!(1ULL<<(sd->class_&MAPID_BASEMASK)&item->class_base[(sd->class_&JOBL_2_1)?1:((sd->class_&JOBL_2_2)?2:0)])) {
-		if (isCostume(sd, n)) {
-			ret = 1;
-		}
-	}
-	
-	//Not usable by upper class. [Inkfish]
-	while(1) {
-		if ( item->class_upper&ITEMUPPER_NORMAL && !(sd->class_&(JOBL_UPPER|JOBL_THIRD|JOBL_BABY)) ) break;
-		if ( item->class_upper&ITEMUPPER_UPPER  &&   sd->class_&(JOBL_UPPER|JOBL_THIRD)            ) break;
-		if ( item->class_upper&ITEMUPPER_BABY   &&   sd->class_&JOBL_BABY                          ) break;
-		if ( item->class_upper&ITEMUPPER_THIRD  &&   sd->class_&JOBL_THIRD                         ) break;
-		if (isCostume(sd, n)) {
-			ret = 1;
-		}
+	// Costume, Restriction is Removed
+	if (isCostume(sd, n)) {
+		ret = 1;
 	}
 	
 	
+	// Disabled Items still count for costumes
 	if (battle->bc->unequip_restricted_equipment & 1) {
 		int i;
 		for (i = 0; i < map->list[sd->bl.m].zone->disabled_items_count; i++)
