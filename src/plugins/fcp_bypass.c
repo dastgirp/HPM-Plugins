@@ -52,6 +52,7 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 	struct mob_data *dstmd;
 	struct status_data *sstatus, *tstatus;
 	struct status_change *tsc;
+	bool hookS = false;
 
 	struct block_list *src = *src_, *bl = *bl_;
 	uint16 skill_id = *skill_id_, skill_lv = *skill_lv_;
@@ -89,7 +90,7 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 		case ST_FULLSTRIP:
 		case GC_WEAPONCRUSH:
 		case SC_STRIPACCESSARY:
-			hookStop();
+			hookS = true;
 			break;
 		default:
 			return 0;
@@ -181,6 +182,42 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 				clif->gospel_info(sd, 0x28);
 				break;
 			}
+			
+			// FCP
+			// By pass FCP when using single strip skills by 15%(requires Glistening Coat).
+			if (sd && tsc && sd->sc.data[SC_SOULLINK] && sd->sc.data[SC_SOULLINK]->val2 == SL_ROGUE && rand()%100 < 15 &&
+				(skill_id == RG_STRIPWEAPON && tsc->data[SC_PROTECTWEAPON] ||
+				skill_id == RG_STRIPSHIELD && tsc->data[SC_PROTECTSHIELD] ||
+				skill_id == RG_STRIPARMOR && tsc->data[SC_PROTECTARMOR] ||
+				skill_id == RG_STRIPHELM && tsc->data[SC_PROTECTHELM])
+				) {
+				int item_id = 7139; // Glistening Coat
+				int ii;
+				ARR_FIND(0, MAX_INVENTORY, ii, sd->status.inventory[ii].nameid == item_id);
+				if (ii < MAX_INVENTORY) {
+					pc->delitem(sd, ii, 1, 0, 0, LOG_TYPE_CONSUME);
+					switch (skill_id) {
+						case RG_STRIPWEAPON:
+							status_change_end(bl, SC_PROTECTWEAPON, INVALID_TIMER);
+							sc_start(NULL, bl, SC_NOEQUIPWEAPON, 100, skill_lv, d);
+							break;
+						case RG_STRIPSHIELD:
+							status_change_end(bl, SC_PROTECTSHIELD, INVALID_TIMER);
+							sc_start(NULL, bl, SC_NOEQUIPSHIELD, 100, skill_lv, d);
+							break;
+						case RG_STRIPARMOR:
+							status_change_end(bl, SC_PROTECTARMOR, INVALID_TIMER );
+							sc_start(NULL, bl, SC_NOEQUIPARMOR, 100, skill_lv, d);
+							break;
+						case RG_STRIPHELM:
+							status_change_end(bl, SC_PROTECTHELM, INVALID_TIMER );
+							sc_start(NULL, bl, SC_NOEQUIPHELM, 100, skill_lv, d);
+							break;
+					}
+					clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
+					break;
+				}
+			}
 
 			// Attempts to strip at rate i and duration d
 			if ((rate = skill->strip_equip(bl, location, rate, skill_lv, d)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH))
@@ -217,6 +254,8 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 	}
 
 	map->freeblock_unlock();
+	if (hookS)
+		hookStop();
 	return 0;
 }
 
