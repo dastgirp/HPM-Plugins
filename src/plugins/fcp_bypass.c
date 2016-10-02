@@ -186,10 +186,10 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 			// FCP
 			// By pass FCP when using single strip skills by 15%(requires Glistening Coat).
 			if (sd && tsc && sd->sc.data[SC_SOULLINK] && sd->sc.data[SC_SOULLINK]->val2 == SL_ROGUE && rand()%100 < 15 &&
-				(skill_id == RG_STRIPWEAPON && tsc->data[SC_PROTECTWEAPON] ||
-				skill_id == RG_STRIPSHIELD && tsc->data[SC_PROTECTSHIELD] ||
-				skill_id == RG_STRIPARMOR && tsc->data[SC_PROTECTARMOR] ||
-				skill_id == RG_STRIPHELM && tsc->data[SC_PROTECTHELM])
+				((skill_id == RG_STRIPWEAPON && tsc->data[SC_PROTECTWEAPON]) ||
+				(skill_id == RG_STRIPSHIELD && tsc->data[SC_PROTECTSHIELD]) ||
+				(skill_id == RG_STRIPARMOR && tsc->data[SC_PROTECTARMOR]) ||
+				(skill_id == RG_STRIPHELM && tsc->data[SC_PROTECTHELM]))
 				) {
 				int item_id = 7139; // Glistening Coat
 				int ii;
