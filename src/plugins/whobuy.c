@@ -43,7 +43,6 @@ ACMD(whobuy)
 	struct item_data *item_data;
 	char output[256];
 
-	nullpo_retr(-1, sd);
 	memset(item_name, '\0', sizeof(item_name));
 
 	if (!*message || sscanf(message, "%99[^\n]", item_name) < 1) {
