@@ -33,7 +33,8 @@ HPExport struct hplugin_info pinfo = {
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-ACMD(whosell){
+ACMD(whosell)
+{
     char item_name[100];
     int item_id = 0, j, count = 0, sat_num = 0;
     int s_type = 1; // search bitmask: 0-name,1-id, 2-card, 4-refine
@@ -44,7 +45,7 @@ ACMD(whosell){
     unsigned int MinPrice = battle->bc->vending_max_value, MaxPrice = 0;
     struct item_data *item_data;
 	static char atcmd_output[CHAT_SIZE_MAX];
-    if (!sd) return false;
+
     if (!*message) {
 	    clif->message(fd, "Use: @whosell <item_id> or @whosell <name>");
 	    return -1;
@@ -77,8 +78,7 @@ ACMD(whosell){
 		    return -1;
 	    }
 	    item_id = item_data->nameid;
-    }
-    else {
+    } else {
 	    clif->message(fd, "Use: @whosell <item_id> or @whosell <name>");
 	    return -1;
     }
@@ -174,9 +174,9 @@ ACMD(whosell){
 /* Server Startup */
 HPExport void plugin_init (void)
 {
-	addAtcommand("whosell",whosell);
+	addAtcommand("whosell", whosell);
 }
 
 HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }
