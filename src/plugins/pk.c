@@ -25,6 +25,7 @@
 
 #include "common/memmgr.h"
 
+#include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
