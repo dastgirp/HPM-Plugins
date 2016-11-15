@@ -5,7 +5,8 @@
 //===== Current Version: =====================================
 //= 1.0
 //===== Description: =========================================
-//= Adds color to dispbottom
+//= Sends dispbottom to all Clients. Requires player to be
+//= attached to script.
 //===== Changelog: ===========================================
 //= v1.0 - Initial Release [Dastgir]
 //===== Repo Link: ===========================================
