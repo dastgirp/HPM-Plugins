@@ -95,7 +95,7 @@ ACMD(afk)
 void afk_timeout_adjust(const char *key, const char *val)
 {
 	int value = config_switch(val);
-	if (strcmpi(key,"afk_timeout") == 0) {
+	if (strcmpi(key,"battle_configuration/afk_timeout") == 0) {
 		if (value < 0) {
 			ShowDebug("Received Invalid Setting for afk_timeout(%d), defaulting to 0\n", value);
 			return;
@@ -108,7 +108,7 @@ void afk_timeout_adjust(const char *key, const char *val)
 
 int afk_timeout_return(const char *key)
 {
-	if (strcmpi(key, "afk_timeout") == 0)
+	if (strcmpi(key, "battle_configuration/afk_timeout") == 0)
 		return afk_timeout;
 
 	return 0;
@@ -137,7 +137,7 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("afk_timeout",afk_timeout_adjust,afk_timeout_return, false);
+	addBattleConf("battle_configuration/afk_timeout",afk_timeout_adjust,afk_timeout_return, false);
 }
 
 HPExport void server_online (void) {

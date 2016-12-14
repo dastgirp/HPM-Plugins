@@ -160,31 +160,31 @@ int bc_ex_vending_info;
 int bc_item_zeny;
 int bc_item_cash;
 void ev_bc(const char *key, const char *val) {
-	if (strcmpi(key,"extended_vending") == 0) {
+	if (strcmpi(key,"battle_configuration/extended_vending") == 0) {
 		bc_extended_vending = config_switch(val);
 		if (bc_extended_vending > 1 || bc_extended_vending < 0){
 			ShowDebug("Wrong Value for extended_vending: %d\n",config_switch(val));
 			bc_extended_vending = 0;
 		}
-	} else if (strcmpi(key,"show_item_vending") == 0) {
+	} else if (strcmpi(key,"battle_configuration/show_item_vending") == 0) {
 		bc_show_item_vending = config_switch(val);
 		if (bc_show_item_vending > 1 || bc_show_item_vending < 0){
 			ShowDebug("Wrong Value for show_item_vending: %d\n",config_switch(val));
 			bc_extended_vending = 0;
 		}
-	} else if (strcmpi(key,"ex_vending_info") == 0) {
+	} else if (strcmpi(key,"battle_configuration/ex_vending_info") == 0) {
 		bc_ex_vending_info = config_switch(val);
 		if (bc_ex_vending_info>1 || bc_ex_vending_info<0){
 			ShowDebug("Wrong Value for ex_vending_info: %d\n",config_switch(val));
 			bc_extended_vending = 0;
 		}
-	} else if (strcmpi(key,"item_zeny") == 0) {
+	} else if (strcmpi(key,"battle_configuration/item_zeny") == 0) {
 		bc_item_zeny = config_switch(val);
 		if (bc_item_zeny != 0 && bc_item_zeny > MAX_ITEMDB ){
 			ShowDebug("Wrong Value for item_zeny: %d\n",config_switch(val));
 			bc_extended_vending = 0;
 		}
-	} else if (strcmpi(key,"item_cash") == 0) {
+	} else if (strcmpi(key,"battle_configuration/item_cash") == 0) {
 		bc_item_cash = config_switch(val);
 		if (bc_item_cash != 0 && bc_item_cash > MAX_ITEMDB ){
 			ShowDebug("Wrong Value for item_cash: %d\n",config_switch(val));
@@ -196,15 +196,15 @@ void ev_bc(const char *key, const char *val) {
 
 int ev_return_bc(const char *key)
 {
-	if (strcmpi(key,"extended_vending") == 0) {
+	if (strcmpi(key,"battle_configuration/extended_vending") == 0) {
 		return bc_extended_vending;
-	} else if (strcmpi(key,"show_item_vending") == 0) {
+	} else if (strcmpi(key,"battle_configuration/show_item_vending") == 0) {
 		return bc_show_item_vending;
-	} else if (strcmpi(key,"ex_vending_info") == 0) {
+	} else if (strcmpi(key,"battle_configuration/ex_vending_info") == 0) {
 		return bc_ex_vending_info;
-	} else if (strcmpi(key,"item_zeny") == 0) {
+	} else if (strcmpi(key,"battle_configuration/item_zeny") == 0) {
 		return bc_item_zeny;
-	} else if (strcmpi(key,"item_cash") == 0) {
+	} else if (strcmpi(key,"battle_configuration/item_cash") == 0) {
 		return bc_item_cash;
 	}
 	return 0;
@@ -773,11 +773,11 @@ HPExport void plugin_init (void){
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("extended_vending",ev_bc, ev_return_bc, false);
-	addBattleConf("show_item_vending",ev_bc, ev_return_bc, false);
-	addBattleConf("ex_vending_info",ev_bc, ev_return_bc, false);
-	addBattleConf("item_zeny",ev_bc, ev_return_bc, false);
-	addBattleConf("item_cash",ev_bc, ev_return_bc, false);
+	addBattleConf("battle_configuration/extended_vending",ev_bc, ev_return_bc, false);
+	addBattleConf("battle_configuration/show_item_vending",ev_bc, ev_return_bc, false);
+	addBattleConf("battle_configuration/ex_vending_info",ev_bc, ev_return_bc, false);
+	addBattleConf("battle_configuration/item_zeny",ev_bc, ev_return_bc, false);
+	addBattleConf("battle_configuration/item_cash",ev_bc, ev_return_bc, false);
 }
 
 HPExport void server_online (void) {

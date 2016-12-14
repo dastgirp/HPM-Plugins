@@ -149,7 +149,7 @@ void skill_attack_display_unknown_pre(int **attack_type, struct block_list **src
 
 void critical_color(const char *key, const char *val)
 {
-	if (strcmpi(key,"magic_critical_color") == 0){
+	if (strcmpi(key,"battle_configuration/magic_critical_color") == 0){
 		int value = config_switch(val);
 		if (value < 1 || value >2){
 			ShowDebug("Received Invalid Setting for magic_critical_color(%d), defaulting to %d\n",value,blue_red_critical);
@@ -162,7 +162,7 @@ void critical_color(const char *key, const char *val)
 }
 int critical_color_return(const char *key)
 {
-	if (strcmpi(key,"magic_critical_color") == 0)
+	if (strcmpi(key,"battle_configuration/magic_critical_color") == 0)
 		return blue_red_critical;
 	return 0;
 }
@@ -175,7 +175,7 @@ HPExport void plugin_init (void)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("magic_critical_color",critical_color, critical_color_return, false);
+	addBattleConf("battle_configuration/magic_critical_color",critical_color, critical_color_return, false);
 }
 
 HPExport void server_online (void)

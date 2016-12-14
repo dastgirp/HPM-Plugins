@@ -78,21 +78,21 @@ int disable_costume_defense = 1;		// Do Not give defense while equipping costume
 
 void battleConfCheck(const char *key, const char *val)
 {
-	if (strcmpi(key,"reserved_costume_id") == 0)
+	if (strcmpi(key,"battle_configuration/reserved_costume_id") == 0)
 		reserved_costume_id = atoi(val);
-	else if (strcmpi(key, "disable_costume_job_check") == 0)
+	else if (strcmpi(key, "battle_configuration/disable_costume_job_check") == 0)
 		disable_job_check = atoi(val);
-	else if (strcmpi(key, "disable_costume_defense") == 0)
+	else if (strcmpi(key, "battle_configuration/disable_costume_defense") == 0)
 		disable_costume_defense = atoi(val);
 }
 
 int battleConfReturn(const char *key)
 {
-	if (strcmpi(key,"reserved_costume_id") == 0)
+	if (strcmpi(key,"battle_configuration/reserved_costume_id") == 0)
 		return reserved_costume_id;
-	else if (strcmpi(key, "disable_costume_job_check") == 0)
+	else if (strcmpi(key, "battle_configuration/disable_costume_job_check") == 0)
 		return disable_job_check;
-	else if (strcmpi(key, "disable_costume_defense") == 0)
+	else if (strcmpi(key, "battle_configuration/disable_costume_defense") == 0)
 		return disable_costume_defense;
 	return 0;
 }
@@ -549,9 +549,9 @@ BUILDIN(costume)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("reserved_costume_id", battleConfCheck ,battleConfReturn, false);
-	addBattleConf("disable_costume_job_check", battleConfCheck ,battleConfReturn, false);
-	addBattleConf("disable_costume_defense", battleConfCheck ,battleConfReturn, false);
+	addBattleConf("battle_configuration/reserved_costume_id", battleConfCheck ,battleConfReturn, false);
+	addBattleConf("battle_configuration/disable_costume_job_check", battleConfCheck ,battleConfReturn, false);
+	addBattleConf("battle_configuration/disable_costume_defense", battleConfCheck ,battleConfReturn, false);
 	
 }
 

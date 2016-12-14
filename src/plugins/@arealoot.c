@@ -106,7 +106,7 @@ int pc_takeitem_pre(struct map_session_data **sd_, struct flooritem_data **fitem
 void arealoot_range_setting(const char *key, const char *val)
 {
 	int value = atoi(val);
-	if (strcmpi(key,"arealoot_range") == 0) {  //1 to 9 Range.
+	if (strcmpi(key,"battle_configuration/arealoot_range") == 0) {  //1 to 9 Range.
 		if (value < 1 || value > 10) {
 			ShowError("'arealoot_range' is set to %d,(Min:1,Max:10)", value);
 			return;
@@ -118,7 +118,7 @@ void arealoot_range_setting(const char *key, const char *val)
 
 int arealoot_range_return(const char *key)
 {
-	if (strcmpi(key, "arealoot_range") == 0)
+	if (strcmpi(key, "battle_configuration/arealoot_range") == 0)
 		return arealoot_range;
 
 	return 0;
@@ -135,5 +135,5 @@ HPExport void server_online (void) {
 }
 
 HPExport void server_preinit (void) {
-	addBattleConf("arealoot_range", arealoot_range_setting, arealoot_range_return, false);
+	addBattleConf("battle_configuration/arealoot_range", arealoot_range_setting, arealoot_range_return, false);
 }

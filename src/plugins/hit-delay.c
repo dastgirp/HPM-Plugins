@@ -152,33 +152,33 @@ int battle_config_validate(const char *val,const char *setting,int64 default_del
 
 void go_warp_delay_bc(const char *key, const char *val)
 {
-	if (strcmpi(key,"warp_delay") == 0) {
-		warp_delay = (int64)battle_config_validate(val,"warp_delay",warp_delay);
-	} else if (strcmpi(key,"warp_delay_others") == 0) {
-		warp_delay_others = (int64)battle_config_validate(val,"warp_delay_others",warp_delay_others);
-	} else if (strcmpi(key,"warp_delay_pet") == 0) {
-		warp_delay_pet = (int64)battle_config_validate(val,"warp_delay_pet",warp_delay_pet);
-	} else if (strcmpi(key,"warp_delay_homun") == 0) {
-		warp_delay_homun = (int64)battle_config_validate(val,"warp_delay_homun",warp_delay_homun);
-	} else if (strcmpi(key,"warp_delay_mob") == 0) {
-		warp_delay_mob = (int64)battle_config_validate(val,"warp_delay_mob",warp_delay_mob);
-	} else if (strcmpi(key,"warp_delay_merc") == 0) {
-		warp_delay_merc = (int64)battle_config_validate(val,"warp_delay_merc",warp_delay_merc);
+	if (strcmpi(key,"battle_configuration/warp_delay") == 0) {
+		warp_delay = (int64)battle_config_validate(val,"battle_configuration/warp_delay",warp_delay);
+	} else if (strcmpi(key,"battle_configuration/warp_delay_others") == 0) {
+		warp_delay_others = (int64)battle_config_validate(val,"battle_configuration/warp_delay_others",warp_delay_others);
+	} else if (strcmpi(key,"battle_configuration/warp_delay_pet") == 0) {
+		warp_delay_pet = (int64)battle_config_validate(val,"battle_configuration/warp_delay_pet",warp_delay_pet);
+	} else if (strcmpi(key,"battle_configuration/warp_delay_homun") == 0) {
+		warp_delay_homun = (int64)battle_config_validate(val,"battle_configuration/warp_delay_homun",warp_delay_homun);
+	} else if (strcmpi(key,"battle_configuration/warp_delay_mob") == 0) {
+		warp_delay_mob = (int64)battle_config_validate(val,"battle_configuration/warp_delay_mob",warp_delay_mob);
+	} else if (strcmpi(key,"battle_configuration/warp_delay_merc") == 0) {
+		warp_delay_merc = (int64)battle_config_validate(val,"battle_configuration/warp_delay_merc",warp_delay_merc);
 	}
 }
 int go_warp_delay_return_bc(const char *key)
 {
-	if (strcmpi(key,"warp_delay") == 0) {
+	if (strcmpi(key,"battle_configuration/warp_delay") == 0) {
 		return (int)warp_delay;
-	} else if (strcmpi(key,"warp_delay_others") == 0) {
+	} else if (strcmpi(key,"battle_configuration/warp_delay_others") == 0) {
 		return (int)warp_delay_others;
-	} else if (strcmpi(key,"warp_delay_pet") == 0) {
+	} else if (strcmpi(key,"battle_configuration/warp_delay_pet") == 0) {
 		return (int)warp_delay_pet;
-	} else if (strcmpi(key,"warp_delay_homun") == 0) {
+	} else if (strcmpi(key,"battle_configuration/warp_delay_homun") == 0) {
 		return (int)warp_delay_homun;
-	} else if (strcmpi(key,"warp_delay_mob") == 0) {
+	} else if (strcmpi(key,"battle_configuration/warp_delay_mob") == 0) {
 		return (int)warp_delay_mob;
-	} else if (strcmpi(key,"warp_delay_merc") == 0) {
+	} else if (strcmpi(key,"battle_configuration/warp_delay_merc") == 0) {
 		return (int)warp_delay_merc;
 	}
 	return 0;
@@ -186,32 +186,32 @@ int go_warp_delay_return_bc(const char *key)
 
 void go_warp_delay_setting(const char *val)
 {
-	warp_delay = (int64)battle_config_validate(val,"warp_delay",warp_delay);
+	warp_delay = (int64)battle_config_validate(val,"battle_configuration/warp_delay",warp_delay);
 }
 
 void go_warp_delay_others_setting(const char *val)
 {
-	warp_delay_others = (int64)battle_config_validate(val,"warp_delay_others",warp_delay_others);
+	warp_delay_others = (int64)battle_config_validate(val,"battle_configuration/warp_delay_others",warp_delay_others);
 }
 
 void go_warp_delay_pet_setting(const char *val)
 {
-	warp_delay_pet = (int64)battle_config_validate(val,"warp_delay_pet",warp_delay_pet);
+	warp_delay_pet = (int64)battle_config_validate(val,"battle_configuration/warp_delay_pet",warp_delay_pet);
 }
 
 void go_warp_delay_homun_setting(const char *val)
 {
-	warp_delay_homun = (int64)battle_config_validate(val,"warp_delay_homun",warp_delay_homun);
+	warp_delay_homun = (int64)battle_config_validate(val,"battle_configuration/warp_delay_homun",warp_delay_homun);
 }
 
 void go_warp_delay_mob_setting(const char *val)
 {
-	warp_delay_mob = (int64)battle_config_validate(val,"warp_delay_mob",warp_delay_mob);
+	warp_delay_mob = (int64)battle_config_validate(val,"battle_configuration/warp_delay_mob",warp_delay_mob);
 }
 
 void go_warp_delay_merc_setting(const char *val)
 {
-	warp_delay_merc = (int64)battle_config_validate(val,"warp_delay_merc",warp_delay_merc);
+	warp_delay_merc = (int64)battle_config_validate(val,"battle_configuration/warp_delay_merc",warp_delay_merc);
 }
 
 /* Server Startup */
@@ -223,12 +223,12 @@ HPExport void plugin_init (void)
 
 HPExport void server_preinit (void)
 {
-	addBattleConf("warp_delay",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("warp_delay_pet",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("warp_delay_homun",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("warp_delay_merc",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_pet",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_homun",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_merc",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc, false);
 }
 
 HPExport void server_online (void)
