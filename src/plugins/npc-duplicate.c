@@ -75,9 +75,9 @@ BUILDIN(duplicatenpc)
 	nd_source = npc->name2id(npc_name);
 
 	if(script_hasdata(st, 9))
-		tclass_ = (script_getnum(st, 9) < -1) ? -1 : script_getnum(st, 9);
+		.class = (script_getnum(st, 9) < -1) ? -1 : script_getnum(st, 9);
 	else
-		tclass_ = nd_source->class_;
+		.class = nd_source->class_;
 
 	if( nd_source == NULL)
 	{

@@ -316,10 +316,10 @@ int pc_isequip_post(int retVal, struct map_session_data *sd, int n)
 	
 	if (item->equip & EQP_AMMO) {
 		if ( (sd->state.active && !pc_iscarton(sd)) // check if sc data is already loaded.
-			&& (sd->status.class_ == JOB_GENETIC_T || sd->status.class_ == JOB_GENETIC) ) {
+			&& (sd->status.class == JOB_GENETIC_T || sd->status.class == JOB_GENETIC) ) {
 			return 0;
 		}
-		if (!pc_ismadogear(sd) && (sd->status.class_ == JOB_MECHANIC_T || sd->status.class_ == JOB_MECHANIC)) {
+		if (!pc_ismadogear(sd) && (sd->status.class == JOB_MECHANIC_T || sd->status.class == JOB_MECHANIC)) {
 			return 0;
 		}
 	}
