@@ -182,7 +182,7 @@ bool clif_spawn_post(bool retVal, struct block_list *bl)
 	vd = status->get_viewdata(bl);
 	if (retVal == false)
 		return retVal;
-	if (vd->class_ == INVISIBLE_CLASS)
+	if (vd->class == INVISIBLE_CLASS)
 		return true; // Doesn't need to be spawned, so everything is alright
 	
 	if (bl->type == BL_PC)
