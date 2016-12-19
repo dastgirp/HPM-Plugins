@@ -133,7 +133,7 @@ int mob_clone_spawn_market(struct map_session_data *sd, int16 m, int16 x, int16 
 	struct chat_data* cd;
 
 	ARR_FIND(MOB_CLONE_START, MOB_CLONE_END, class_, mob->db_data[class_] == NULL);
-	if .class >= MOB_CLONE_END)
+	if (class_ >= MOB_CLONE_END)
 		return 0;
 
 	db = mob->db_data[class_] = (struct mob_db*)aCalloc(1, sizeof(struct mob_db));
