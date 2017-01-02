@@ -37,7 +37,7 @@ static int count_mob(struct block_list *bl, va_list ap) // [FE]
 {
 	struct mob_data *md = (struct mob_data*)bl;
 	int id = va_arg(ap, int);
-	if (md->class == id)
+	if (md->class_ == id)
 		return 1;
 	return 0;
 }

@@ -21,25 +21,28 @@ OnInit:
 	end;
 
 OnAtcommandEnable:
-	if (restk){
-		dispbottom "Restock System Disabled";
+	if (restk == 1) {
+		dispbottom("Restock System Disabled");
 		restk = 0;
 		end;
 	}
-	dispbottom "Restock System Enabled";
+	dispbottom("Restock System Enabled");
 	restk = 1;
 	end;
 
 OnAtcommand:
 	if (restk == 1) {
-		dispbottom "Restock is Currently Enabled";
+		dispbottom("Restock is Currently Enabled");
 	}
-	if (!restk) {
-		dispbottom "Restock is Currently Disabled,use @restock to Enable";
+	if (restk == 0) {
+		dispbottom("Restock is Currently Disabled,use @restock to Enable");
 		end;
 	}
-	.@type = atoi(.@atcmd_parameters$[3]);
-	if (.@atcmd_numparameters < 4){
+	.@quantity = atoi(.@atcmd_parameters$[1]);
+	.@type = atoi(.@atcmd_parameters$[2]);
+	.@type2 = atoi(.@atcmd_parameters$[3]);
+	// itemid quantity type1 type2 isn't provided.
+	if (.@atcmd_numparameters < 4) {
 		dispbottom("Usage:");
 		dispbottom("@restock2 <itemid> <quantity> <type1> <type2>");
 		dispbottom("Type 1:");
@@ -56,7 +59,9 @@ OnAtcommand:
 		dispbottom("@restock2 x y z 5 For Removing All Items From Restock");
 		dispbottom("x,y,z Can be any number, e.g: @restock2 0 0 0 3 will give you help option,@restock2 x y z 5 will Empty your list");
 		end;
-	} else if (.@type == 3){
+	}
+	// Type2 => Help
+	if (.@type2 == 3) {
 		dispbottom("Help:");
 		dispbottom("If you want to restock 5 Orange Potion item from Storage, you can type");
 		dispbottom("@restock2 502 5 1 1");
@@ -67,31 +72,36 @@ OnAtcommand:
 		dispbottom("If You used restock from storage (@restock2 502 5 1 1) and then used same item from GStorage");
 		dispbottom("then the value will be overwritten and the item will be restocked from GStorage.");
 		end;
-	} else if (.@type == 4){
-		query_sql "SELECT `restockid`,`restkq`,`restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" ",.@id,.@qu,.@fr;
-		if (!.@id) {
+	}
+	// Type2 => List Restock Item
+	if (.@type2 == 4) {
+		// Get List of Restock Items
+		query_sql("SELECT `restockid`,`restkq`,`restkf` FROM `restock` WHERE `charid`="+ getcharid(0), .@id, .@qu, .@fr);
+		if (.@id == 0) {
 			dispbottom("No Item in Restock...");
 			end;
 		}
-		.@id2 = getarraysize(.@id);
-		if (.@id2>128) {
-			.@id2 = 128;
-		}
+		.@size = getarraysize(.@id);
 		dispbottom("------------------- List of Restock Items -------------------");
-		for (.@i = 0; .@i <= .@id2; .@i = .@i+1) {
-			if (getitemname(.@id[@i])!= "null") {
+		for (.@i = 0; .@i < .@size; ++.@i) {
+			// Show the List
+			if (getitemname(.@id[@i]) !=  "null") {
 				dispbottom("Restocking "+.@qu[.@i]+" "+getitemname(.@id[.@i])+" From "+(.@fr[.@i]==1?"Storage":"Guild Storage"));
 			}
 		}
 		dispbottom("-------------------     End of List       --------------------");
 		end;
 
-	} else if (.@type == 5) {
-		query_sql "DELETE FROM `restock` WHERE `charid`="+getcharid(0)+" ";
+	}
+	// Type2 => Clear Restock Items
+	else if (.@type2 == 5) {
+		query_sql("DELETE FROM `restock` WHERE `charid`="+getcharid(0));
 		dispbottom("All Restock Items Deleted.");
 		end;
 	}
+	// Initial ItemID = 0
 	.@item_id = 0;
+	// Search by Item Name(if string given)
 	.@item_search$ = .@atcmd_parameters$[0];
 	if (atoi(.@item_search$) > 0) {
 		.@item_id = atoi(.@item_search$);
@@ -104,45 +114,57 @@ OnAtcommand:
 		dispbottom("Item Selected: "+ getitemname(.@item_ids[0]) +", Id: "+ .@item_ids[0]);
 		.@item_id = .@item_ids[0];
 	}
+	// No Item ID Found
 	if (!.@item_id) {
 		dispbottom("No Item Selected.");
 	} else if (getitemname(.@item_id) == "null") {
-		dispbottom "Proper Item ID Please";
+		dispbottom("Proper Item ID Please");
 		end;
 	}
-	if (!atoi(.@atcmd_parameters$[2]) || atoi(.@atcmd_parameters$[2]) > 2) {
-		dispbottom "Input Proper Type1 Please"; end;}
-	if (atoi(.@atcmd_parameters$[3])==1){
-		if (atoi(.@atcmd_parameters$[1]) < 1){
-			dispbottom "Input Proper Quantity Please!";
+
+	if (.@type <= 0 || .@type > 2) {
+		dispbottom("Input Proper Type1 Please");
+		end;
+	}
+
+	// Add Item to Restock List
+	if (.@type2 == 1){
+		// Invalid Quantity
+		if (.@quantity < 1){
+			dispbottom("Input Proper Quantity Please!");
 			end;
 		}
-		query_sql "SELECT `restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+.@item_id+" ",.@rf;
+		// Check if existing entry exists
+		query_sql("SELECT `restkf` FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id, .@rf);
+		// Update the table if existing entry exists
 		if (.@rf) {
-			query_sql "UPDATE `restock` SET `restkq`="+atoi(.@atcmd_parameters$[1])+", `restkf`="+atoi(.@atcmd_parameters$[2])+" WHERE `charid`="+getcharid(0)+" AND `restockid`="+.@item_id+" ";
+			query_sql("UPDATE `restock` SET `restkq`="+ .@quantity +", `restkf`="+ .@type +" WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id);
 		} else {
-			query_sql "INSERT INTO `restock` VALUES("+getcharid(0)+","+.@item_id+","+atoi(.@atcmd_parameters$[1])+","+atoi(.@atcmd_parameters$[2])+")";
+			query_sql("INSERT INTO `restock` VALUES("+ getcharid(0) +","+ .@item_id +","+ .@quantity +","+ .@type +")");
 		}
-		if (!countitem(.@item_id)) {
+		// Check if Item Exists currently, if not then restock
+		if (countitem(.@item_id) < .@quantity) {
 			restkid = .@item_id;
 			callsub OnRestock;
 		}
-		dispbottom("Restocking "+atoi(.@atcmd_parameters$[1])+" "+getitemname(.@item_id)+" From "+((atoi(.@atcmd_parameters$[2])==1)?"Storage":"Guild Storage")+"!");
+		dispbottom("Restocking "+.@quantity+" "+getitemname(.@item_id)+" From "+((.@type==1)?"Storage":"Guild Storage")+"!");
 		end;
 	}
-	if (atoi(.@atcmd_parameters$[3])==2) {
-		query_sql "DELETE FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+.@item_id+" ";
-		dispbottom("Deleted "+.@item_id+" From Restocking!");
+	// Remove Item from Restock List
+	if (.@type2 == 2) {
+		query_sql("DELETE FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id);
+		dispbottom("Deleted "+ .@item_id +" From Restocking!");
 		end;
 	}
 	end;
 
 OnRestock:
-	query_sql "SELECT `restkq`,`restkf` FROM `restock` WHERE `charid`="+getcharid(0)+" AND `restockid`="+restkid+" ",.@qu,.@fr;
-	if (.@qu){
+	// Get Restock Amount
+	query_sql("SELECT `restkq`,`restkf` FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ restkid, .@qu, .@fr);
+	if (.@qu) {
+		// Restock Item
 		.@ru = restkid;
-		restock_item(.@ru,.@qu,.@fr);
-		restkid = 0;
+		restock_item(.@ru, .@qu, .@fr);
 	}
 	restkid = 0;
 	end;
