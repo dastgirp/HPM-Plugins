@@ -550,7 +550,7 @@ int npc_buysellsel_pre(struct map_session_data **sd_, int *id_, int *type_)
 		return 1;
 	}
 
-	if (nd->class < 0 && !sd->state.callshop) {// not called through a script and is not a visible NPC so an invalid call
+	if (nd->class_ < 0 && !sd->state.callshop) {// not called through a script and is not a visible NPC so an invalid call
 		return 1;
 	}
 
@@ -628,7 +628,7 @@ int npc_click_pre(struct map_session_data **sd_, struct npc_data **nd_)
 		return 1;
 
 	//Hidden/Disabled npc.
-	if (nd->class < 0 || nd->option&(OPTION_INVISIBLE|OPTION_HIDE))
+	if (nd->class_ < 0 || nd->option&(OPTION_INVISIBLE|OPTION_HIDE))
 		return 1;
 	
 	if (nd->u.scr.shop && nsd->items && nd->u.scr.trader) {
