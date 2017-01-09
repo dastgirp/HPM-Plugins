@@ -63,5 +63,8 @@ Initial:<br/>
 * movespeed<br/>
 * noinvitation (Friend)<br/>
 * fixedaspd<br/>
-
+<br/>
+09-01-2016<br/>
+* bAtkEnemyVit<br/>
+<br/>
 Support Topic: http://hercules.ws/board/topic/8202-plugin-collections/
