@@ -8,12 +8,12 @@
 Add Following Items to ClientSide:
 
 idnum2itemdisplaynametable.txt
-    30000#Zeny#
-    30001#Cash#
+	30000#Zeny#
+	30001#Cash#
 
 idnum2itemresnametable.txt
-    30000#±ÝÈ#
-    30001#¹Ì½º¸±È­#
+	30000#±ÝÈ#
+	30001#¹Ì½º¸±È­#
 */
 
 #include "common/hercules.h"
@@ -56,10 +56,10 @@ idnum2itemresnametable.txt
 
 HPExport struct hplugin_info pinfo =
 {
-    "Extended Vending System",	// Plugin name
-    SERVER_TYPE_MAP,// Which server types this plugin works with?
-    "1.0",			// Plugin version
-    HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"Extended Vending System",	// Plugin name
+	SERVER_TYPE_MAP,// Which server types this plugin works with?
+	"1.0",			// Plugin version
+	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
 #define VEND_COLOR 0x00FFFF // Cyan
@@ -70,13 +70,19 @@ struct s_ext_vend{
 struct s_ext_vend ext_vend[MAX_INVENTORY];
 
 struct player_data {
-    int vend_loot;
+	int vend_loot;
 	int vend_lvl;
 };
 
 struct autotrade_data {
 	int vend_loot;
 };
+
+int bc_extended_vending;
+int bc_show_item_vending;
+int bc_ex_vending_info;
+int bc_item_zeny;
+int bc_item_cash;
 
 //Clif Edits
 void clif_vend_message(struct map_session_data *sd, const char* msg, uint32 color);
@@ -105,34 +111,47 @@ int skill_vending_ev( struct map_session_data *sd, int nameid) {
 	struct item_data *item;
 	struct player_data *ssd;
 	char output[1024];
+	int i;
 	
 	nullpo_ret(sd);
 
 
-	if ( nameid <= 0) {
-		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0);
+	if (nameid <= 0) {
+		clif->skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0);
 		return 0;
 	}
 	
-	if ( nameid > MAX_ITEMDB ){
+	if (nameid > MAX_ITEMDB) {
 		return 0;
 	}
-    if ( !( ssd = getFromMSD(sd,0) ) ) {
-		CREATE( ssd, struct player_data, 1 );
+
+	if (nameid != bc_item_zeny && nameid != bc_item_cash) {
+		ARR_FIND(0, MAX_INVENTORY, i, ext_vend[i].itemid == nameid);
+		if (i == MAX_INVENTORY)
+			return 0;
+	}
+
+	if (named )
+	item = itemdb->exists(nameid);
+	if (item == NULL) {
+		return 0;
+	}
+
+	if (!( ssd = getFromMSD(sd,0))) {
+		CREATE(ssd, struct player_data, 1);
 		ssd->vend_loot = 0;
 		ssd->vend_lvl = 0;
-		addToMSD( sd, ssd, 0, true );
-    }
-	ssd->vend_loot = nameid;
-	item = itemdb->exists(nameid);
-	
-	sprintf(output,"You have selected: %s",item->jname);
-	clif_vend_message(sd,output,VEND_COLOR);
-
-	if ( !pc_can_give_items(sd) ){
-		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0);
+		addToMSD(sd, ssd, 0, true);
 	}
-	else {
+
+	ssd->vend_loot = nameid;
+	
+	sprintf(output,"You have selected: %s", item->jname);
+	clif_vend_message(sd, output, VEND_COLOR);
+
+	if (!pc_can_give_items(sd)){
+		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0);
+	} else {
 		sd->state.prevend = 1;
 		clif->openvendingreq(sd,2+ssd->vend_lvl);
 	}
@@ -154,11 +173,6 @@ void assert_report(const char *file, int line, const char *func, const char *tar
 	ShowError("--- end %s ----------------------------------------\n", title);
 }
 
-int bc_extended_vending;
-int bc_show_item_vending;
-int bc_ex_vending_info;
-int bc_item_zeny;
-int bc_item_cash;
 void ev_bc(const char *key, const char *val) {
 	if (strcmpi(key,"battle_configuration/extended_vending") == 0) {
 		bc_extended_vending = config_switch(val);
@@ -245,7 +259,7 @@ void clif_parse_OpenVending_pre(int *fd, struct map_session_data **sd_) {
 		ssd->vend_loot = 0;
 		ssd->vend_lvl = 0;
 		addToMSD( sd, ssd, 0, true );
-    }
+	}
 	item = itemdb->exists(ssd->vend_loot);
 
 	if ((bc_extended_vending == 1) && (bc_show_item_vending==1) && ssd->vend_loot){
@@ -374,7 +388,7 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 		ssd->vend_loot = 0;
 		ssd->vend_lvl = 0;
 		addToMSD( sd, ssd, 0, true );
-    }
+	}
 
 	//dstsd deleted
 	if (bl->prev == NULL)
@@ -393,7 +407,6 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 
 						int c = 0, i, d = 0;
 					
-
 						ssd->vend_lvl = (int)skill_lv;
 						if (bc_item_zeny)
 							d++;
@@ -449,7 +462,7 @@ void vending_list_pre(struct map_session_data **sd, unsigned int *id2) {
 	if (ssd) {
 		vend_loot = ssd->vend_loot;
 	}
-    
+	
 	if ( !pc_can_give_items(*sd) || !pc_can_give_items(vsd) ) { //check if both GMs are allowed to trade
 		// GM is not allowed to trade
 		if ((*sd)->lang_id >= atcommand->max_message_table)
@@ -486,8 +499,6 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	if (ssd)
 		vend_loot = ssd->vend_loot;
 	
-	if (vend_loot)
-		hookStop();
 	if ( vsd->vender_id != uid ) { // shop has changed
 		clif->buyvending(sd, 0, 0, 6);  // store information was incorrect
 		return;
@@ -511,7 +522,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	w = 0;  // weight counter
 	for( i = 0; i < count; i++ ) {
 		short amount = *(const uint16*)(data + 4*i + 0);
-		short idx    = *(const uint16*)(data + 4*i + 2);
+		short idx	= *(const uint16*)(data + 4*i + 2);
 		idx -= 2;
 
 		if ( amount <= 0 )
@@ -531,51 +542,61 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 		/**
 		 * Extended Vending system 
 		 **/
+		ShowDebug("i:%d, count:%d, amount:%d, z:%d, loot:%d\n", ii, count, amount, z, vend_loot);
+		ShowDebug("Configs: %d:%d:%d:%d:%d\n", bc_extended_vending, bc_item_zeny, bc_item_cash, bc_ex_vending_info, bc_show_item_vending);	
 		if ( bc_extended_vending == 1 ){
 			if ( vend_loot == bc_item_zeny || !vend_loot ) {
 				if ( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
 					//clif_buyvending(sd, idx, amount, 1); // you don't have enough zeny
+					hookStop();
 					return;
 				}
 				if ( z + (double)vsd->status.zeny > (double)MAX_ZENY && !battle->bc->vending_over_max ) {
 					clif->buyvending(sd, idx, vsd->vending[j].amount, 4); // too much zeny = overflow
+					hookStop();
 					return;
 		
 				}
 			} else if (vend_loot == bc_item_cash){
 				if ( z > sd->cashPoints || z < 0. || z > (double)MAX_ZENY ) {
 					clif->messagecolor_self(sd->fd,COLOR_WHITE,"You do not have enough CashPoint");
+					hookStop();
 					return;
 				}
 			} else {
 				int k, loot_count = 0, vsd_w = 0;
-				for (k = 0; k < MAX_INVENTORY; k++)
-					if (sd->status.inventory[k].nameid == vend_loot)
+				for (k = 0; k < MAX_INVENTORY; k++) {
+					if (sd->status.inventory[k].nameid == vend_loot) {
 						loot_count += sd->status.inventory[k].amount;
+					}
+				}
 						
 				if ( z > loot_count || z < 0) {
 					clif->messagecolor_self(sd->fd,COLOR_WHITE,"You do not have enough items");
+					hookStop();
 					return;
 				}
 				if ( pc->inventoryblank(vsd) <= 0 ) {
 					clif->messagecolor_self(sd->fd,COLOR_WHITE,"Seller has not enough space in your inventory");
+					hookStop();
 					return;
 				}
 				vsd_w += itemdb_weight(vend_loot) * (int)z;
 				if ( vsd_w + vsd->weight > vsd->max_weight ) {
 					clif->messagecolor_self(sd->fd,COLOR_WHITE,"Seller can not take all the item");
+					hookStop();
 					return;
 				} 
 			}
 		} else {
-			if ( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY )
-			{
+			if ( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
 				clif->buyvending(sd, idx, amount, 1); // you don't have enough zeny
+				hookStop();
 				return;
 			}
-			if ( z + (double)vsd->status.zeny > (double)MAX_ZENY && !battle->bc->vending_over_max )
-			{
+			if ( z + (double)vsd->status.zeny > (double)MAX_ZENY && !battle->bc->vending_over_max ) {
 				clif->buyvending(sd, idx, vsd->vending[j].amount, 4); // too much zeny = overflow
+				hookStop();
 				return;
 			}
 
@@ -583,6 +604,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 		w += itemdb_weight(vsd->status.cart[idx].nameid) * amount;
 		if ( w + sd->weight > sd->max_weight ) {
 			clif->buyvending(sd, idx, amount, 2); // you can not buy, because overweight
+			hookStop();
 			return;
 		}
 		
@@ -595,6 +617,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 		if ( vend[j].amount < amount ) {
 			// send more quantity is not a hack (an other player can have buy items just before)
 			clif->buyvending(sd, idx, vsd->vending[j].amount, 4); // not enough quantity
+			hookStop();
 			return;
 		}
 		
@@ -605,10 +628,13 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 				break;	//We'd add this item to the existing one (in buyers inventory)
 			case ADDITEM_NEW:
 				new_++;
-				if (new_ > blank)
+				if (new_ > blank) {
+					hookStop();
 					return; //Buyer has no space in his inventory
+				}
 				break;
 			case ADDITEM_OVERAMOUNT:
+				hookStop();
 				return; //too many items
 		}
 	}
@@ -649,7 +675,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 
 	for (i = 0; i < count; i++) {
 		short amount = *(const uint16*)(data + 4*i + 0);
-		short idx    = *(const uint16*)(data + 4*i + 2);
+		short idx	= *(const uint16*)(data + 4*i + 2);
 		const char *item_name = itemdb_jname(vsd->status.cart[idx].nameid);
 		double rev = 0.;
 		idx -= 2;
