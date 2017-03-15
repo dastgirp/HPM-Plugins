@@ -1,8 +1,17 @@
-/*
- Restock Plugin
- -- By Dastgir/Hercules
- Please Load NPC- Restock.txt too
-*/
+//===== Hercules Plugin ======================================
+//= Restock Plugin
+//===== By: ==================================================
+//= Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.1
+//===== Compatible With: ===================================== 
+//= Hercules
+//===== Description: =========================================
+//= Enables Restock of Items.
+//===== Additional Information: ==============================
+//= Please Load NPC- Restock.txt too.
+//============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -34,71 +43,85 @@
 #include "common/HPMDataCheck.h" /* should always be the last file included! (if you don't make it last, it'll intentionally break compile time) */
 
 HPExport struct hplugin_info pinfo = {
-	"Restock System",// Plugin name
-	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"Restock System",
+	SERVER_TYPE_MAP,
+	"1.1",
+	HPM_VERSION,
 };
 
 int restock_misc_itemid;
 
-int pc_restock_misc_pre(struct map_session_data **sd, int *n, int *amount, int *type, short *reason, e_log_pick_type* log_type){
+int pc_restock_misc_pre(struct map_session_data **sd, int *n, int *amount, int *type, short *reason, e_log_pick_type* log_type)
+{
 	int index = *n;
 	if (*sd == NULL)
 		return 1;
-	restock_misc_itemid = 0;
-	if ((*sd)->status.inventory[index].nameid > 0){
-		restock_misc_itemid = (*sd)->status.inventory[index].nameid;
+	if (pc_readglobalreg(*sd, script->add_str("restk")) == 1) {
+		restock_misc_itemid = 0;
+		if ((*sd)->status.inventory[index].nameid > 0){
+			restock_misc_itemid = (*sd)->status.inventory[index].nameid;
+		}
 	}
 	return 0;
 }
-int pc_restock_misc_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type){
+
+int pc_restock_misc_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type)
+{
 	if (retVal == 1)
 		return retVal;
-	if (restock_misc_itemid && pc->search_inventory(sd, restock_misc_itemid) == -1){
+
+	if (pc_readglobalreg(sd, script->add_str("restk")) == 1 && restock_misc_itemid && pc->search_inventory(sd, restock_misc_itemid) == -1){
 		pc_setglobalreg(sd,script->add_str("restkid"), restock_misc_itemid );
 		npc->event(sd, "Restock::OnRestock", 0);
+		restock_misc_itemid = 0;
 	}
 	return retVal;
 }
-BUILDIN(restock_item){
+
+BUILDIN(restock_item)
+{
 	int rid, rqu, fr;
 	int i, j, flag;
 	struct map_session_data *sd;
 	struct item item_tmp;
+	bool pushed_one = false;
 	rid = script_getnum(st, 2);
 	rqu = script_getnum(st, 3);
 	fr = script_getnum(st, 4);
 	sd = script->rid2sd(st);
 
-	if (sd == NULL)
-		return 0;
-	else if (fr == 2){
+	if (sd == NULL) {
+		script_pushint(st, 0);
+		return false;
+	} else if (fr == 2) {
 		struct guild *g;
 		struct guild_storage *gstorage2;
 		g = guild->search(sd->status.guild_id);
 		if (g == NULL) {
 			clif->message(sd->fd, msg_txt(43));
+			script_pushint(st, 0);
 			return true;
 		}
 		gstorage2 = gstorage->ensure(sd->status.guild_id);
 		if (gstorage == NULL) {// Doesn't have opened @gstorage yet, so we skip the deletion since *shouldn't* have any item there.
+			script_pushint(st, 0);
 			return true;
 		}
 		j = gstorage2->storage_amount;
 		gstorage2->lock = 1; 
 		for (i = 0; i < j; ++i) {
-			if (gstorage2->items[i].nameid == rid && gstorage2->items[i].amount >= rqu){
+			if (gstorage2->items[i].nameid == rid && gstorage2->items[i].amount >= rqu) {
 				memset(&item_tmp, 0, sizeof(item_tmp));
 				item_tmp.nameid = gstorage2->items[i].nameid;
 				item_tmp.identify = 1;
 				gstorage->delitem(sd, gstorage2, i, rqu);
-				if ((flag = pc->additem(sd,&item_tmp,rqu,LOG_TYPE_STORAGE))){
+				if ((flag = pc->additem(sd,&item_tmp,rqu,LOG_TYPE_STORAGE))) {
 					clif->additem(sd, 0, 0, flag);
-					pc_setglobalreg(sd,script->add_str("restkid1"), gstorage2->items[i].nameid );
-					pc_setglobalreg(sd,script->add_str("restkid2"), rqu );
+					pc_setglobalreg(sd,script->add_str("restkid1"), gstorage2->items[i].nameid);
+					pc_setglobalreg(sd,script->add_str("restkid2"), rqu);
 					gstorage->close(sd);
 					gstorage2->lock = 0;
+					pushed_one = true;
 					script_pushint(st, 1);
 					break;
 				}
@@ -106,31 +129,31 @@ BUILDIN(restock_item){
 		}
 		gstorage->close(sd);
 		gstorage2->lock = 0;
-	}
-	else if (fr == 1){
+	} else if (fr == 1) {
 		struct storage_data* stor = &sd->status.storage;
-		if (stor == NULL){
+		if (stor == NULL) {
+			script_pushint(st, 0);
 			return true;
 		}
 		j = stor->storage_amount;
-		if (sd->state.storage_flag){
-			
+		if (sd->state.storage_flag) {
 			sd->state.storage_flag = 0;
 			storage->close(sd);
 		}
 		sd->state.storage_flag = 1;
 		for (i = 0; i < j; ++i) {
-			if (stor->items[i].nameid == rid && stor->items[i].amount >= rqu){
+			if (stor->items[i].nameid == rid && stor->items[i].amount >= rqu) {
 				memset(&item_tmp, 0, sizeof(item_tmp));
 				item_tmp.nameid = stor->items[i].nameid;
 				item_tmp.identify = 1;
 				storage->delitem(sd, i, rqu);
-				if ((flag = pc->additem(sd,&item_tmp,rqu,LOG_TYPE_STORAGE))){
+				if ((flag = pc->additem(sd,&item_tmp,rqu,LOG_TYPE_STORAGE))) {
 					clif->additem(sd, 0, 0, flag);
-					pc_setglobalreg(sd,script->add_str("restkid1"), stor->items[i].nameid );
-					pc_setglobalreg(sd,script->add_str("restkid2"), rqu );
+					pc_setglobalreg(sd,script->add_str("restkid1"), stor->items[i].nameid);
+					pc_setglobalreg(sd,script->add_str("restkid2"), rqu);
 					sd->state.storage_flag = 0;
 					storage->close(sd);
+					pushed_one = true;
 					script_pushint(st, 1);
 					break;
 				}
@@ -138,10 +161,12 @@ BUILDIN(restock_item){
 		}
 		sd->state.storage_flag = 0;
 		storage->close(sd);
-
 	}
-	script_pushint(st,0);
-	
+
+	if (!pushed_one) {
+		script_pushint(st, 0);
+	}
+
 	return true;
 }
 
