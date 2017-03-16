@@ -131,7 +131,6 @@ int skill_vending_ev( struct map_session_data *sd, int nameid) {
 			return 0;
 	}
 
-	if (named )
 	item = itemdb->exists(nameid);
 	if (item == NULL) {
 		return 0;
@@ -542,8 +541,6 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 		/**
 		 * Extended Vending system 
 		 **/
-		ShowDebug("i:%d, count:%d, amount:%d, z:%d, loot:%d\n", ii, count, amount, z, vend_loot);
-		ShowDebug("Configs: %d:%d:%d:%d:%d\n", bc_extended_vending, bc_item_zeny, bc_item_cash, bc_ex_vending_info, bc_show_item_vending);	
 		if ( bc_extended_vending == 1 ){
 			if ( vend_loot == bc_item_zeny || !vend_loot ) {
 				if ( z > (double)sd->status.zeny || z < 0. || z > (double)MAX_ZENY ) {
