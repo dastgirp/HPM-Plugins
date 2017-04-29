@@ -1,11 +1,19 @@
-/*
-=============================================
-@whosell plugin
-Converted by: Dastgir
-Original Made by: Ossi
-================================================
-v 1.0 Initial Release
-*/
+//===== Hercules Plugin ======================================
+//= @whosell
+//===== By: ==================================================
+//= Ossi
+//= Edited by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.6
+//===== Description: =========================================
+//= Shows the player who is currently selling item(vend)
+//===== Changelog: ===========================================
+//= v1.6 - Initial Conversion
+//===== Additional Comments: =================================
+//= @whobuy ItemName
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 
 #include "common/hercules.h"
 

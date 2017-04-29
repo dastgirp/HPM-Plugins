@@ -1,7 +1,19 @@
-/*
-	By Shikazu
-	Edited by Dastgir/Hercules
-*/
+//===== Hercules Plugin ======================================
+//= @mapmoblist
+//===== By: ==================================================
+//= Shikazu
+//= Edited by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Shows All Monsters/MvP's in the map mentioned.
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//===== Additional Comments: =================================
+//= 
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 
 #include "common/hercules.h"
 
@@ -42,6 +54,9 @@ static int count_mob(struct block_list *bl, va_list ap) // [FE]
 	return 0;
 }
 
+/**
+ * @mapmoblist <MapName>
+ */
 ACMD(mapmoblist)
 {
 	char temp[100];

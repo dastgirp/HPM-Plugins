@@ -1,10 +1,18 @@
-/*
-=============================================
-@whobuy plugin
-Author: Dastgir/Hercules
-=============================================
-v 1.0 Initial Release
-*/
+//===== Hercules Plugin ======================================
+//= @whobuy
+//===== By: ==================================================
+//= by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Shows the player who is currently buying item(buyingstore)
+//===== Changelog: ===========================================
+//= v1.0 - Initial Release
+//===== Additional Comments: =================================
+//= @whobuy ItemName
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 
 #include "common/hercules.h"
 
@@ -26,10 +34,10 @@ v 1.0 Initial Release
 
 
 HPExport struct hplugin_info pinfo = {
-	"whobuy",		// Plugin name
-	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.0",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"@whobuy",
+	SERVER_TYPE_MAP,
+	"1.0",
+	HPM_VERSION,
 };
 
 ACMD(whobuy)

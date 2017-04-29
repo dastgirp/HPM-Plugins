@@ -1,3 +1,19 @@
+//===== Hercules Plugin ======================================
+//= Map-Char Packet Transfer
+//===== By: ==================================================
+//= by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Demonstrate the packet transfer from Map-Char Server
+//===== Changelog: ===========================================
+//= v1.0 - Initial Release
+//===== Additional Comments: =================================
+//= 
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -26,10 +42,10 @@
 
 
 HPExport struct hplugin_info pinfo = {
-	"Plugin",		// Plugin name
-	SERVER_TYPE_MAP|SERVER_TYPE_CHAR,// Which server types this plugin works with?
-	"1.0",			// Plugin version
-	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
+	"Packet Transfer",
+	SERVER_TYPE_MAP|SERVER_TYPE_CHAR,
+	"1.0",
+	HPM_VERSION,
 };
 
 int common_value = 0;

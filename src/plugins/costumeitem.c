@@ -5,7 +5,7 @@
 //= Mhalicot
 //= Mr. [Hercules/Ind]
 //===== Current Version: =====================================
-//= 3.6
+//= 3.8
 //===== Description: =========================================
 //= Converts an ordinary equipable to Costume Item
 //===== Changelog: ===========================================

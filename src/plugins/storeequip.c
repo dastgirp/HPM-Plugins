@@ -1,10 +1,20 @@
-/*
-=============================================
-@storeequip Plugin
-================================================
-v 1.0 Initial Release
-Stores all item except equipment
-*/
+//===== Hercules Plugin ======================================
+//= Store Equipments
+//===== By: ==================================================
+//= by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Stores All Equipments
+//===== Changelog: ===========================================
+//= v1.0 - Initial Release
+//===== Additional Comments: =================================
+//= AtCommand: @storeequip
+//= ScriptCommand: storeequip();
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -21,10 +31,10 @@ Stores all item except equipment
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
-	"@storeequip",			// Plugin name
-	SERVER_TYPE_MAP,	// Which server types this plugin works with?
-	"1.0",				// Plugin version
-	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
+	"Store Equipments(storeequip)",
+	SERVER_TYPE_MAP,
+	"1.0",
+	HPM_VERSION,
 };
 
 bool store_all_equip(struct map_session_data *sd) {
@@ -52,8 +62,9 @@ bool store_all_equip(struct map_session_data *sd) {
 	}
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->status.inventory[i].amount) {
-			if(sd->status.inventory[i].equip)
+			if (sd->status.inventory[i].equip) {
 				storage->add(sd,  i, sd->status.inventory[i].amount);
+			}
 		}
 	}
 	storage->close(sd);
@@ -64,8 +75,7 @@ bool store_all_equip(struct map_session_data *sd) {
  * @storeequip
  * Put everything equipped into storage.
  *------------------------------------------*/
-ACMD(storeequip) {
-	
+ACMD(storeequip) {	
 	if (store_all_equip(sd) == false)
 		return false;
 

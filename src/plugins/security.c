@@ -1,7 +1,18 @@
-/*
-	By Dastgir/Hercules
-	Use NPC too along with this plugin(Found in https://github.com/dastgir/HPM-Plugins)
-*/
+//===== Hercules Plugin ======================================
+//= Security
+//===== By: ==================================================
+//= by Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= Prohibits actions depending upon security level.
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//===== Additional Comments: =================================
+//= Use NPC too along with this plugin
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
 
 #include "common/hercules.h"
 
