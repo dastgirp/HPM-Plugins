@@ -89,6 +89,7 @@ HPExport void plugin_init(void)
 	addHookPre(map, flags_init, map_flags_init_pre);
 }
 
-HPExport void server_online(void) {
-	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

@@ -67,10 +67,12 @@ ACMD(storeit)
 
 
 /* run when server starts */
-HPExport void plugin_init (void) {
-    addAtcommand("storeit",storeit);
+HPExport void plugin_init(void)
+{
+    addAtcommand("storeit", storeit);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

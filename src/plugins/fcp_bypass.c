@@ -259,12 +259,12 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 	return 0;
 }
 
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	addHookPre(skill, castend_nodamage_id, skill_castend_nodamage_id_pre);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

@@ -113,7 +113,7 @@ int party_send_message_pre(struct map_session_data **sd, const char **mes)
 	return 1;
 }
 
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 #ifndef PLAYER_MESSAGE_TIMESTAMP
 	addHookPre(party, send_message, party_send_message_pre);
@@ -123,7 +123,7 @@ HPExport void plugin_init (void)
 #endif
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

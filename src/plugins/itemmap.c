@@ -279,15 +279,16 @@ ACMD(itemmap_g) {
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	addAtcommand("itemmap", itemmap);	// All
 	addAtcommand("itemmap_p", itemmap_p);	// Party
 	addAtcommand("itemmap_g", itemmap_g);	// Guild
 
-	addScriptCommand("getitem_map","iis??",getitem_map);
+	addScriptCommand("getitem_map", "iis??", getitem_map);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

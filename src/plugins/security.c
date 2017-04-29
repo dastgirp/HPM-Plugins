@@ -216,7 +216,7 @@ int guild_leave_permission(struct map_session_data **sd, int *guild_id, int *acc
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	addHookPre(pc, dropitem, pc_cant_drop);
 	addHookPre(trade, request, cant_trade);
@@ -232,6 +232,7 @@ HPExport void plugin_init (void)
 	addHookPre(guild, leave, guild_leave_permission);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

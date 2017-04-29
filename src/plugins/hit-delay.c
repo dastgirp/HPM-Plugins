@@ -215,13 +215,13 @@ void go_warp_delay_merc_setting(const char *val)
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	addHookPre(pc, setpos, pc_setpos_delay);
 	addHookPre(pc, damage, pc_damage_received);
 }
 
-HPExport void server_preinit (void)
+HPExport void server_preinit(void)
 {
 	addBattleConf("battle_configuration/warp_delay",go_warp_delay_bc, go_warp_delay_return_bc, false);
 	addBattleConf("battle_configuration/warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc, false);
@@ -231,7 +231,7 @@ HPExport void server_preinit (void)
 	addBattleConf("battle_configuration/warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc, false);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

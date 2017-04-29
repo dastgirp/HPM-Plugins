@@ -309,7 +309,8 @@ struct Damage battle_calc_weapon_attack_post(struct Damage wd, struct block_list
 	return wd;
 }
 
-HPExport void plugin_init(void) {
+HPExport void plugin_init(void)
+{
     bAtkEnemyVit = map->get_new_bonus_id();
     script->set_constant("bAtkEnemyVit", bAtkEnemyVit, false, false);
 
@@ -319,6 +320,8 @@ HPExport void plugin_init(void) {
     addHookPost(battle, calc_weapon_attack, battle_calc_weapon_attack_post);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
+	
 }

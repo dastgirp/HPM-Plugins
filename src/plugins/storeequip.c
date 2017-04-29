@@ -84,11 +84,13 @@ BUILDIN(storeequip) {
 
 
 /* run when server starts */
-HPExport void plugin_init (void) {
-	addAtcommand("storeequip",storeequip);
-	addScriptCommand("storeequip","",storeequip);
+HPExport void plugin_init(void)
+{
+	addAtcommand("storeequip", storeequip);
+	addScriptCommand("storeequip", "", storeequip);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

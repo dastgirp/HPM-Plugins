@@ -125,15 +125,18 @@ int arealoot_range_return(const char *key)
 }
 
 /* run when server starts */
-HPExport void plugin_init (void) {
-    addAtcommand("arealoot",arealoot);
+HPExport void plugin_init(void)
+{
+    addAtcommand("arealoot", arealoot);
 	addHookPre(pc, takeitem, pc_takeitem_pre);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }
 
-HPExport void server_preinit (void) {
+HPExport void server_preinit(void)
+{
 	addBattleConf("battle_configuration/arealoot_range", arealoot_range_setting, arealoot_range_return, false);
 }

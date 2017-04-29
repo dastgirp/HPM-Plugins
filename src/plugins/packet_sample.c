@@ -75,7 +75,7 @@ HPExport void plugin_init(void)
 {
 	switch(SERVER_TYPE){
 		case SERVER_TYPE_MAP:
-			addAtcommand("packet_test",packet_test);
+			addAtcommand("packet_test", packet_test);
 			break;
 		case SERVER_TYPE_CHAR:
 			addPacket(0x2b40,6,char_receive_packet,hpParse_FromMap);			
@@ -83,6 +83,7 @@ HPExport void plugin_init(void)
 	}
 }
 
-HPExport void server_online(void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

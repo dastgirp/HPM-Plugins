@@ -139,13 +139,14 @@ int mob_dead_nde(struct mob_data **md, struct block_list **src, int *type) {
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
-	addAtcommand("monster_nde",monster_nde);
+	addAtcommand("monster_nde", monster_nde);
 	
 	addHookPre(mob, dead, mob_dead_nde);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

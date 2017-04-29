@@ -78,12 +78,12 @@ BUILDIN(dispbottom2) // Format : dispbottom2(0xFF00FF,"Message"{,"Player Name"})
 	return true;
 }
 
-HPExport void plugin_init (void) 
+HPExport void plugin_init(void)
 {
-	addScriptCommand("dispbottom2","ss?",dispbottom2);
+	addScriptCommand("dispbottom2", "ss?", dispbottom2);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

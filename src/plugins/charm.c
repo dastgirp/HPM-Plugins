@@ -203,7 +203,8 @@ int pc_delitem_post(int retVal, struct map_session_data *sd, int n, int amount, 
 	return retVal;
 }
 
-HPExport void plugin_init (void) {
+HPExport void plugin_init(void)
+{
 	addHookPre(itemdb, readdb_additional_fields, itemdb_readdb_additional_fields_pre);
 	addHookPre(itemdb, isstackable, itemdb_isstackable_pre);
 	addHookPre(itemdb, isstackable2, itemdb_isstackable2_pre);
@@ -213,6 +214,7 @@ HPExport void plugin_init (void) {
 	addHookPost(pc, delitem, pc_delitem_post);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

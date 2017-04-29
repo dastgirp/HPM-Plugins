@@ -481,7 +481,8 @@ int skillnotok_pre(uint16 *skill_id, struct map_session_data **sd) {
 	return 0;
 }
 
-HPExport void plugin_init (void) {
+HPExport void plugin_init(void)
+{
 	addAtcommand("market", market);
 	addAtcommand("marketkill", marketkill);
 
@@ -498,6 +499,7 @@ HPExport void plugin_init (void) {
 	addHookPre(script, buildin_killmonsterall_sub, killmonster_sub_pre);
 	addHookPre(skill, not_ok, skillnotok_pre);
 }
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

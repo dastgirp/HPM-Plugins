@@ -781,7 +781,8 @@ void pc_autotrade_populate_pre(struct map_session_data **sd) {
 	return;
 }
 
-HPExport void plugin_init (void){
+HPExport void plugin_init(void)
+{
 	
 	addHookPre(clif, pSelectArrow, clif_parse_SelectArrow_pre);
 	addHookPre(clif, pOpenVending, clif_parse_OpenVending_pre);
@@ -796,7 +797,8 @@ HPExport void plugin_init (void){
 	}
 }
 
-HPExport void server_preinit (void) {
+HPExport void server_preinit(void)
+{
 	addBattleConf("battle_configuration/extended_vending",ev_bc, ev_return_bc, false);
 	addBattleConf("battle_configuration/show_item_vending",ev_bc, ev_return_bc, false);
 	addBattleConf("battle_configuration/ex_vending_info",ev_bc, ev_return_bc, false);
@@ -804,6 +806,7 @@ HPExport void server_preinit (void) {
 	addBattleConf("battle_configuration/item_cash",ev_bc, ev_return_bc, false);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

@@ -131,15 +131,18 @@ void npc_parse_unknown_mapflag_pre(const char **name, const char **w3, const cha
 	return;
 }
 
-HPExport void plugin_init (void){
+HPExport void plugin_init(void)
+{
 	addAtcommand("afk", afk);
 	addHookPre(npc, parse_unknown_mapflag, npc_parse_unknown_mapflag_pre);
 }
 
-HPExport void server_preinit (void) {
+HPExport void server_preinit(void)
+{
 	addBattleConf("battle_configuration/afk_timeout",afk_timeout_adjust,afk_timeout_return, false);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

@@ -93,12 +93,14 @@ void map_flags_init_pre(void)
 	return;
 }
 
-HPExport void plugin_init (void) {
+HPExport void plugin_init(void)
+{
 	addHookPre(npc, parse_unknown_mapflag, npc_parse_unknown_mapflag_pre);
 	addHookPost(status, calc_speed, status_calc_speed_post);
 	addHookPre(map, flags_init, map_flags_init_pre);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

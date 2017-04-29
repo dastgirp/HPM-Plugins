@@ -51,12 +51,12 @@ BUILDIN(dispbottom_all) // Format : dispbottom_all("Message");
 	return true;
 }
 
-HPExport void plugin_init (void) 
+HPExport void plugin_init(void)
 {
-	addScriptCommand("dispbottom_all","s",dispbottom_all);
+	addScriptCommand("dispbottom_all", "s", dispbottom_all);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

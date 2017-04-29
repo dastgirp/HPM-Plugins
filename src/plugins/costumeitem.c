@@ -547,7 +547,7 @@ BUILDIN(costume)
 	return true;
 }
 
-HPExport void server_preinit (void)
+HPExport void server_preinit(void)
 {
 	addBattleConf("battle_configuration/reserved_costume_id", battleConfCheck ,battleConfReturn, false);
 	addBattleConf("battle_configuration/disable_costume_job_check", battleConfCheck ,battleConfReturn, false);
@@ -556,7 +556,8 @@ HPExport void server_preinit (void)
 }
 
 /* Server Startup */
-HPExport void plugin_init (void) {
+HPExport void plugin_init(void)
+{
 	
 	pc->checkcombo = pc_checkcombo_mine;
 	
@@ -576,6 +577,7 @@ HPExport void plugin_init (void) {
 	addScriptCommand("costume", "i", costume);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

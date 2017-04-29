@@ -168,17 +168,17 @@ int critical_color_return(const char *key)
 }
 
 /* Server Startup */
-HPExport void plugin_init (void)
+HPExport void plugin_init(void)
 {
 	addHookPre(skill, attack_display_unknown, skill_attack_display_unknown_pre);
 }
 
-HPExport void server_preinit (void)
+HPExport void server_preinit(void)
 {
 	addBattleConf("battle_configuration/magic_critical_color",critical_color, critical_color_return, false);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

@@ -639,7 +639,7 @@ int npc_click_pre(struct map_session_data **sd_, struct npc_data **nd_)
 	return 0;
 }
 
-HPExport void plugin_init(void) 
+HPExport void plugin_init(void)
 {
 	addHookPre(clif, buylist, clif_buylist_pre);
 	addHookPre(clif, pPurchaseReq, clif_parse_PurchaseReq_pre);
@@ -651,7 +651,7 @@ HPExport void plugin_init(void)
 	addScriptCommand("sellitem2", "iiiiiiii?", sellitem2);
 }
 
-HPExport void server_online (void)
+HPExport void server_online(void)
 {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }

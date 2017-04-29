@@ -170,12 +170,14 @@ BUILDIN(restock_item)
 	return true;
 }
 
-HPExport void plugin_init(void) {
+HPExport void plugin_init(void)
+{
 	addHookPre(pc, delitem, pc_restock_misc_pre);
 	addHookPost(pc, delitem, pc_restock_misc_post);
-	addScriptCommand("restock_item","iii",restock_item);
+	addScriptCommand("restock_item", "iii", restock_item);
 }
 
-HPExport void server_online (void) {
-	ShowInfo ("'%s' Plugin by Dastgir/Hercules. Version '%s'\n",pinfo.name,pinfo.version);
+HPExport void server_online(void)
+{
+	ShowInfo("'%s' Plugin by Dastgir/Hercules. Version '%s'\n", pinfo.name, pinfo.version);
 }
