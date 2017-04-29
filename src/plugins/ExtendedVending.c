@@ -777,6 +777,7 @@ void pc_autotrade_populate_pre(struct map_session_data **sd) {
 		SQL->GetData(map->mysql_handle, 1, &mdata, NULL); ssd->vend_lvl = atoi(mdata);
 		break;
 	}
+	SQL->FreeResult(map->mysql_handle);
 	return;
 }
 
