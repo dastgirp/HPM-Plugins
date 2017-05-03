@@ -47,39 +47,39 @@ HPExport struct hplugin_info pinfo =
 
 ACMD(deadon)
 {
-	struct map_session_data *pl_sd;
+	struct map_session_data *pl_sd = NULL;
 	struct s_mapiterator *iter;
 	
-	if (*message == NULL) {
+	if (!*message) {
 		clif->message(fd,"Usage: @deadon <CharacterName/all>");
 		return false;
 	}
 
-	if (strcmpi(message, "all") != 0 (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));	// Character not found.
 		return false;
 	}
 
-	if (pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
+	if (pl_sd != NULL && pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
 		clif->message(fd, "You cannot use this command on higher GM level.");
 		return false;
 	}
 	
 	if (strcmpi(message, "all") == 0) {
 		iter = mapit_getallusers();
-		for (pl_sd = BL_UCCAST(BL_PC, mapit->first(iter)); mapit->exists(iter); pl_sd = BL_UCCAST(BL_PC, mapit->next(iter))) {
+		for (pl_sd = BL_UCAST(BL_PC, mapit->first(iter)); mapit->exists(iter); pl_sd = BL_UCAST(BL_PC, mapit->next(iter))) {
 			if (pl_sd->status.char_id == sd->status.char_id || sd->bl.m != pl_sd->bl.m)
 				continue; 
 			if (pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
 				continue;
 			}
-			sc_start(&pl_sd->bl, SC_TRICKDEAD, 100, 0, 0);
+			sc_start(&sd->bl, &pl_sd->bl, SC_TRICKDEAD, 100, 0, 0);
 			clif->message(pl_sd->fd, "You were forced to lie down by GM.");
 		}
 		mapit->free(iter);
 		clif->message(fd, "All Players are acting dead now.");
 	} else {
-		sc_start(&pl_sd->bl, SC_TRICKDEAD, 100, 0, 0);
+		sc_start(&sd->bl, &pl_sd->bl, SC_TRICKDEAD, 100, 0, 0);
 		clif->message(pl_sd->fd, "You were forced to lie down by GM.");
 		clif->message(fd, "Player is acting dead now.");
 	}
@@ -87,29 +87,29 @@ ACMD(deadon)
 	return true;
 }
 
-ACMD_FUNC(deadoff)
+ACMD(deadoff)
 {
-	struct map_session_data *pl_sd;
+	struct map_session_data *pl_sd = NULL;
 	struct s_mapiterator *iter;
 	
-	if (*message == NULL) {
+	if (!*message) {
 		clif->message(fd,"Usage: @deadoff <CharacterName/all>");
 		return false;
 	}
 
-	if (strcmpi(message, "all") != 0 (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));	// Character not found.
 		return false;
 	}
 
-	if (pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
+	if (pl_sd != NULL && pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
 		clif->message(fd, "You cannot use this command on higher GM level.");
 		return false;
 	}
 
 	if (strcmpi(message, "all") == 0) {
 		iter = mapit_getallusers();
-		for (pl_sd = BL_UCCAST(BL_PC, mapit->first(iter)); mapit->exists(iter); pl_sd = BL_UCCAST(BL_PC, mapit->next(iter))) {
+		for (pl_sd = BL_UCAST(BL_PC, mapit->first(iter)); mapit->exists(iter); pl_sd = BL_UCAST(BL_PC, mapit->next(iter))) {
 			if (pl_sd->status.char_id == sd->status.char_id || sd->bl.m != pl_sd->bl.m)
 				continue; 
 			if (pc_get_group_level(pl_sd) > pc_get_group_level(sd)) {
