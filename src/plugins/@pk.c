@@ -1,9 +1,11 @@
 //===== Hercules Plugin ======================================
 //= @pk command
 //===== By: ==================================================
-//= AnnieRuru
+//= AnnieRuru (v1.1)
+//===== Modified By: =========================================
+//= Dastgir
 //===== Current Version: =====================================
-//= 1.1
+//= v1.2
 //===== Compatible With: ===================================== 
 //= Hercules
 //===== Description: =========================================
@@ -31,7 +33,7 @@
 HPExport struct hplugin_info pinfo = {
 	"@pk",
 	SERVER_TYPE_MAP,
-	"1.1",
+	"1.2",
 	HPM_VERSION,
 };
 
@@ -76,7 +78,7 @@ int battle_check_target_post(int retVal, struct block_list *src, struct block_li
 	if (retVal != 1 && src->type == BL_PC && target->type == BL_PC) {
 		struct player_data *src_pc = getFromMSD(BL_CAST(BL_PC, src), 0 );
 		struct player_data *target_pc = getFromMSD(BL_CAST(BL_PC, target), 0 );
-		if (src_pc != NULL && target_pc != NULL) {
+		if (src_pc != NULL && target_pc != NULL && src_pc->status.account_id != target_pc->status.account_id) {
 			if (src_pc->pkmode && target_pc->pkmode) {
 				hookStop();
 				return 1;
