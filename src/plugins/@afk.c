@@ -21,6 +21,7 @@
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -80,12 +81,12 @@ ACMD(afk)
 	sd->state.autotrade = 1;
 	sd->state.monster_ignore = 1;
 	pc_setsit(sd);
-	skill->sit(sd,1);
+	skill->sit(sd, 1);
 	clif->sitting(&sd->bl);
-	clif->changelook(&sd->bl,LOOK_HEAD_TOP,471);
-	clif->specialeffect(&sd->bl, 234,AREA);
+	clif->changelook(&sd->bl, LOOK_HEAD_TOP, 471);
+	clif->specialeffect(&sd->bl, 234, AREA);
 	if (afk_timeout) {
-		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout*1000,0);
+		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout * 1000,0);
 	}
 	channel->quit(sd); //Quit from Channels.
 	clif->authfail_fd(fd, 15);

@@ -45,7 +45,7 @@ bool store_all_equip(struct map_session_data *sd) {
 	
 	fd = sd->fd;
 
-	if (sd->npc_id) {
+	if (sd->npc_id > 0) {
 		clif->message(fd, "You cannot be talking to an NPC and use this command.");
 		return false;
 	}
@@ -76,7 +76,7 @@ bool store_all_equip(struct map_session_data *sd) {
  * Put everything equipped into storage.
  *------------------------------------------*/
 ACMD(storeequip) {	
-	if (store_all_equip(sd) == false)
+	if (!store_all_equip(sd))
 		return false;
 
 	clif->message(fd, "Stored All Items.");
@@ -84,11 +84,13 @@ ACMD(storeequip) {
 }
 
 BUILDIN(storeequip) {
-	TBL_PC *sd;
+	map_session_data *sd = script->rid2sd(st);
 
-	sd = script->rid2sd(st);
-	if (store_all_equip(sd) == false)
+	if (!store_all_equip(sd))
 		script_pushint(st, 0);
+	else
+		script_pushint(st, 1);
+
 	return true;
 }
 

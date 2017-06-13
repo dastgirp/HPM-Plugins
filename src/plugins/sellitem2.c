@@ -20,6 +20,7 @@
 //===== Repo Link: ===========================================
 //= https://github.com/dastgir/HPM-Plugins
 //============================================================
+
 #include "common/hercules.h"
 
 #include <stdio.h>
@@ -99,7 +100,8 @@ static inline int itemtype(int type) {
 	}
 }
 
-struct npc_extra_data *nsd_search(struct npc_data *nd, bool create) {
+struct npc_extra_data *nsd_search(struct npc_data *nd, bool create)
+{
 	struct npc_extra_data *nsd = NULL;
 	if (nd == NULL)
 		return NULL;
@@ -117,7 +119,8 @@ struct npc_extra_data *nsd_search(struct npc_data *nd, bool create) {
  *
  * @param master id of the original npc
  **/
-void npc_trader_update2(int master) {
+void npc_trader_update2(int master)
+{
 	struct DBIterator *iter;
 	struct block_list* bl;
 	struct npc_data *master_nd = map->id2nd(master);
@@ -146,7 +149,8 @@ void npc_trader_update2(int master) {
  * adds <Item_ID> (or modifies if present) to shop
  * if price not provided (or -1) uses the item's value_sell
  **/
-BUILDIN(sellitem2) {
+BUILDIN(sellitem2)
+{
 	struct npc_data *nd;
 	struct item_data *it;
 	int i = 0, id = script_getnum(st,2);
@@ -160,10 +164,10 @@ BUILDIN(sellitem2) {
 	int card4 = script_getnum(st, 9);
 	struct npc_extra_data *nsd;
 
-	if (!(nd = map->id2nd(st->oid))) {
+	if ((nd = map->id2nd(st->oid)) == NULL) {
 		ShowWarning("buildin_sellitem2: trying to run without a proper NPC!\n");
 		return false;
-	} else if (!(it = itemdb->exists(id))) {
+	} else if ((it = itemdb->exists(id)) == NULL) {
 		ShowWarning("buildin_sellitem2: unknown item id '%d'!\n",id);
 		return false;
 	}
@@ -174,9 +178,9 @@ BUILDIN(sellitem2) {
 	if (value == -1)
 		value = it->value_buy;
 
-	if (!nd->u.scr.shop)
-		npc_trader_update2(nd->src_id?nd->src_id:nd->bl.id);
-	else {
+	if (nd->u.scr.shop == 0) {
+		npc_trader_update2(nd->src_id ? nd->src_id : nd->bl.id);
+	} else {
 		for (i = 0; i < nsd->items; i++) {
 			if (nsd->item[i].nameid == id &&
 				nsd->item[i].identify == identify &&
@@ -190,9 +194,9 @@ BUILDIN(sellitem2) {
 		}
 	}
 
-	if (nd->u.scr.shop->type == NST_ZENY && value*0.75 < it->value_sell*1.24) {
+	if (nd->u.scr.shop->type == NST_ZENY && value * 0.75 < it->value_sell * 1.24) {
 		ShowWarning("buildin_sellitem2: Item %s [%d] discounted buying price (%d->%d) is less than overcharged selling price (%d->%d) in NPC %s (%s)\n",
-					it->name, id, value, (int)(value*0.75), it->value_sell, (int)(it->value_sell*1.24), nd->exname, nd->path);
+					it->name, id, value, (int)(value * 0.75), it->value_sell, (int)(it->value_sell * 1.24), nd->exname, nd->path);
 	}
 
 	if (i != nsd->items) {
@@ -204,7 +208,7 @@ BUILDIN(sellitem2) {
 		}
 
 		if (i == nsd->items) {
-			if(nsd->items == USHRT_MAX ) {
+			if (nsd->items == USHRT_MAX) {
 				ShowWarning("buildin_sellitem2: Can't add %s (%s/%s), shop list is full!\n", it->name, nd->exname, nd->path);
 				return false;
 			}
@@ -231,7 +235,7 @@ int npc_unload_pre(struct npc_data **nd, bool *single)
 	struct npc_extra_data *nsd;
 	nullpo_ret(*nd);
 	nsd = nsd_search(*nd, false);
-	if (nsd)
+	if (nsd != NULL)
 		aFree(nsd->item);	// Free the item struct.
 
 	return 0;
@@ -240,7 +244,8 @@ int npc_unload_pre(struct npc_data **nd, bool *single)
 /// Sends a list of items in a shop.
 /// R 0133 <packet len>.W <owner id>.L { <price>.L <amount>.W <index>.W <type>.B <name id>.W <identified>.B <damaged>.B <refine>.B <card1>.W <card2>.W <card3>.W <card4>.W }* (ZC_PC_PURCHASE_ITEMLIST_FROMMC)
 /// R 0800 <packet len>.W <owner id>.L <unique id>.L { <price>.L <amount>.W <index>.W <type>.B <name id>.W <identified>.B <damaged>.B <refine>.B <card1>.W <card2>.W <card3>.W <card4>.W }* (ZC_PC_PURCHASE_ITEMLIST_FROMMC2)
-void clif_buylist_pre(struct map_session_data **sd_, struct npc_data **nd_) {
+void clif_buylist_pre(struct map_session_data **sd_, struct npc_data **nd_)
+{
 	struct npc_extra_data *nsd;
 	struct npc_shop_litem *shop;
 	struct map_session_data *sd = *sd_;
@@ -402,9 +407,9 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 	*/
 	if (z > sd->status.zeny)
 		return 1; // Not enough Zeny
-	if( w + sd->weight > sd->max_weight )
+	if (w + sd->weight > sd->max_weight)
 		return 2; // Too heavy
-	if( pc->inventoryblank(sd) < new_ )
+	if (pc->inventoryblank(sd) < new_)
 		return 3; // Not enough space to store items
 
 	pc->payzeny(sd, (int)z, LOG_TYPE_NPC, NULL);
