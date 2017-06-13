@@ -49,7 +49,7 @@ int config_delay = 5; // After turn pk on/off, how many seconds delay before the
 // maps where @pk command can be used
 int enable_maps = PK_ENABLE_TOWN;
 // Which map player can actually pk
-int pk_maps = PK_ENABLE_OTHER;
+int pk_maps = PK_ENABLE_ALL;
 
 struct player_data {
 	unsigned int pkmode :1;
@@ -65,11 +65,11 @@ ACMD(pk)
 		ssd->pkmode = 0;
 		addToMSD(sd, ssd, 0, true);
 	}
-	if (enable_maps&PK_ENABLE_TOWN && !map->list[sd->bl.m].flag.town) {
+	if (!enable_maps&PK_ENABLE_ALL && enable_maps&PK_ENABLE_TOWN && !map->list[sd->bl.m].flag.town) {
 		clif->message(sd->fd, "You can only change your PK state in towns.");
 		return false;
 	}
-	if (enable_maps&PK_ENABLE_OTHER && map->list[sd->bl.m].flag.town) {
+	if (!enable_maps&PK_ENABLE_ALL && enable_maps&PK_ENABLE_OTHER && map->list[sd->bl.m].flag.town) {
 		clif->message(sd->fd, "You cannot change your PK state in towns.");
 		return false;
 	}
@@ -95,21 +95,14 @@ int battle_check_target_post(int retVal, struct block_list *src, struct block_li
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 		struct map_session_data *targetsd = BL_CAST(BL_PC, target);
 
-		// Can only PK in town
-		if (pk_maps&PK_ENABLE_TOWN && !map->list[sd->bl.m].flag.town) {
-			return retVal;
-		}
-		// Can only pk in fields
-		if (pk_maps&PK_ENABLE_OTHER && map->list[sd->bl.m].flag.town) {
-			return retVal;
-		}
-
-		if (sd->status.account_id != targetsd->status.account_id) {
-			struct player_data *src_pc = getFromMSD(sd, 0);
-			struct player_data *target_pc = getFromMSD(targetsd, 0);
-			if (src_pc != NULL && target_pc != NULL && src_pc->pkmode && target_pc->pkmode) {
-				hookStop();
-				return 1;
+		if ((pk_maps&PK_ENABLE_TOWN && map->list[sd->bl.m].flag.town) || (pk_maps&PK_ENABLE_OTHER && map->list[sd->bl.m].flag.town)) {
+			if (sd->status.account_id != targetsd->status.account_id) {
+				struct player_data *src_pc = getFromMSD(sd, 0);
+				struct player_data *target_pc = getFromMSD(targetsd, 0);
+				if (src_pc != NULL && target_pc != NULL && src_pc->pkmode && target_pc->pkmode) {
+					hookStop();
+					return 1;
+				}
 			}
 		}
 	}
