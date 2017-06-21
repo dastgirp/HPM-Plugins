@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: ===================================== 
 //= Hercules
 //===== Description: =========================================
@@ -45,7 +45,7 @@
 HPExport struct hplugin_info pinfo = {
 	"Restock System",
 	SERVER_TYPE_MAP,
-	"1.1",
+	"1.2",
 	HPM_VERSION,
 };
 
@@ -84,7 +84,7 @@ BUILDIN(restock_item)
 	int i, j, flag;
 	struct map_session_data *sd;
 	struct item item_tmp;
-	bool pushed_one = false;
+	bool success = false;
 	rid = script_getnum(st, 2);
 	rqu = script_getnum(st, 3);
 	fr = script_getnum(st, 4);
@@ -121,7 +121,7 @@ BUILDIN(restock_item)
 					pc_setglobalreg(sd,script->add_str("restkid2"), rqu);
 					gstorage->close(sd);
 					gstorage2->lock = 0;
-					pushed_one = true;
+					success = true;
 					script_pushint(st, 1);
 					break;
 				}
@@ -130,41 +130,45 @@ BUILDIN(restock_item)
 		gstorage->close(sd);
 		gstorage2->lock = 0;
 	} else if (fr == 1) {
-		struct storage_data* stor = &sd->status.storage;
-		if (stor == NULL) {
+		if (sd->state.storage_flag == STORAGE_FLAG_NORMAL) {
+			sd->state.storage_flag = STORAGE_FLAG_CLOSED;
+			storage->close(sd);
+		}
+
+		if (sd->storage.received == false) {
+			clif->message(sd->fd, msg_txt(27)); // "Storage has not been loaded yet"
 			script_pushint(st, 0);
 			return true;
 		}
-		j = stor->storage_amount;
-		if (sd->state.storage_flag) {
-			sd->state.storage_flag = 0;
-			storage->close(sd);
-		}
-		sd->state.storage_flag = 1;
-		for (i = 0; i < j; ++i) {
-			if (stor->items[i].nameid == rid && stor->items[i].amount >= rqu) {
+		
+		j = VECTOR_LENGTH(sd->storage.item);
+		sd->state.storage_flag = STORAGE_FLAG_NORMAL;
+
+		for (i = 0; i < VECTOR_LENGTH(sd->storage.item); ++i) {
+			if (VECTOR_INDEX(sd->storage.item, i).nameid == rid && VECTOR_INDEX(sd->storage.item, i).amount >= rqu) {
 				memset(&item_tmp, 0, sizeof(item_tmp));
-				item_tmp.nameid = stor->items[i].nameid;
+				item_tmp.nameid = rid;
 				item_tmp.identify = 1;
-				storage->delitem(sd, i, rqu);
-				if ((flag = pc->additem(sd,&item_tmp,rqu,LOG_TYPE_STORAGE))) {
+
+				storage->delitem(sd, i, VECTOR_INDEX(sd->storage.item, i).amount);
+
+				if ((flag = pc->additem(sd, &item_tmp, rqu, LOG_TYPE_STORAGE))) {
 					clif->additem(sd, 0, 0, flag);
-					pc_setglobalreg(sd,script->add_str("restkid1"), stor->items[i].nameid);
+					pc_setglobalreg(sd,script->add_str("restkid1"), rid);
 					pc_setglobalreg(sd,script->add_str("restkid2"), rqu);
-					sd->state.storage_flag = 0;
-					storage->close(sd);
-					pushed_one = true;
-					script_pushint(st, 1);
+					success = true;
 					break;
 				}
 			}
 		}
-		sd->state.storage_flag = 0;
+		sd->state.storage_flag = STORAGE_FLAG_CLOSED;
 		storage->close(sd);
 	}
 
-	if (!pushed_one) {
+	if (!success) {
 		script_pushint(st, 0);
+	} else {
+		script_pushint(st, 1);
 	}
 
 	return true;
