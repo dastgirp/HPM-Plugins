@@ -84,7 +84,7 @@ ACMD(storeequip) {
 }
 
 BUILDIN(storeequip) {
-	map_session_data *sd = script->rid2sd(st);
+	struct map_session_data *sd = script->rid2sd(st);
 
 	if (!store_all_equip(sd))
 		script_pushint(st, 0);
