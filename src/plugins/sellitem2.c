@@ -592,8 +592,10 @@ bool npc_trader_open_pre(struct map_session_data **sd_, struct npc_data **nd_) {
 		case NST_ZENY:
 			sd->state.callshop = 1;
 			clif->npcbuysell(sd, nd->bl.id);
+			hookStop();
 			return true;/* we skip sd->npc_shopid, npc->buysell will set it then when the player selects */
 		case NST_MARKET:
+			hookStop();
 			return false;
 		default:
 			clif->cashshop_show(sd,nd);
