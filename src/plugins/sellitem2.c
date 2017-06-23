@@ -584,7 +584,7 @@ bool npc_trader_open_pre(struct map_session_data **sd_, struct npc_data **nd_) {
 	
 	if (nsd == NULL)
 		return true;
-	hookStop();
+
 	if (!nd->u.scr.shop || !nsd->items)
 		return false;
 
@@ -600,6 +600,7 @@ bool npc_trader_open_pre(struct map_session_data **sd_, struct npc_data **nd_) {
 			break;
 	}
 	sd->npc_shopid = nd->bl.id;
+	hookStop();
 	return true;
 }
 
@@ -611,11 +612,9 @@ int npc_click_pre(struct map_session_data **sd_, struct npc_data **nd_)
 	
 	nullpo_retr(1, sd);
 	
-	if (nd) {
+	if (nd != NULL) {
 		nsd = nsd_search(nd, false);
-		if (nsd && nd->subtype == SCRIPT) {
-			hookStop();
-		} else {
+		if (nsd == NULL || nd->subtype != SCRIPT) {
 			return 0;
 		}
 	} else {
@@ -624,23 +623,31 @@ int npc_click_pre(struct map_session_data **sd_, struct npc_data **nd_)
 	
 	if (sd->npc_id != 0) {
 		// The player clicked a npc after entering an OnTouch area
-		if( sd->areanpc_id != sd->npc_id )
+		if (sd->areanpc_id != sd->npc_id) {
 			ShowError("npc_click: npc_id != 0\n");
+		}
+		hookStop();
 		return 1;
 	}
 
-	if ((nd = npc->checknear(sd,&nd->bl)) == NULL)
+	if ((nd = npc->checknear(sd,&nd->bl)) == NULL) {
+		hookStop();
 		return 1;
+	}
 
 	//Hidden/Disabled npc.
-	if (nd->class_ < 0 || nd->option&(OPTION_INVISIBLE|OPTION_HIDE))
+	if (nd->class_ < 0 || nd->option&(OPTION_INVISIBLE|OPTION_HIDE)) {
+		hookStop();
 		return 1;
+	}
 	
 	if (nd->u.scr.shop && nsd->items && nd->u.scr.trader) {
 		if (!npc->trader_open(sd, nd)) {
+			hookStop();
 			return 1;
 		}
 	}
+	hookStop();
 	return 0;
 }
 
