@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.3b
+//= 1.4
 //===== Description: =========================================
 //= You need to wait before warping, if you have been hit
 //===== Changelog: ===========================================
@@ -15,6 +15,7 @@
 //= v1.3 - Players and Others are now separated.
 //= v1.3a- You can now warp once dead.
 //= v1.3b- Some Crash Fixes.
+//= v1.4 - Timer is Reset once dead.
 //===== Additional Detail: ===================================
 //= 6 Battle Configs:
 //= * warp_delay: Seconds*1000
@@ -69,10 +70,24 @@ struct warp_delay_tick {
 	enum bl_type who_hit;
 };
 
+int pc_dead_pre(struct map_session_data **sd, struct block_list **src)
+{
+	struct warp_delay_tick *delay_data;
+	nullpo_retr(0, sd);
+
+	if ((delay_data = getFromMSD(*sd, 0)) == NULL) {
+		return 0;
+	}
+	// Reset the Data
+	delay_data->last_hit = 0;
+	delay_data->who_hit = BL_NUL;
+	return 1;
+}
+
 void pc_damage_received(struct map_session_data **sd, struct block_list **src, unsigned int *hp, unsigned int *sp)
 {
 	struct warp_delay_tick *delay_data;
-	if (!(delay_data = getFromMSD(*sd,0))) {
+	if ((delay_data = getFromMSD(*sd, 0)) == NULL) {
 		CREATE(delay_data,struct warp_delay_tick,1);
 		addToMSD(*sd,delay_data,0,true);
 	}
@@ -100,7 +115,7 @@ int pc_setpos_delay(struct map_session_data **sd, unsigned short *map_index, int
 		return 1;
 	}
 
-	if (!(delay_data = getFromMSD(*sd, 0))) {
+	if ((delay_data = getFromMSD(*sd, 0)) == NULL) {
 		return 0;
 	}
 
@@ -128,7 +143,7 @@ int pc_setpos_delay(struct map_session_data **sd, unsigned short *map_index, int
 			break;
 	}
 
-	if ((*sd)->status.hp && DIFF_TICK(timer->gettick(),delay_data->last_hit) < temp_delay ){
+	if ((*sd)->status.hp && DIFF_TICK(timer->gettick(), delay_data->last_hit) < temp_delay ){
 		char output[50];
 		sprintf(output,"Please Wait %d second before warping.",(int)((temp_delay-DIFF_TICK(timer->gettick(),delay_data->last_hit))/1000));
 		clif->message((*sd)->fd,output);
@@ -164,6 +179,8 @@ void go_warp_delay_bc(const char *key, const char *val)
 		warp_delay_mob = (int64)battle_config_validate(val,"battle_configuration/warp_delay_mob",warp_delay_mob);
 	} else if (strcmpi(key,"battle_configuration/warp_delay_merc") == 0) {
 		warp_delay_merc = (int64)battle_config_validate(val,"battle_configuration/warp_delay_merc",warp_delay_merc);
+	} else {
+		ShowError("hit-delay: Invalid Configuration '%s'\n", key);
 	}
 }
 int go_warp_delay_return_bc(const char *key)
@@ -184,51 +201,21 @@ int go_warp_delay_return_bc(const char *key)
 	return 0;
 }
 
-void go_warp_delay_setting(const char *val)
-{
-	warp_delay = (int64)battle_config_validate(val,"battle_configuration/warp_delay",warp_delay);
-}
-
-void go_warp_delay_others_setting(const char *val)
-{
-	warp_delay_others = (int64)battle_config_validate(val,"battle_configuration/warp_delay_others",warp_delay_others);
-}
-
-void go_warp_delay_pet_setting(const char *val)
-{
-	warp_delay_pet = (int64)battle_config_validate(val,"battle_configuration/warp_delay_pet",warp_delay_pet);
-}
-
-void go_warp_delay_homun_setting(const char *val)
-{
-	warp_delay_homun = (int64)battle_config_validate(val,"battle_configuration/warp_delay_homun",warp_delay_homun);
-}
-
-void go_warp_delay_mob_setting(const char *val)
-{
-	warp_delay_mob = (int64)battle_config_validate(val,"battle_configuration/warp_delay_mob",warp_delay_mob);
-}
-
-void go_warp_delay_merc_setting(const char *val)
-{
-	warp_delay_merc = (int64)battle_config_validate(val,"battle_configuration/warp_delay_merc",warp_delay_merc);
-}
-
-/* Server Startup */
 HPExport void plugin_init(void)
 {
 	addHookPre(pc, setpos, pc_setpos_delay);
 	addHookPre(pc, damage, pc_damage_received);
+	addHookPre(pc, dead, pc_dead_pre);
 }
 
 HPExport void server_preinit(void)
 {
-	addBattleConf("battle_configuration/warp_delay",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("battle_configuration/warp_delay_mob",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("battle_configuration/warp_delay_pet",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("battle_configuration/warp_delay_homun",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("battle_configuration/warp_delay_merc",go_warp_delay_bc, go_warp_delay_return_bc, false);
-	addBattleConf("battle_configuration/warp_delay_others",go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay", go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_mob", go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_pet", go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_homun", go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_merc", go_warp_delay_bc, go_warp_delay_return_bc, false);
+	addBattleConf("battle_configuration/warp_delay_others", go_warp_delay_bc, go_warp_delay_return_bc, false);
 }
 
 HPExport void server_online(void)
