@@ -65,11 +65,11 @@ ACMD(pk)
 		ssd->pkmode = 0;
 		addToMSD(sd, ssd, 0, true);
 	}
-	if (!enable_maps&PK_ENABLE_ALL && enable_maps&PK_ENABLE_TOWN && !map->list[sd->bl.m].flag.town) {
+	if ((enable_maps&PK_ENABLE_ALL) == 0 && (enable_maps&PK_ENABLE_TOWN) > 0 && !map->list[sd->bl.m].flag.town) {
 		clif->message(sd->fd, "You can only change your PK state in towns.");
 		return false;
 	}
-	if (!enable_maps&PK_ENABLE_ALL && enable_maps&PK_ENABLE_OTHER && map->list[sd->bl.m].flag.town) {
+	if ((enable_maps&PK_ENABLE_ALL) == 0 && (enable_maps&PK_ENABLE_OTHER) > 0 && map->list[sd->bl.m].flag.town) {
 		clif->message(sd->fd, "You cannot change your PK state in towns.");
 		return false;
 	}
@@ -78,7 +78,7 @@ ACMD(pk)
 		clif->message(sd->fd, output);
 		return false;
 	}
-	if (!ssd->pkmode) {
+	if (ssd->pkmode == 0) {
 		ssd->pkmode = 1;
 		clif->message(sd->fd, "Your PK state is now ON");
 	} else {
