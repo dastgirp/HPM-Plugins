@@ -68,7 +68,7 @@ int return_battle_config( const char *key )
 	return 0;
 }
 
-bool pc_gainexp_pre(struct map_session_data **sd_, struct block_list **src, unsigned int *base_exp, unsigned int *job_exp, bool *is_quest)
+bool pc_gainexp_pre(struct map_session_data **sd_, struct block_list **src, uint64 *base_exp, uint64 *job_exp, bool *is_quest)
 {
 	struct player_data *ssd;
 	struct map_session_data *sd = *sd_;
@@ -100,7 +100,7 @@ bool pc_gainexp_pre(struct map_session_data **sd_, struct block_list **src, unsi
 	return true;
 }
 
-void pc_calcexp_post(struct map_session_data *sd, unsigned int *base_exp, unsigned int *job_exp, struct block_list *src)
+void pc_calcexp_post(struct map_session_data *sd, uint64 *base_exp, uint64 *job_exp, struct block_list *src)
 {
 	struct player_data *ssd = getFromMSD(sd, 0);
 	if (ssd == NULL)
