@@ -106,7 +106,7 @@ case "$MODE" in
 			fname="${fnameext%.*}"
 			if [ $fname != 'constdb2doc' ] && [ $fname != 'db2sql' ] && [ $fname != 'dbghelpplug' ] && [ $fname != 'sample' ] && [ $fname != 'script_mapquit' ]
 			then
-				make plugin.$fname -j3 || aborterror "Build Failed($fnameext)"
+				make plugin.$fname -j3
 			fi
 		done
 		;;
