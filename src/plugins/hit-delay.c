@@ -36,10 +36,12 @@
 #include "common/HPMi.h"
 #include "common/memmgr.h"
 #include "common/mmo.h"
+#include "common/nullpo.h"
 #include "common/socket.h"
 #include "common/strlib.h"
 #include "common/timer.h"
 #include "common/mapindex.h"
+
 #include "map/clif.h"
 #include "map/script.h"
 #include "map/skill.h"
