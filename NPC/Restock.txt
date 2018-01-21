@@ -15,45 +15,45 @@ prontera,140,140,5	script	Restock	4_M_ALCHE_C,{
 	end;
 
 OnInit:
-	query_sql "CREATE TABLE IF NOT EXISTS `restock` (`charid` int(10) NOT NULL,`restockid` int(6) NOT NULL,`restkq` int(5) NOT NULL,`restkf` int(10) NOT NULL default '1') ENGINE=MyISAM DEFAULT CHARSET=latin1 "; 
-	bindatcmd("restock","Restock::OnAtcommandEnable",0,99);
-	bindatcmd("restock2","Restock::OnAtcommand",0,99);
+	bindatcmd("restock", strnpcinfo(0) +"::OnToggle", 0, 99);
+	bindatcmd("restock2", strnpcinfo(0) +"::OnRestock", 0, 99);
+	bindatcmd("restock_list", strnpcinfo(0) +"::OnList", 0, 99);
 	end;
 
-OnAtcommandEnable:
-	if (restk == 1) {
-		dispbottom("Restock System Disabled");
-		restk = 0;
+OnList:
+	restock_list();
+	end;
+
+OnToggle:
+	.@toggle = restock_toggle();
+	if (.@toggle == -1) {
+		dispbottom("Error Triggering restock command.");
 		end;
 	}
-	dispbottom("Restock System Enabled");
-	restk = 1;
+	
+	dispbottom("Restock System: "+ (.@toggle == 0)?"Disabled.":"Enabled.");
 	end;
 
-OnAtcommand:
-	if (restk == 1) {
-		dispbottom("Restock is Currently Enabled");
-	}
-	if (restk == 0) {
-		dispbottom("Restock is Currently Disabled,use @restock to Enable");
+OnRestock:
+	if (restock_status() == 0) {
+		dispbottom("Restock is Currently Disabled, use @restock to Enable");
 		end;
 	}
 	.@quantity = atoi(.@atcmd_parameters$[1]);
 	.@type = atoi(.@atcmd_parameters$[2]);
 	.@type2 = atoi(.@atcmd_parameters$[3]);
-	// itemid quantity type1 type2 isn't provided.
+	// All Parameters are not provided.
 	if (.@atcmd_numparameters < 4) {
 		dispbottom("Usage:");
-		dispbottom("@restock2 <itemid> <quantity> <type1> <type2>");
-		dispbottom("Type 1:");
+		dispbottom("@restock2 <ItemID> <Quantity> <RestockFrom> <Type>");
+		dispbottom("Restock From:");
 		dispbottom("1 = Storage");
 		dispbottom("2 = GStorage");
-		dispbottom("Type 2:");
+		dispbottom("Type:");
 		dispbottom("1 = Add");
 		dispbottom("2 = Remove");
-		dispbottom("3 = Help");
-		dispbottom("4 = List");
-		dispbottom("5 = Empty The List");
+		dispbottom("3 = Remove All Items");
+		dispbottom("5 = List Items")
 		dispbottom("@restock2 x y z 3 For Help");
 		dispbottom("@restock2 x y z 4 For Current Restocking List");
 		dispbottom("@restock2 x y z 5 For Removing All Items From Restock");
@@ -75,27 +75,12 @@ OnAtcommand:
 	}
 	// Type2 => List Restock Item
 	if (.@type2 == 4) {
-		// Get List of Restock Items
-		query_sql("SELECT `restockid`,`restkq`,`restkf` FROM `restock` WHERE `charid`="+ getcharid(0), .@id, .@qu, .@fr);
-		if (.@id == 0) {
-			dispbottom("No Item in Restock...");
-			end;
-		}
-		.@size = getarraysize(.@id);
-		dispbottom("------------------- List of Restock Items -------------------");
-		for (.@i = 0; .@i < .@size; ++.@i) {
-			// Show the List
-			if (getitemname(.@id[@i]) !=  "null") {
-				dispbottom("Restocking "+.@qu[.@i]+" "+getitemname(.@id[.@i])+" From "+(.@fr[.@i]==1?"Storage":"Guild Storage"));
-			}
-		}
-		dispbottom("-------------------     End of List       --------------------");
+		restock_list();
 		end;
-
 	}
 	// Type2 => Clear Restock Items
 	else if (.@type2 == 5) {
-		query_sql("DELETE FROM `restock` WHERE `charid`="+getcharid(0));
+		restock(502, 0, RS_STORAGE, RS_TYPE_DEL_ALL);
 		dispbottom("All Restock Items Deleted.");
 		end;
 	}
@@ -129,6 +114,7 @@ OnAtcommand:
 
 	// Add Item to Restock List
 	if (.@type2 == 1){
+		if (restock(.@atcmd_parameters$[0], atoi(.@atcmd_parameters$[1]), atoi(.@atcmd_parameters$[2]), atoi(.@atcmd_parameters$[3])))
 		// Invalid Quantity
 		if (.@quantity < 1){
 			dispbottom("Input Proper Quantity Please!");
