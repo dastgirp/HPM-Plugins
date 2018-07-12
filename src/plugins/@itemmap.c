@@ -54,7 +54,7 @@ int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,
 			if( (flag = pc->additem(sd, &it, count, log_type)) ) {
 				clif->additem(sd, 0, 0, flag);
 				if( pc->candrop(sd,&it) )
-					map->addflooritem(&sd->bl,&it,count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
+					map->addflooritem(&sd->bl,&it,count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,false);
 			}
 		}
 	}
