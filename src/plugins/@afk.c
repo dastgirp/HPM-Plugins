@@ -79,7 +79,7 @@ ACMD(afk)
 		return true;
 	}
 	sd->state.autotrade = 1;
-	sd->state.monster_ignore = 1;
+	sd->block_action.immune = 1;
 	pc_setsit(sd);
 	skill->sit(sd, 1);
 	clif->sitting(&sd->bl);
