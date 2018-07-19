@@ -86,6 +86,8 @@ enum {
 	RS_TYPE_MAX,
 };
 
+bool restock(struct map_session_data *sd, int item_id, int quantity, int rs_from);
+
 bool rs_exists(struct map_session_data *sd)
 {
 	return (getFromMSD(sd, 0) == NULL) ? false : true;
@@ -133,14 +135,17 @@ int pc_restock_misc_post(int retVal, struct map_session_data *sd, int n, int amo
 	if (retVal == 1)
 		return retVal;
 
-	rsd = rs_search(*sd, false);
+	rsd = rs_search(sd, false);
 
 	if (rsd != NULL && rsd->enabled && rsd->idx > -1) {
-		struct restock_item rsi = VECTOR_INDEX(rsd->restock, i);
-		if (pc->search_inventory(sd, rsi.id) < rsi.quantity) {
-			restock(sd, rsi.id, rsi.quantity, rsi.restock_from);
+		int i;
+		for (i = 0; i < VECTOR_LENGTH(rsd->restock); i++) {
+			struct restock_item rsi = VECTOR_INDEX(rsd->restock, i);
+			if (pc->search_inventory(sd, rsi.id) < rsi.quantity) {
+				restock(sd, rsi.id, rsi.quantity, rsi.restock_from);
+			}
+			rsd->idx = -1;
 		}
-		rsd->idx = -1;
 	}
 	return retVal;
 }
@@ -176,18 +181,17 @@ bool resotck_add_item(struct map_session_data *sd, int item_id, int quantity, in
 	ARR_FIND(0, VECTOR_LENGTH(rsd->restock), i, VECTOR_INDEX(rsd->restock, i).id == item_id);
 	// New restock id.
 	if (i == VECTOR_LENGTH(rsd->restock)) {
-		VECTOR_PUSHZEROED(rsd->restock, 1, 1);
-		rsi = &VECTOR_LAST(rsd->restock);
-	} else {
-		rsi = &VECTOR_INDEX(rsd->restock, i);
+		VECTOR_ENSURE(rsd->restock, 1, 1);
+		VECTOR_PUSHZEROED(rsd->restock);
 	}
+	rsi = &VECTOR_INDEX(rsd->restock, i);
 	rsi->id = item_id;
 	rsi->quantity = quantity;
 	rsi->restock_from = rs_from;
 
 	if (SQL_ERROR == SQL->Query(map->mysql_handle,
-		"INSERT INTO `restock` (`char_id`, `item_id`, `quantity`, `restock_from`) VALUES ('%d', '%d', '%d', '%d') 
-			ON DUPLICATE KEY UPDATE `quantity`='%d', `restock_from`='%d'",
+		"INSERT INTO `restock` (`char_id`, `item_id`, `quantity`, `restock_from`) VALUES ('%d', '%d', '%d', '%d')"
+		" ON DUPLICATE KEY UPDATE `quantity`='%d', `restock_from`='%d'",
 								sd->status.char_id,
 								item_id,
 								quantity,
@@ -196,6 +200,7 @@ bool resotck_add_item(struct map_session_data *sd, int item_id, int quantity, in
 								rs_from
 								))
 		Sql_ShowDebug(map->mysql_handle);
+	return true;
 }
 
 bool restock(struct map_session_data *sd, int item_id, int quantity, int rs_from)
@@ -212,13 +217,12 @@ bool restock(struct map_session_data *sd, int item_id, int quantity, int rs_from
 			struct guild *g;
 			struct guild_storage *gstorage2;
 			g = guild->search(sd->status.guild_id);
-			if (g == NULL) {
+			if (g == NULL || sd->state.storage_flag == STORAGE_FLAG_NORMAL || sd->state.storage_flag == STORAGE_FLAG_GUILD) {
 				clif->message(sd->fd, msg_txt(43));
 				return false;
 			}
 			gstorage2 = gstorage->ensure(sd->status.guild_id);
 			if (gstorage == NULL) {// Doesn't have opened @gstorage yet, so we skip the deletion since *shouldn't* have any item there.
-				script_pushint(st, 0);
 				return false;
 			}
 			j = gstorage2->storage_amount;
@@ -244,20 +248,21 @@ bool restock(struct map_session_data *sd, int item_id, int quantity, int rs_from
 		}
 
 		case RS_STORAGE: {
-			struct storage_data* stor = &sd->status.storage;
-			if (stor == NULL) {
+			if (sd->storage.received == false) {
 				return false;
 			}
-			j = stor->storage_amount;
-			if (sd->state.storage_flag) {
+			if (sd->state.storage_flag == STORAGE_FLAG_NORMAL) {
 				sd->state.storage_flag = 0;
 				storage->close(sd);
 			}
-			sd->state.storage_flag = 1;
+
+			j = VECTOR_LENGTH(sd->storage.item);
+			sd->state.storage_flag = STORAGE_FLAG_NORMAL;
+
 			for (i = 0; i < j; ++i) {
-				if (stor->items[i].nameid == item_id && stor->items[i].amount >= quantity) {
+				if (VECTOR_INDEX(sd->storage.item, i).nameid == item_id && VECTOR_INDEX(sd->storage.item, i).amount >= quantity) {
 					memset(&item_tmp, 0, sizeof(item_tmp));
-					item_tmp.nameid = stor->items[i].nameid;
+					item_tmp.nameid = VECTOR_INDEX(sd->storage.item, i).nameid;
 					item_tmp.identify = 1;
 					storage->delitem(sd, i, quantity);
 					if ((flag = pc->additem(sd,&item_tmp,quantity,LOG_TYPE_STORAGE))) {
@@ -296,7 +301,7 @@ void pc_load_restock_data(int *fd, struct map_session_data **sd_) {
 			SQL->GetData(map->mysql_handle, 0, &data, NULL); id = atoi(data);
 			SQL->GetData(map->mysql_handle, 1, &data, NULL); quantity = atoi(data);
 			SQL->GetData(map->mysql_handle, 2, &data, NULL); rs_from = atoi(data);
-			restock_add_item(sd, id, quantity, rs_from);
+			restock(sd, id, quantity, rs_from);
 			break;
 		}
 		SQL->FreeResult(map->mysql_handle);
@@ -386,15 +391,15 @@ BUILDIN(restock)
 
 	switch (type) {
 		case RS_TYPE_ADD: {
-			restock_add_item(sd, item_id, quantity, rs_from);
+			restock(sd, item_id, quantity, rs_from);
 			break;
 		}
 		case RS_TYPE_DEL: {
 			int i;
 			struct restock_data *rsd = NULL;
-			struct restock_item *rsi = NULL;
+			//struct restock_item *rsi = NULL;
 			if (!rs_exists(sd)) {
-				clif->message("restock: No Item exists in restock list.");
+				clif->message(sd->fd, "restock: No Item exists in restock list.");
 				script_pushint(st, 0);
 				return true;
 			}
@@ -403,7 +408,7 @@ BUILDIN(restock)
 			ARR_FIND(0, VECTOR_LENGTH(rsd->restock), i, VECTOR_INDEX(rsd->restock, i).id == item_id);
 			// Not Found
 			if (i == VECTOR_LENGTH(rsd->restock)) {
-				clif->message("restock: No Such Item exists in restock list.");
+				clif->message(sd->fd, "restock: No Such Item exists in restock list.");
 				script_pushint(st, 0);
 				return true;
 			}

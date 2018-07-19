@@ -1,11 +1,24 @@
-/*
-=============================================
-@itemmap Plugin
-Converted by: Dastgir
-Original Made by: Xantara
-================================================
-v 1.0 Initial Release
-*/
+//===== Hercules Plugin ======================================
+//= @itemmap
+//===== By: ==================================================
+//= Dastgir/Hercules
+//===== Current Version: =====================================
+//= 1.1
+//===== Description: =========================================
+//= Add additional commands:
+//= @itemmap
+//= @itemmap_p
+//= @itemmap_g
+//= ScriptCommand: getitem_map
+//===== Changelog: ===========================================
+//= v1.0 - Initial Conversion
+//= v1.1 - Compatible with new Hercules [20180719]
+//===== Additional Comments: =================================
+//= 
+//===== Repo Link: ===========================================
+//= https://github.com/dastgir/HPM-Plugins
+//============================================================
+
 
 #include "common/hercules.h"
 
@@ -32,10 +45,10 @@ v 1.0 Initial Release
 #include "common/HPMDataCheck.h"
 
 HPExport struct hplugin_info pinfo = {
-	"@itemmap",			// Plugin name
-	SERVER_TYPE_MAP,	// Which server types this plugin works with?
-	"1.0",				// Plugin version
-	HPM_VERSION,		// HPM Version (don't change, macro is automatically updated)
+	"@itemmap",
+	SERVER_TYPE_MAP,
+	"1.1",
+	HPM_VERSION,
 };
 
 /*------------------------------------------
@@ -45,16 +58,15 @@ int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,
 {
 	int i, flag;
 	
-	if (!sd) return false;
+	if (sd == NULL)
+		return false;
 
-	for ( i = 0; i < amt; i += count )
-	{
-		if ( !pet->create_egg(sd,it.nameid) )
-		{ // if not pet egg
-			if( (flag = pc->additem(sd, &it, count, log_type)) ) {
+	for (i = 0; i < amt; i += count){
+		if (!pet->create_egg(sd,it.nameid)) {
+			if ((flag = pc->additem(sd, &it, count, log_type)) > 0) {
 				clif->additem(sd, 0, 0, flag);
-				if( pc->candrop(sd,&it) )
-					map->addflooritem(&sd->bl,&it,count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
+				if (pc->candrop(sd,&it))
+					map->addflooritem(&sd->bl, &it, count, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 0, false);
 			}
 		}
 	}
@@ -64,22 +76,22 @@ int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,
 	return 1;
 }
 
-/*====================================================================
-	getitem_map <item id>,<amount>,"<mapname>"{,<type>,<ID for Type>};
-		type: 0=everyone, 1=party, 2=guild, 3=bg
- =====================================================================*/
+/**
+ * getitem_map(<item id>,<amount>,"<mapname>"{,<type>{,<ID for Type>}});
+ * type: 0=everyone, 1=party, 2=guild, 3=bg
+ */
 static int buildin_getitem_map_sub(struct block_list *bl,va_list ap)
 {
 	struct item it;
 
 	int amt,count;
-	TBL_PC *sd = (TBL_PC *)bl;
+	struct map_session_data *sd = BL_CAST(BL_PC, bl);
 
 	it    = va_arg(ap,struct item);
 	amt   = va_arg(ap,int);
 	count = va_arg(ap,int);
 
-	pc_getitem_map(sd,it,amt,count,LOG_TYPE_SCRIPT);
+	pc_getitem_map(sd, it, amt, count, LOG_TYPE_SCRIPT);
 
 	return 0;
 }
@@ -92,78 +104,75 @@ BUILDIN(getitem_map)
 	struct battleground_data *bgd = NULL;
 	struct script_data *data;
 
-	int m,i,get_count,nameid,amount,type=0,type_id=0;
+	int m, i, get_count = 1, nameid = UNKNOWN_ITEM_ID, amount, type = 0, type_id = 0;
 	const char *mapname;
 
-	data = script_getdata(st,2);
-	script->get_val(st,data);
-	if( data_isstring(data) )
-	{
+	data = script_getdata(st, 2);
+	script->get_val(st, data);
+	if(data_isstring(data)) {
 		const char *name = script->conv_str(st,data);
 		struct item_data *item_data = itemdb->search_name(name);
-		if( item_data )
+		if (item_data != NULL) {
 			nameid = item_data->nameid;
-		else
-			nameid = UNKNOWN_ITEM_ID;
-	}
-	else
+		}
+	} else
 		nameid = script->conv_num(st,data);
 
-	if( (amount = script_getnum(st,3)) <= 0 )
+	if ((amount = script_getnum(st,3)) <= 0)
 		return true;
 
 	mapname = script_getstr(st,4);
-	if( (m = map->mapname2mapid(mapname)) < 0 )
+	if ((m = map->mapname2mapid(mapname)) < 0)
 		return true;
 
-	if( script_hasdata(st,5) ){
-		type    = script_getnum(st,5);
-		type_id = script_getnum(st,6);
+	if (script_hasdata(st,5)) {
+		type = script_getnum(st, 5);
+		type_id = script_getnum(st, 6);
 	}
 	
-	if( nameid <= 0 || !itemdb->exists(nameid) ){
+	if (nameid <= 0 || !itemdb->exists(nameid)) {
 		ShowError("buildin_getitem_map: Nonexistant item %d requested.\n", nameid);
 		return false; //No item created.
 	}
 
-	memset(&it,0,sizeof(it));
+	memset(&it, 0, sizeof(it));
 	it.nameid = nameid;
 	it.identify = itemdb->isidentified(nameid);
 
-	if (!itemdb->isstackable(nameid))
-		get_count = 1;
-	else
+	if (itemdb->isstackable(nameid))
 		get_count = amount;
 
-	switch(type)
-	{
-		case 1:
-			if( (p = party->search(type_id)) != NULL )
-			{
-				for( i=0; i < MAX_PARTY; i++ )
-					if( p->data[i].sd && m == p->data[i].sd->bl.m )
-						pc_getitem_map(p->data[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+	switch(type) {
+	case 1:
+		if ((p = party->search(type_id)) != NULL) {
+			for (i = 0; i < MAX_PARTY; i++) {
+				if (p->data[i].sd != NULL && m == p->data[i].sd->bl.m) {
+					pc_getitem_map(p->data[i].sd, it, amount, get_count, LOG_TYPE_SCRIPT);
+				}
 			}
-			break;
-		case 2:
-			if( (g = guild->search(type_id)) != NULL )
-			{
-				for( i=0; i < g->max_member; i++ )
-					if( g->member[i].sd && m == g->member[i].sd->bl.m )
-						pc_getitem_map(g->member[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+		}
+		break;
+	case 2:
+		if ((g = guild->search(type_id)) != NULL) {
+			for (i = 0; i < g->max_member; i++) {
+				if (g->member[i].sd && m == g->member[i].sd->bl.m) {
+					pc_getitem_map(g->member[i].sd, it, amount, get_count, LOG_TYPE_SCRIPT);
+				}
 			}
-			break;
-		case 3:
-			if( (bgd = bg->team_search(type_id)) != NULL )
-			{
-				for( i=0; i < MAX_BG_MEMBERS; i++ )
-					if( bgd->members[i].sd && m == bgd->members[i].sd->bl.m )
-						pc_getitem_map(bgd->members[i].sd,it,amount,get_count,LOG_TYPE_SCRIPT);
+		}
+		break;
+	case 3:
+		if ((bgd = bg->team_search(type_id)) != NULL) {
+			for (i=0; i < MAX_BG_MEMBERS; i++) {
+				if(bgd->members[i].sd != NULL && m == bgd->members[i].sd->bl.m) {
+					pc_getitem_map(bgd->members[i].sd, it, amount, get_count, LOG_TYPE_SCRIPT);
+				}
 			}
-			break;
-		default:
-			map->foreachinmap(buildin_getitem_map_sub,m,BL_PC,it,amount,get_count);
-			break;
+		}
+		break;
+	default:
+		map->foreachinmap(buildin_getitem_map_sub, m, BL_PC, it, amount, get_count);
+		break;
 	}
 
 	return true;

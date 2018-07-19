@@ -60,15 +60,12 @@ static int count_mob(struct block_list *bl, va_list ap) // [FE]
 ACMD(mapmoblist)
 {
 	char temp[100];
-	bool mob_searched[MAX_MOB_DB];
-	int mob_mvp[MAX_MOB_DB];
+	bool mob_searched[MAX_MOB_DB] = { 0 };
+	int mob_mvp[MAX_MOB_DB] = { 0 };
 	struct s_mapiterator* it;
 	unsigned short count = 0, i, mapindex_ = 0;
 	int m = 0;
 	int mvp_index = 0;
-
-	memset(mob_searched, 0, MAX_MOB_DB);
-	memset(mob_mvp, 0, MAX_MOB_DB);
 
 	if (*message) {
 		// Player input map name, search mob list for that map

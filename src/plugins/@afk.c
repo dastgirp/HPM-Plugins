@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.4
+//= 1.5
 //===== Description: =========================================
 //= Will change your look to contain afk bubble without
 //= needing a player to be online
@@ -13,6 +13,7 @@
 //= v1.2 - Added afk_timeout option and battle_config for it
 //= v1.3 - Added noafk mapflag.
 //= v1.4 - Compatible with new Hercules.
+//= v1.5 - Compatible with new Hercules [20180719]
 //===== Additional Comments: =================================
 //= AFK Timeout Setting(BattleConf):
 //= 	afk_timeout: TimeInSeconds
@@ -52,7 +53,7 @@ HPExport struct hplugin_info pinfo =
 {
 	"@afk",
 	SERVER_TYPE_MAP,
-	"1.4",
+	"1.5",
 	HPM_VERSION,
 };
 
@@ -79,7 +80,7 @@ ACMD(afk)
 		return true;
 	}
 	sd->state.autotrade = 1;
-	sd->state.monster_ignore = 1;
+	sd->block_action.immune = 1;
 	pc_setsit(sd);
 	skill->sit(sd, 1);
 	clif->sitting(&sd->bl);
