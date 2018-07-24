@@ -3,11 +3,12 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.0
+//= 1.1
 //===== Description: =========================================
 //= Sell items with Refines/Cards into shop
 //===== Changelog: ===========================================
 //= v1.0 - Initial Release
+//= v1.1 - Added support for new clients.
 //===== Additional Info: =====================================
 // *sellitem2 <Item_ID>,identify,refine,attribute,card1,card2,card3,card4{,price};
 // 
@@ -43,6 +44,7 @@
 #include "map/pet.h"
 #include "map/script.h"
 #include "map/skill.h"
+#include "map/packets_struct.h"
 
 #include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
@@ -50,7 +52,7 @@
 HPExport struct hplugin_info pinfo = {
 	"sellitem2",
 	SERVER_TYPE_MAP,
-	"1.0",
+	"1.1",
 	HPM_VERSION,
 };
 
@@ -60,10 +62,7 @@ struct shop_litem_entry {
 	int identify; ///< Identified?
 	int refine;   ///< Refine Count
 	int attribute;///< Damaged?
-	int card1;    ///< Crad 1
-	int card2;    ///< Card 2
-	int card3;    ///< Card 3
-	int card4;    ///< Card 4
+	int card[4];  ///< Cards
 };
 VECTOR_STRUCT_DECL(shop_litem, struct shop_litem_entry);
 
@@ -72,10 +71,7 @@ struct npc_shop_litem {	// NPC Shop ItemList
 	unsigned int identify;
 	unsigned int refine;
 	unsigned int attribute;
-	unsigned int card1;
-	unsigned int card2;
-	unsigned int card3;
-	unsigned int card4;
+	int card[4];
 	unsigned int value;
 };
 
@@ -186,10 +182,10 @@ BUILDIN(sellitem2)
 				nsd->item[i].identify == identify &&
 				nsd->item[i].refine == refine &&
 				nsd->item[i].attribute == attribute &&
-				nsd->item[i].card1 == card1 &&
-				nsd->item[i].card2 == card2 &&
-				nsd->item[i].card3 == card3 &&
-				nsd->item[i].card4 == card4)	// Found Same Item
+				nsd->item[i].card[0] == card1 &&
+				nsd->item[i].card[1] == card2 &&
+				nsd->item[i].card[2] == card3 &&
+				nsd->item[i].card[3] == card4)	// Found Same Item
 				break;
 		}
 	}
@@ -221,10 +217,10 @@ BUILDIN(sellitem2)
 		nsd->item[i].identify = identify;
 		nsd->item[i].refine = refine;
 		nsd->item[i].attribute = attribute;
-		nsd->item[i].card1 = card1;
-		nsd->item[i].card2 = card2;
-		nsd->item[i].card3 = card3;
-		nsd->item[i].card4 = card4;
+		nsd->item[i].card[0] = card1;
+		nsd->item[i].card[1] = card2;
+		nsd->item[i].card[2] = card3;
+		nsd->item[i].card[3] = card4;
 		nsd->item[i].value = value;
 	}
 	return true;
@@ -248,69 +244,63 @@ void clif_buylist_pre(struct map_session_data **sd_, struct npc_data **nd_)
 {
 	struct npc_extra_data *nsd;
 	struct npc_shop_litem *shop;
+
 	struct map_session_data *sd = *sd_;
 	struct npc_data *nd = *nd_;
-	unsigned int shop_size = 0;
-	int fd, i;
-#if PACKETVER < 20100105
-	const int cmd = 0x133;
-	const int offset = 8;
-#else
-	const int cmd = 0x800;
-	const int offset = 12;
-#endif
 
-#if PACKETVER >= 20150226
-	const int item_length = 47;
-#else
-	const int item_length = 22;
-#endif
+	struct PACKET_ZC_PC_PURCHASE_ITEMLIST_FROMMC *p;
+	int i, fd, count, len;
 
 	nullpo_retv(sd);
 	nullpo_retv(nd);
-	if ((nsd = nsd_search(nd, false)) == NULL)
-		return;
-
-	shop = nsd->item;
-	shop_size = nsd->items;
+	nullpo_retv(nsd = nsd_search(nd, false));
 
 	fd = sd->fd;
+	shop = nsd->item;
+	count = nsd->items;
+	len = sizeof(struct PACKET_ZC_PC_PURCHASE_ITEMLIST_FROMMC) + count * sizeof(struct PACKET_ZC_PC_PURCHASE_ITEMLIST_FROMMC_sub);
+
 	sd->vended_id = nd->bl.id;
 
-	WFIFOHEAD(fd, offset+shop_size*item_length);
-	WFIFOW(fd, 0) = cmd;
-	WFIFOW(fd, 2) = offset+shop_size*item_length;
-	WFIFOL(fd, 4) = -(nd->bl.id);	// -ve indicates buy from shop
+	WFIFOHEAD(fd, len);
+	p = WFIFOP(fd, 0);
+	p->packetType = vendinglistType;
+	p->packetLength = len;
+	p->AID = -(nd->bl.id);
 #if PACKETVER >= 20100105
-	WFIFOL(fd, 8) = -1;
+	p->venderId = -1;
 #endif
 	
-	for (i = 0; i < shop_size; i++) {
+	for (i = 0; i < count; i++) {
 #if PACKETVER >= 20150226
-		int temp = 0;
+		int temp;
 #endif
 		struct item_data* data = itemdb->search(shop[i].nameid);
-		WFIFOL(fd, offset+ 0+i*item_length) = shop[i].value;
-		WFIFOW(fd, offset+ 4+i*item_length) = 1;	// Amount(ToDo)
-		WFIFOW(fd, offset+ 6+i*item_length) = i+2;	// Idx, send as i
-		WFIFOB(fd, offset+ 8+i*item_length) = itemtype(data->type);
-		WFIFOW(fd, offset+ 9+i*item_length) = (data->view_id > 0) ? data->view_id : shop[i].nameid;
-		WFIFOB(fd, offset+11+i*item_length) = shop[i].identify;
-		WFIFOB(fd, offset+12+i*item_length) = shop[i].attribute;
-		WFIFOB(fd, offset+13+i*item_length) = shop[i].refine;
-		WFIFOW(fd, offset+14+i*item_length) = shop[i].card1;
-		WFIFOW(fd, offset+16+i*item_length) = shop[i].card2;
-		WFIFOW(fd, offset+18+i*item_length) = shop[i].card3;
-		WFIFOW(fd, offset+20+i*item_length) = shop[i].card4;
+		p->items[i].price  = shop[i].value;
+		p->items[i].amount = 1;	// Amount(ToDo)
+		p->items[i].index  = i+2;	// Idx, send as i
+		p->items[i].itemType   = itemtype(data->type);
+		p->items[i].itemId     = (data->view_id > 0) ? data->view_id : shop[i].nameid;
+		p->items[i].identified = shop[i].identify;
+		p->items[i].damaged    = shop[i].attribute;
+		p->items[i].refine     = shop[i].refine;
+		p->items[i].slot.card[0] = shop[i].card[0];
+		p->items[i].slot.card[1] = shop[i].card[1];
+		p->items[i].slot.card[2] = shop[i].card[2];
+		p->items[i].slot.card[3] = shop[i].card[3];
 #if PACKETVER >= 20150226
-		for (temp = 0; temp < 5; temp++){
-			WFIFOW(fd, offset+22+i*item_length+temp*5+0) = 0;
-			WFIFOW(fd, offset+22+i*item_length+temp*5+2) = 0;
-			WFIFOB(fd, offset+22+i*item_length+temp*5+4) = 0;
+		for (temp = 0; temp < MAX_ITEM_OPTIONS; temp++) {
+			p->items[i].option_data[temp].index = 0;
+			p->items[i].option_data[temp].value = 0;
+			p->items[i].option_data[temp].param = 0;
 		}
 #endif
+#if PACKETVER >= 20160921
+		p->items[i].location = pc->item_equippoint(sd, data);
+		p->items[i].viewSprite = data->view_sprite;
+#endif
 	}
-	WFIFOSET(fd,WFIFOW(fd,2));
+	WFIFOSET(fd, len);
 	hookStop();
 }
 
@@ -357,10 +347,10 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 				 entry->identify == shop[j].identify &&
 				 entry->refine == shop[j].refine &&
 				 entry->attribute == shop[j].attribute &&
-				 entry->card1 == shop[j].card1 &&
-				 entry->card2 == shop[j].card2 &&
-				 entry->card3 == shop[j].card3 &&
-				 entry->card4 == shop[j].card4
+				 entry->card[0] == shop[j].card[0] &&
+				 entry->card[1] == shop[j].card[1] &&
+				 entry->card[2] == shop[j].card[2] &&
+				 entry->card[3] == shop[j].card[3]
 				 );
 		if (j == shop_size)
 			return 3; // no such item in shop
@@ -434,10 +424,10 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 		item_tmp.identify = entry->identify;
 		item_tmp.refine = refine;
 		item_tmp.attribute = entry->attribute;
-		item_tmp.card[0] = (short)entry->card1;
-		item_tmp.card[1] = (short)entry->card2;
-		item_tmp.card[2] = (short)entry->card3;
-		item_tmp.card[3] = (short)entry->card4;
+		item_tmp.card[0] = (short)entry->card[0];
+		item_tmp.card[1] = (short)entry->card[1];
+		item_tmp.card[2] = (short)entry->card[2];
+		item_tmp.card[3] = (short)entry->card[3];
 
 		pc->additem(sd, &item_tmp, entry->amount, LOG_TYPE_NPC);
 		
@@ -472,10 +462,10 @@ void clif_parse_purchase(struct map_session_data* sd, int bl_id, const uint8* da
 			entry.identify = nsd->item[idx].identify;
 			entry.refine = nsd->item[idx].refine;
 			entry.attribute = nsd->item[idx].attribute;
-			entry.card1 = nsd->item[idx].card1;
-			entry.card2 = nsd->item[idx].card2;
-			entry.card3 = nsd->item[idx].card3;
-			entry.card4 = nsd->item[idx].card4;
+			entry.card[0] = nsd->item[idx].card[0];
+			entry.card[1] = nsd->item[idx].card[1];
+			entry.card[2] = nsd->item[idx].card[2];
+			entry.card[3] = nsd->item[idx].card[3];
 
 			VECTOR_PUSH(item_list, entry);
 		}
