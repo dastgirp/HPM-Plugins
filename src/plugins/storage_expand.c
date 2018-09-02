@@ -65,9 +65,9 @@ struct storage_plugin_data {
  * @packet 0x3011 [out] <packet_len>.W <account_id>.L <struct item[]>.P
  * @param  sd     [in]  pointer to session data.
  */
-void intif_send_account_storage_pre(const struct map_session_data **sd_)
+void intif_send_account_storage_pre(struct map_session_data **sd_)
 {
-	const struct map_session_data *sd = *sd_;
+	struct map_session_data *sd = *sd_;
 	int len = 0, i = 0, c = 0;
 	int16 parts = 1;
 	int offset = 12, j = 0, len_t = 0;
@@ -110,6 +110,7 @@ void intif_send_account_storage_pre(const struct map_session_data **sd_)
 		WFIFOSET(inter_fd, len_t);
 		//ShowInfo("Sent %d(%d) Items (%d/%d), Length: %d(%d), Expected: %d\n", c, i, j, parts, len_t, len, sd->storage.aggregate);
 	}
+	sd->storage.save = false; // Save Request Sent.
 	hookStop();
 }
 

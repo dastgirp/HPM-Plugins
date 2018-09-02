@@ -225,7 +225,7 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 
 			// Nothing stripped.
 			if (sd && !rate)
-				clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 			break;
 		}
 	}

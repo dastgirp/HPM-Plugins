@@ -117,7 +117,7 @@ int skill_vending_ev( struct map_session_data *sd, int nameid) {
 
 
 	if (nameid <= 0) {
-		clif->skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0);
+		clif->skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0, 0);
 		return 0;
 	}
 	
@@ -149,7 +149,7 @@ int skill_vending_ev( struct map_session_data *sd, int nameid) {
 	clif_vend_message(sd, output, VEND_COLOR);
 
 	if (!pc_can_give_items(sd)){
-		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0);
+		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0, 0);
 	} else {
 		sd->state.prevend = 1;
 		clif->openvendingreq(sd,2+ssd->vend_lvl);
@@ -228,7 +228,7 @@ void clif_parse_SelectArrow_pre(int *fd,struct map_session_data **sd)
 {
 	if (pc_istrading(*sd)) {
 	//Make it fail to avoid shop exploits where you sell something different than you see.
-		clif->skill_fail(*sd,(*sd)->ud.skill_id,USESKILL_FAIL_LEVEL,0);
+		clif->skill_fail(*sd, (*sd)->ud.skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 		clif_menuskill_clear(*sd);
 		return;
 	}
@@ -320,7 +320,7 @@ int clif_vend(struct map_session_data *sd, int skill_lv) {
 		WFIFOW(fd,2) = c * 2 + 4;
 		WFIFOSET(fd, WFIFOW(fd, 2));
 	} else {
-		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0);
+		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0, 0);
 		return 0;
 	}
 
@@ -398,7 +398,7 @@ int skill_castend_nodamage_id_pre(struct block_list **src_, struct block_list **
 		case MC_VENDING:
 			if (sd){
 				if ( !pc_can_give_items(sd) ) //Prevent vending of GMs with unnecessary Level to trade/drop. [Skotlex]
-					clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
+					clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0, 0);
 				else { // Extended Vending system 
 					if (bc_extended_vending == 1){
 						struct item_data *item;
