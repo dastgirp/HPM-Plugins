@@ -102,7 +102,7 @@ void pc_damage_received(struct map_session_data **sd, struct block_list **src, u
 	
 }
 
-int pc_setpos_delay(struct map_session_data **sd, unsigned short *map_index, int *x, int *y, clr_type *clrtype)
+int pc_setpos_delay(struct map_session_data **sd, unsigned short *map_index, int *x, int *y, enum clr_type *clrtype)
 {
 	int16 m;
 	struct warp_delay_tick *delay_data;

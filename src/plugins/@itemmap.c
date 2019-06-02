@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Dastgir/Hercules
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Description: =========================================
 //= Add additional commands:
 //= @itemmap
@@ -13,6 +13,7 @@
 //===== Changelog: ===========================================
 //= v1.0 - Initial Conversion
 //= v1.1 - Compatible with new Hercules [20180719]
+//= v1.2 - Fixed crash(#44)
 //===== Additional Comments: =================================
 //= 
 //===== Repo Link: ===========================================
@@ -47,7 +48,7 @@
 HPExport struct hplugin_info pinfo = {
 	"@itemmap",
 	SERVER_TYPE_MAP,
-	"1.1",
+	"1.2",
 	HPM_VERSION,
 };
 
@@ -65,13 +66,11 @@ int pc_getitem_map(struct map_session_data *sd,struct item it,int amt,int count,
 		if (!pet->create_egg(sd,it.nameid)) {
 			if ((flag = pc->additem(sd, &it, count, log_type)) > 0) {
 				clif->additem(sd, 0, 0, flag);
-				if (pc->candrop(sd,&it))
+				if (pc->candrop(sd, &it))
 					map->addflooritem(&sd->bl, &it, count, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 0, false);
 			}
 		}
 	}
-	
-	logs->pick_pc(sd, log_type, -amt, &sd->status.inventory[i],sd->inventory_data[i]);
 	
 	return 1;
 }

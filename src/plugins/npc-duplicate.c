@@ -4,12 +4,13 @@
 //= Dastgir/Hercules
 //= Kenpachi
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Description: =========================================
 //= Duplicates the NPC to given location
 //===== Changelog: ===========================================
 //= v1.0 - Initial Conversion
 //= v1.1 - Bug Fixes
+//= v1.2 - Crash Fix
 //===== Additional Comments: =================================
 //= duplicatenpc("NpcName", "DuplicateName", "DupHiddenName", "map", x, y, dir{, sprite{, xs, ys}});
 //= DuplicateRemove({"NPCname"});
@@ -52,29 +53,32 @@
 HPExport struct hplugin_info pinfo = {
 	"Duplicate NPC's Command",		// Plugin name
 	SERVER_TYPE_MAP,// Which server types this plugin works with?
-	"1.1",			// Plugin version
+	"1.2",			// Plugin version
 	HPM_VERSION,	// HPM Version (don't change, macro is automatically updated)
 };
 
-// duplicatenpc("NpcName", "DuplicateName", "DupHiddenName", "map", x, y, dir{, sprite{, xs, ys}});
+/**
+ * duplicatenpc("NpcName", "DuplicateName", "map", x, y, dir{, sprite{, xs, {ys}}});
+ * Creates a duplicate NPC.
+ * Does not support Unique name
+ */
 BUILDIN(duplicatenpc)
 {
 	const char *npc_name = script_getstr(st, 2);
 	const char *dup_name = script_getstr(st, 3);
-	const char *dup_hidden_name = script_getstr(st, 4);
-	const char *tmap = script_getstr(st, 5);
-	int tx = script_getnum(st, 6);
-	int ty = script_getnum(st, 7);
-	int tdir = script_getnum(st, 8);
+	const char *tmap = script_getstr(st, 4);
+	int tx = script_getnum(st, 5);
+	int ty = script_getnum(st, 6);
+	int tdir = script_getnum(st, 7);
 	int tclass_, txs = -1, tys = -1, tmapid;
 	struct npc_data *nd_source, *nd_target;
 	char targetname[24] = "";
 
-	if (script_hasdata(st, 10)) {
-		txs = (script_getnum(st, 10) < -1) ? -1 : script_getnum(st, 10);
+	if (script_hasdata(st, 9)) {
+		txs = (script_getnum(st, 9) < -1) ? -1 : script_getnum(st, 9);
 	}
 	if (script_hasdata(st, 11)) {
-		tys = (script_getnum(st, 11) < -1) ? -1 : script_getnum(st, 10);
+		tys = (script_getnum(st, 10) < -1) ? -1 : script_getnum(st, 10);
 	}
 
 	if (txs == -1 && tys != -1) {
@@ -84,7 +88,7 @@ BUILDIN(duplicatenpc)
 		tys = 0;
 	}
 
-	if (strlen(dup_name) + strlen(dup_hidden_name) > NAME_LENGTH) {
+	if (strlen(dup_name) > NAME_LENGTH) {
 		ShowError("duplicatenpc: Name#HiddenName is to long (max %d chars). (%s)\n",NAME_LENGTH, npc_name);
 		script_pushint(st, 0);
 		return false;
@@ -92,8 +96,8 @@ BUILDIN(duplicatenpc)
 
 	nd_source = npc->name2id(npc_name);
 
-	if (script_hasdata(st, 9)) {
-		tclass_ = (script_getnum(st, 9) < -1) ? -1 : script_getnum(st, 9);
+	if (script_hasdata(st, 8)) {
+		tclass_ = (script_getnum(st, 8) < -1) ? -1 : script_getnum(st, 8);
 	} else {
 		tclass_ = nd_source->class_;
 	}
@@ -113,24 +117,23 @@ BUILDIN(duplicatenpc)
 
 	nd_target = npc->create_npc(nd_source->subtype, tmapid, tx, ty, tdir, tclass_);
 	strcat(targetname, dup_name);
-	if (strcmp(dup_hidden_name, "") != 0) {
-		strncat(targetname, "#", 1);
-		strncat(targetname, dup_hidden_name, strlen(dup_hidden_name));
-	}
 
 	safestrncpy(nd_target->name, targetname , sizeof(nd_target->name));
 	safestrncpy(nd_target->exname, targetname, sizeof(nd_target->exname));
 
 	npc->duplicate_sub(nd_target, nd_source, txs, tys, NPO_ONINIT);
 	
-	
 	script_pushint(st, 1);
 	return true;
 }
 
 
-// [Kenpachi]
-// DuplicateRemove({"NPCname"});
+/**
+ * duplicateremove({"NPC Name"})
+ * Removes the duplicated NPC,
+ * If the npc name provided is the original one,
+ * all duplicates will be removed
+ */
 BUILDIN(duplicateremove)
 {
 	struct npc_data *nd;
@@ -147,24 +150,28 @@ BUILDIN(duplicateremove)
 	}
 
 	if (nd != NULL) {
-		if(nd->src_id == 0) {	//remove all dupicates for this source npc
-			map->foreachnpc(npc->unload_dup_sub,nd->bl.id);
-		} else { // just remove this duplicate
-			npc->unload(nd,true);
+		st->state = END;
+		if(nd->src_id == 0) {  // Remove All Duplicates
+			npc->unload_duplicates(nd);
+			npc->unload(nd, true);
+		} else { // Remove single duplicate
+			npc->unload(nd, true);
+			if (nd->u.scr.script) {
+				script->free_code(nd->u.scr.script);
+				nd->u.scr.script = NULL;
+			}
 		}
+		npc->read_event_script();
 	}
 
 	script_pushint(st, 1);
 	return true;
 }
 
-
-/* Server Startup */
 HPExport void plugin_init(void)
 {
-	addScriptCommand("duplicatenpc", "ssssiii???", duplicatenpc);
+	addScriptCommand("duplicatenpc", "sssiii???", duplicatenpc);
 	addScriptCommand("duplicateremove", "?", duplicateremove);
-
 }
 
 HPExport void server_online(void)

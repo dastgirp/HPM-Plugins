@@ -105,7 +105,7 @@ BUILDIN(aura)
 	}
 
 	// Refresh
-	pc->setpos(sd, sd->mapindex, sd->bl.x, sd->bl.y, (clr_type)CLR_RESPAWN);
+	pc->setpos(sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
 	script_pushint(st, 1);
 	return true;
 }
@@ -133,7 +133,7 @@ ACMD(aura)
 	}
 	
 	// Respawn
-	pc->setpos(sd, sd->mapindex, sd->bl.x, sd->bl.y, (clr_type)CLR_RESPAWN);
+	pc->setpos(sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
 	clif->message(fd, "Aura has been Set.");
 
 	return true;

@@ -42,6 +42,7 @@
 #include "map/npc.h"
 #include "map/pc.h"
 #include "map/pet.h"
+#include "map/refine.h"
 #include "map/script.h"
 #include "map/skill.h"
 #include "map/packets_struct.h"
@@ -152,7 +153,7 @@ BUILDIN(sellitem2)
 	int i = 0, id = script_getnum(st,2);
 	int value = 0;
 	int identify = script_getnum(st, 3);
-	int refine = script_getnum(st, 4);
+	int ref = script_getnum(st, 4);
 	int attribute = script_getnum(st, 5);
 	int card1 = script_getnum(st, 6);
 	int card2 = script_getnum(st, 7);
@@ -180,7 +181,7 @@ BUILDIN(sellitem2)
 		for (i = 0; i < nsd->items; i++) {
 			if (nsd->item[i].nameid == id &&
 				nsd->item[i].identify == identify &&
-				nsd->item[i].refine == refine &&
+				nsd->item[i].refine == ref &&
 				nsd->item[i].attribute == attribute &&
 				nsd->item[i].card[0] == card1 &&
 				nsd->item[i].card[1] == card2 &&
@@ -215,7 +216,7 @@ BUILDIN(sellitem2)
 		
 		nsd->item[i].nameid = it->nameid;
 		nsd->item[i].identify = identify;
-		nsd->item[i].refine = refine;
+		nsd->item[i].refine = ref;
 		nsd->item[i].attribute = attribute;
 		nsd->item[i].card[0] = card1;
 		nsd->item[i].card[1] = card2;
@@ -406,12 +407,12 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 
 	for (i = 0; i < VECTOR_LENGTH(*item_list); ++i) {
 		struct shop_litem_entry *entry = &VECTOR_INDEX(*item_list, i);
-		int refine = entry->refine;
+		int ref = entry->refine;
 		struct item item_tmp;
 		switch(itemdb_type(entry->id)) {
 			case IT_WEAPON:
 			case IT_ARMOR:
-				refine = cap_value(refine, 0, MAX_REFINE);
+				ref = cap_value(ref, 0, MAX_REFINE);
 				break;
 			case IT_PETEGG:
 				pet->create_egg(sd, entry->id);			
@@ -422,7 +423,7 @@ int shop_buylist(struct npc_data *nd, struct npc_extra_data *nsd, struct map_ses
 		memset(&item_tmp, 0, sizeof(item_tmp));
 		item_tmp.nameid = entry->id;
 		item_tmp.identify = entry->identify;
-		item_tmp.refine = refine;
+		item_tmp.refine = ref;
 		item_tmp.attribute = entry->attribute;
 		item_tmp.card[0] = (short)entry->card[0];
 		item_tmp.card[1] = (short)entry->card[1];

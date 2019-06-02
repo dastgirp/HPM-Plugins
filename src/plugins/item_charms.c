@@ -7,7 +7,7 @@
 //===== Current Version: =====================================
 //= 1.1
 //===== Compatible With: ===================================== 
-//= Hercules 2016-06-15
+//= Hercules 2019-06-02
 //===== Description: =========================================
 //= Give item bonus like the game DiabloII
 //===== Topic ================================================
@@ -143,7 +143,7 @@ void status_calc_pc_additional_pre(struct map_session_data **sd_, enum e_status_
 	return;
 }
 
-int pc_additem_post(int retVal, struct map_session_data *sd, struct item *item_data ,int amount, e_log_pick_type log_type)
+int pc_additem_post(int retVal, struct map_session_data *sd, const struct item *item_data ,int amount, e_log_pick_type log_type)
 {
 	struct item_data *idata = itemdb->search(item_data->nameid);
 	struct charm_item_data *cidata = NULL;
@@ -164,7 +164,7 @@ int pc_additem_post(int retVal, struct map_session_data *sd, struct item *item_d
 	return retVal;
 }
 
-int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type)
+int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, enum e_log_pick_type *log_type)
 {
 	struct charm_item_data *cidata = NULL;
 	struct player_data *ssd = NULL;

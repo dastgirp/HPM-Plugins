@@ -4,9 +4,9 @@
 //= AnnieRuru
 //= Credit - Dastgir -> http://hercules.ws/board/topic/7188-market/
 //===== Current Version: =====================================
-//= 1.5
+//= 1.6
 //===== Compatible With: ===================================== 
-//= Hercules 2016-1-1
+//= Hercules 2019-06-02
 //===== Description: =========================================
 //= Create a market clone, to leave a message for other players
 //= while the player can go hunting/questing/events
@@ -58,7 +58,7 @@ int market_clone_companion = 0; // set to 1 to enable
 HPExport struct hplugin_info pinfo = {
 	"marketclone",
 	SERVER_TYPE_MAP,
-	"1.5",
+	"1.6",
 	HPM_VERSION,
 };
 
@@ -428,7 +428,7 @@ void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *
 	return;
 }
 
-void clif_charnameack_pre(int *fd, struct block_list **bl) {
+void clif_blname_ack_pre(int *fd, struct block_list **bl) {
 	if ((*bl)->type == BL_MOB) {
 		TBL_MOB *md = (TBL_MOB*)(*bl);
 		if (md->guardian_data && md->guardian_data->g)
@@ -490,7 +490,7 @@ HPExport void plugin_init(void)
 	addHookPost(battle, check_target, battle_check_target_post);
 	addHookPre(chat, join, chat_joinchat_pre);
 	addHookPost(clif, getareachar_unit, clif_getareachar_unit_post);
-	addHookPre(clif, charnameack, clif_charnameack_pre);
+	addHookPre(clif, blname_ack, clif_blname_ack_pre);
 	addHookPre(map, quit, map_quit_pre);
 	addHookPre(atcommand, atkillmonster_sub, killmonster_sub_pre);
 	addHookPre(script, buildin_killmonster_sub_strip, killmonster_sub_pre);
