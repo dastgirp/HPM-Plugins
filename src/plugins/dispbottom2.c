@@ -68,7 +68,7 @@ BUILDIN(dispbottom2) // Format : dispbottom2(0xFF00FF,"Message"{,"Player Name"})
 		const char* player;
 		struct map_session_data *tsd;
 		player = script_getstr(st, 4);
-		tsd = map->nick2sd(player);
+		tsd = map->nick2sd(player, false);
 		if (tsd != NULL)
 			clif_displaymessagecolor(tsd, message, color);
 		return true;

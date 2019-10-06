@@ -202,7 +202,7 @@ ACMD(sit)
 		return false;
 	}
 
-	if ((pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if ((pl_sd = map->nick2sd(message, true)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));
 		return false;
 	}
@@ -240,7 +240,7 @@ ACMD(stand)
 		return false;
 	}
 
-	if ((pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if ((pl_sd = map->nick2sd(message, true)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));
 		return false;
 	}
@@ -326,7 +326,7 @@ BUILDIN(mapsit)
  *------------------------------------------*/
 BUILDIN(sit)
 {
-	struct map_session_data *pl_sd = map->nick2sd(script_getstr(st, 2));
+	struct map_session_data *pl_sd = map->nick2sd(script_getstr(st, 2), true);
 	int type = script_getnum(st, 3);
 	
 	type = cap_value(type, 0, 1);

@@ -89,7 +89,7 @@ void clif_vend_message(struct map_session_data *sd, const char* msg, uint32 colo
 void clif_vend_message(struct map_session_data *sd, const char* msg, uint32 color)
 {
 	int fd;
-	unsigned short len = strlen(msg) + 1;
+	unsigned short len = (unsigned short)strlen(msg) + 1;
 	
 	nullpo_retv(sd);
 	

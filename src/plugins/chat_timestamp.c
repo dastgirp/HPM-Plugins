@@ -157,7 +157,7 @@ void clif_wis_message_pre(int *fd_, const char **nick_, const char **mes_, int *
 	safestrncpy(WFIFOP(fd,28), mes, mes_len + 1);
 	WFIFOSET(fd,WFIFOW(fd,2));
 #else
-	ssd = map->nick2sd(nick);
+	ssd = map->nick2sd(nick, false);
 
 	WFIFOHEAD(fd, mes_len + NAME_LENGTH + 9);
 	WFIFOW(fd,0) = 0x97;

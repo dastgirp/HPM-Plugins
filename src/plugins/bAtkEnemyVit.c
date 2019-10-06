@@ -69,7 +69,7 @@ HPExport struct hplugin_info pinfo = {
 int bAtkEnemyVit = -1;
 
 struct s_atk_vit {
-	unsigned int vit;     // Enemy Vit
+	int vit;               // Enemy Vit
 	int atk;               // Increase Atk by x%
 };
 

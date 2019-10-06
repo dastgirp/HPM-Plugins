@@ -67,7 +67,7 @@ void clif_parse_LoadEndAck_post(int fd, struct map_session_data *sd)
 		struct mapflag_data *mf;
 		mf = getFromMAPD(&map->list[sd->bl.m], 0);
 		if (mf != NULL && mf->nohomunc == 1) {
-			homun->vaporize(sd, HOM_ST_REST);
+			homun->vaporize(sd, HOM_ST_REST, true);
 			clif->messagecolor_self(sd->fd, COLOR_RED, "You cannot spawn homunculus here.");
 			hookStop();
 		}
@@ -84,14 +84,14 @@ bool homunculus_call_post(bool retVal, struct map_session_data *sd)
 	mf = getFromMAPD(&map->list[sd->bl.m], 0);
 
 	if (mf != NULL && mf->nohomunc == 1 && sd->status.hom_id > 0) {
-		homun->vaporize(sd, HOM_ST_REST);
+		homun->vaporize(sd, HOM_ST_REST, true);
 		clif->messagecolor_self(sd->fd, COLOR_RED, "You can't spawn homunculus here.");
 		hookStop();
 	}
 	return retVal;
 }
 
-bool homunculus_create_post(bool retVal, struct map_session_data *sd, const struct s_homunculus *hom)
+bool homunculus_create_post(bool retVal, struct map_session_data *sd, const struct s_homunculus *hom, bool is_new)
 {
 	struct homun_data *hd;
 	struct mapflag_data *mf;
@@ -102,7 +102,7 @@ bool homunculus_create_post(bool retVal, struct map_session_data *sd, const stru
 	hd = sd->hd;
 	mf = getFromMAPD(&map->list[sd->bl.m], 0);
 	if (hd != NULL && mf != NULL && mf->nohomunc > 0) {
-		homun->vaporize(sd, HOM_ST_REST);
+		homun->vaporize(sd, HOM_ST_REST, true);
 		clif->messagecolor_self(sd->fd, COLOR_RED, "You can't spawn homunculus here.");
 		hookStop();
 		return false;

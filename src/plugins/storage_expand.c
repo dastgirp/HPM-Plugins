@@ -86,7 +86,7 @@ void intif_send_account_storage_pre(struct map_session_data **sd_)
 	len = sd->storage.aggregate * sizeof(struct item);
 	if (len == 0)
 		len = 1;
-	parts = ceil(len/65535.0f);
+	parts = (int16)ceil(len/65535.0f);
 
 	for (j = 0; j < parts; j++) {
 		len_t = 12;
@@ -268,9 +268,9 @@ int mapif_account_storage_load_pre(int *fd_, int *account_id_)
 	int fd = *fd_, account_id = *account_id_;
 	struct storage_data stor = { 0 };
 	int count = 0, i = 0, len = 0;
-	int len_t = 0, j = 0, c = 0;
+	int len_t = 0, c = 0;
 	int offset = 12;
-	int parts = 0;
+	int16 parts = 0, j = 0;
 
 	Assert_ret(account_id > 0);
 
@@ -283,7 +283,7 @@ int mapif_account_storage_load_pre(int *fd_, int *account_id_)
 	len = count * sizeof(struct item);
 	if (len == 0)
 		len = 1;
-	parts = ceil(len/65535.0f);
+	parts = (int16)ceil(len/65535.0f);
 
 	for (j = 0; j < parts; j++) {
 		len_t = 12;
