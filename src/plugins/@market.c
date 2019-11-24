@@ -170,7 +170,7 @@ int mob_clone_spawn_market(struct map_session_data *sd, int16 m, int16 x, int16 
 	if (market_clone_companion) {
 		if (sd->sc.data[SC_PUSH_CART]) {
 			mmd->market_pushcart = sd->sc.data[SC_PUSH_CART]->val1;
-			clif->sc_load(&md->bl, mmd->uid, AREA, SI_ON_PUSH_CART, mmd->market_pushcart, 0, 0);
+			clif->sc_load(&md->bl, mmd->uid, AREA, status->get_sc_icon(SC_ON_PUSH_CART), mmd->market_pushcart, 0, 0);
 		}
 		if (pc_hasmount(sd) || pc_isfalcon(sd)) {
 			int option = sd->sc.option & (OPTION_RIDING|OPTION_DRAGON|OPTION_WUGRIDER|OPTION_FALCON|OPTION_MADOGEAR);
@@ -246,7 +246,8 @@ ACMD(market){
 //		return false;
 //	} no more f*cking sscanf
 	{ // say hello to the dirties string calculation ~ Hooray ~ !!
-		int i = 0, j = 0;
+		int j = 0;
+		size_t i = 0;
 		size_t l = strlen(message) + 1;
 		char *temp = (char*)aMalloc(strlen(message) +1);
 		if (message[0] != '\"') {
@@ -422,7 +423,7 @@ void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *
 		if (mmd) {
 			clif->dispchat((struct chat_data*)map->id2bl(mmd->market_chat_id), sd->fd);
 			if (market_clone_companion && mmd->market_pushcart)
-				clif->sc_load(&sd->bl, mmd->uid, SELF, SI_ON_PUSH_CART, mmd->market_pushcart, 0, 0);
+				clif->sc_load(&sd->bl, mmd->uid, SELF, status->get_sc_icon(SC_ON_PUSH_CART), mmd->market_pushcart, 0, 0);
 		}
 	}
 	return;

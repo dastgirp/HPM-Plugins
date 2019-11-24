@@ -55,7 +55,7 @@ ACMD(deadon)
 		return false;
 	}
 
-	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message, true)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));	// Character not found.
 		return false;
 	}
@@ -97,7 +97,7 @@ ACMD(deadoff)
 		return false;
 	}
 
-	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
+	if (strcmpi(message, "all") != 0 && (pl_sd = map->nick2sd(message, true)) == NULL && (pl_sd = map->charid2sd(atoi(message))) == NULL) {
 		clif->message(fd, msg_txt(3));	// Character not found.
 		return false;
 	}

@@ -73,9 +73,9 @@ ACMD(whobuy)
 			for (j = 0; j < pl_sd->buyingstore.slots; j++) {
 				if(pl_sd->buyingstore.items[j].nameid == item_id) {
 					snprintf(output, CHAT_SIZE_MAX, "Price %d | Amount %d | Buyer %s | Map %s[%d,%d]", pl_sd->buyingstore.items[j].price, pl_sd->buyingstore.items[j].amount, pl_sd->status.name, mapindex_id2name(pl_sd->mapindex), pl_sd->bl.x, pl_sd->bl.y);
-					if (pl_sd->buyingstore.items[j].price < MinPrice)
+					if ((unsigned int)pl_sd->buyingstore.items[j].price < MinPrice)
 						MinPrice = pl_sd->buyingstore.items[j].price;
-					if (pl_sd->buyingstore.items[j].price > MaxPrice)
+					if ((unsigned int)pl_sd->buyingstore.items[j].price > MaxPrice)
 						MaxPrice = pl_sd->buyingstore.items[j].price;
 					clif->message(fd, output);
 					count++;
