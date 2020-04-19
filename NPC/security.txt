@@ -8,7 +8,7 @@ OnInit:
 	/* Config */
 	.max_attempt = 3;	//3 Times Wrong Attempt = Ban.
 	.ban_hour = 3;		//Hours to ban
-	.allowed = 1|2|4|8|64|128|512|1024|2048|4096;		//Allowed Settings..
+	.allowed = 0x1|0x2|0x4|0x8|0x40|0x80|0x200|0x400|0x800|0x1000|0x2000|0x4000|0x8000;		//Allowed Settings..
 	end;
 	
 OnPCLoginEvent:
@@ -39,9 +39,12 @@ OnPlayerMenu:
 				"Can't use Vending",					//	128
 				"Can't delete items by any means",		//	256
 				"Can't buy items",						//	512
-				"Can't Send Guild Invite",				//	1024
-				"Can't Receive Guild Invite",			//	2048
-				"Can't Leave the guild";				//	4096
+				"Can't send Guild Invite",				//	1024
+				"Can't receive Guild Invite",			//	2048
+				"Can't leave the guild",				//	4096
+				"Can't send RoDEX Mail",				//  0x2000
+				"Can't send zeny via RoDEX",			//  0x4000
+				"Can't send item via RoDEX";			//  0x8000
 	while (1){
 		mes "[^FFA500 Security System ^000000]";
 		mes "Security Status: "+ ((#security>0)?"^00FF00On^000000":"^FF0000Off^000000");

@@ -34,6 +34,7 @@
 #include "map/mob.h"
 #include "map/npc.h"
 #include "map/pc.h"
+#include "map/rodex.h"
 #include "map/storage.h"
 #include "map/trade.h"
 #include "plugins/HPMHooking.h"
@@ -66,6 +67,9 @@ enum S_Options {	//Security Options
 	S_CANT_SEND_GINVITE = 0x0400,		// Cannot Send Guild Invite
 	S_CANT_RECEIVE_GINVITE = 0x0800,	// Cannot Receive Guild Invite
 	S_CANT_LEAVE_GUILD = 0x1000,		// Cannot Leave Guild
+	S_CANT_RODEX = 0x2000,              // Cannot Send RoDEX Mail
+	S_CANT_RODEX_ZENY = 0x4000,         // Cannot Send Zeny via RoDEX
+	S_CANT_RODEX_ITEM = 0x8000,         // Cannot Send Item via RoDEX
 };
 
 int pc_cant_drop(struct map_session_data **sd, int *n, int *amount) {	// Can't Drop Items
@@ -226,6 +230,48 @@ int guild_leave_permission(struct map_session_data **sd, int *guild_id, int *acc
 	return 0;
 }
 
+int rodex_send_mail_pre(struct map_session_data **sd, const char **receiver_name, const char **body, const char **title, int64 *zeny) {
+	nullpo_retr(RODEX_SEND_MAIL_FATAL_ERROR, *sd);
+	nullpo_retr(RODEX_SEND_MAIL_FATAL_ERROR, *receiver_name);
+	nullpo_retr(RODEX_SEND_MAIL_FATAL_ERROR, *body);
+	nullpo_retr(RODEX_SEND_MAIL_FATAL_ERROR, *title);
+	if (!rodex->isenabled() || (*sd)->npc_id > 0) {
+		rodex->clean(*sd, 1);
+		return RODEX_SEND_MAIL_FATAL_ERROR;
+	}
+	if (is_secure(*sd) > 0) {
+		if (security_opt(*sd) & S_CANT_RODEX) {
+			clif->message((*sd)->fd, "Security is on. You cannot send RoDEX Mail.");
+			hookStop();
+			return RODEX_SEND_MAIL_FATAL_ERROR;
+		}
+		if (*zeny > 0 && security_opt(*sd) & S_CANT_RODEX_ZENY) {
+			clif->message((*sd)->fd, "Security is on. You cannot send Zeny via RoDEX.");
+			hookStop();
+			return RODEX_SEND_MAIL_FATAL_ERROR;
+		}
+		int i = 0;
+		bool rodex_item_found = false;
+		for (i = 0; i < RODEX_MAX_ITEM; i++) {
+			struct item *tmpItem = &(*sd)->rodex.tmp.items[i].item;
+
+			if (tmpItem->nameid == 0)
+				continue;
+			
+			rodex_item_found = true;
+			break;
+		}
+		if (rodex_item_found && security_opt(*sd) & S_CANT_RODEX_ITEM) {
+			clif->message((*sd)->fd, "Security is on. You cannot send items via RoDEX.");
+			hookStop();
+			return RODEX_SEND_MAIL_FATAL_ERROR;
+		}
+	}
+	
+	return RODEX_SEND_MAIL_SUCCESS;
+
+}
+
 /* Server Startup */
 HPExport void plugin_init(void)
 {
@@ -241,6 +287,7 @@ HPExport void plugin_init(void)
 	addHookPre(clif, openvendingreq, open_vending);
 	addHookPre(guild, invite, guild_invite_permission);
 	addHookPre(guild, leave, guild_leave_permission);
+	addHookPre(rodex, send_mail, rodex_send_mail_pre);
 }
 
 HPExport void server_online(void)
