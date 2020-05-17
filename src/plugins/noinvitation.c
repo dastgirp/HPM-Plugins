@@ -5,7 +5,7 @@
 //===== Current Version: =====================================
 //= 1.1
 //===== Compatible With: ===================================== 
-//= Hercules 2016-06-30
+//= Hercules 2020-05-16
 //===== Description: =========================================
 //= block players from invite friends
 //===== Topic ================================================
@@ -41,6 +41,7 @@ HPExport struct hplugin_info pinfo = {
 
 struct mapflag_data {
 	unsigned noinvitation : 1;
+	int group_bypass;
 };
 
 void npc_parse_unknown_mapflag_pre(const char **name, const char **w3, const char **w4, const char **start, const char **buffer, const char **filepath, int **retval)
@@ -48,10 +49,14 @@ void npc_parse_unknown_mapflag_pre(const char **name, const char **w3, const cha
 	if (!strcmp(*w3, "noinvitation")) {
 		int16 m = map->mapname2mapid(*name);
 		struct mapflag_data *mf;
-		if (!( mf = getFromMAPD(&map->list[m], 0))) {
+		int bypass_level = atoi(*w4);
+		if (bypass_level == 0)
+			bypass_level = 100;
+		if (!(mf = getFromMAPD(&map->list[m], 0))) {
 			CREATE(mf, struct mapflag_data, 1);
 			addToMAPD(&map->list[m], mf, 0, true);
 		}
+		mf->group_bypass = bypass_level;
 		mf->noinvitation = 1;
 		hookStop();
 	}
@@ -64,7 +69,7 @@ void clif_friendlist_req_pre(struct map_session_data **sd, int *account_id, int 
 	struct mapflag_data *mf;
 	nullpo_retv(ssd);
 	mf = getFromMAPD(&map->list[ssd->bl.m], 0);
-	if (mf && mf->noinvitation) {
+	if (mf && mf->noinvitation && pc_get_group_level(ssd) < mf->group_bypass) {
 		clif->messagecolor_self(ssd->fd, COLOR_RED, "You can't invite friends in this map.");
 		hookStop();
 	}
