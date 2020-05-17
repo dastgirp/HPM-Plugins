@@ -84,8 +84,22 @@ void intif_send_account_storage_pre(struct map_session_data **sd_)
 		return;
 
 	len = sd->storage.aggregate * sizeof(struct item);
-	if (len == 0)
-		len = 1;
+	// Force save if no items found.
+	if (len == 0) {
+		len_t = 12;
+		WFIFOHEAD(inter_fd, len_t);
+
+		WFIFOW(inter_fd, 0) = 0x3011;
+		WFIFOW(inter_fd, 2) = (uint16)len_t;
+		WFIFOL(inter_fd, 4) = sd->status.account_id;
+		WFIFOW(inter_fd, 8) = 1;        // Current Part
+		WFIFOW(inter_fd, 10) = 1;       // Total Parts
+
+		WFIFOSET(inter_fd, len_t);
+		sd->storage.save = false; // Save Request Sent.
+		hookStop();
+		return;
+	}
 	parts = (int16)ceil(len/65535.0f);
 
 	for (j = 0; j < parts; j++) {
@@ -157,18 +171,23 @@ void intif_parse_account_storage_pre(int *fd_)
 	}
 
 	//ShowInfo("Received %d/%d, Size: %d. AccountID: %d\n", RFIFOW(fd, 8), total_parts, payload_size, account_id);
+	if (payload_size == 0) {
+		// Payload size 0, do nothing
+		VECTOR_ENSURE(sd->storage.item, data->count, 1);
+	} else {
+		storage_count = (payload_size / sizeof(struct item));
+		data->count += storage_count;
 
-	storage_count = (payload_size/sizeof(struct item));
-	data->count += storage_count;
+		VECTOR_ENSURE(sd->storage.item, data->count, 1);
 
-	VECTOR_ENSURE(sd->storage.item, data->count, 1);
+		sd->storage.aggregate = data->count; // Total items in storage.
 
-	sd->storage.aggregate = data->count; // Total items in storage.
-
-	for (i = 0; i < storage_count; i++) {
-		const struct item *it = RFIFOP(fd, 12 + i * sizeof(struct item));
-		VECTOR_PUSH(sd->storage.item, *it);
+		for (i = 0; i < storage_count; i++) {
+			const struct item* it = RFIFOP(fd, 12 + i * sizeof(struct item));
+			VECTOR_PUSH(sd->storage.item, *it);
+		}
 	}
+
 	data->current_part += 1;
 
 	if (data->current_part != data->total_parts) {
@@ -222,8 +241,12 @@ int mapif_parse_AccountStorageSave_pre(int *fd_)
 		return 0;	
 	}
 
-
-	count = payload_size/sizeof(struct item);
+	if (payload_size == 0) {
+		count = 0;
+	}
+	else {
+		count = payload_size / sizeof(struct item);
+	}
 	data->count += count;
 
 	if (count > 0) {
@@ -237,8 +260,8 @@ int mapif_parse_AccountStorageSave_pre(int *fd_)
 
 		data->p_stor.aggregate += count;
 		//ShowInfo("Recieved (SR) Part: %d/%d Count: %d/%d Size: %d\n", data->current_part, data->total_parts, count, data->count, payload_size);
-		data->current_part += 1;
 	}
+	data->current_part += 1;
 
 	if (data->current_part != data->total_parts) {
 		hookStop();
@@ -281,8 +304,21 @@ int mapif_account_storage_load_pre(int *fd_, int *account_id_)
 	count = inter_storage->fromsql(account_id, &stor);
 
 	len = count * sizeof(struct item);
-	if (len == 0)
-		len = 1;
+	if (len == 0) {
+		len_t = 12;
+		WFIFOHEAD(fd, len_t);
+
+		WFIFOW(fd, 0) = 0x3805;
+		WFIFOW(fd, 2) = (uint16)len_t;
+		WFIFOL(fd, 4) = account_id;
+		WFIFOW(fd, 8) = 1;	// Current Part
+		WFIFOW(fd, 10) = 1;	// Total Parts
+
+		WFIFOSET(fd, len_t);
+		VECTOR_CLEAR(stor.item);
+		hookStop();
+		return 1;
+	}
 	parts = (int16)ceil(len/65535.0f);
 
 	for (j = 0; j < parts; j++) {
