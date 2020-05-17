@@ -227,7 +227,7 @@ BUILDIN(sellitem2)
 	return true;
 }
 
-int npc_unload_pre(struct npc_data **nd, bool *single)
+int npc_unload_pre(struct npc_data **nd, bool *single, bool *unload_mobs)
 {
 	struct npc_extra_data *nsd;
 	nullpo_ret(*nd);

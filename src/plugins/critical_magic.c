@@ -116,7 +116,7 @@ void skill_attack_display_unknown_pre(int **attack_type, struct block_list **src
 			int64 _damage = 0,u_=0;
 			int num = abs(skill->get_num(skill_id,skill_lv));
 			damage = damage*2;
-			md = mob->once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE);
+			md = mob->once_spawn_sub(src, src->m, src->x, src->y, "--en--",1083,"", SZ_SMALL, AI_NONE, 0);
 			if ((tmpd = getFromMOBDATA(md,0)) == NULL) {
 				CREATE(tmpd, struct tmp_data, 1);
 				addToMOBDATA(md, tmpd, 0, true);

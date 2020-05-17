@@ -247,7 +247,7 @@ bool restock(struct map_session_data *sd, int item_id, int quantity, int rs_from
 			break;
 		}
 
-		case RS_STORAGE: {
+		case RS_STORAGE: { 
 			if (sd->storage.received == false) {
 				return false;
 			}

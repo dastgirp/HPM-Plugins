@@ -152,10 +152,10 @@ BUILDIN(duplicateremove)
 	if (nd != NULL) {
 		st->state = END;
 		if(nd->src_id == 0) {  // Remove All Duplicates
-			npc->unload_duplicates(nd);
-			npc->unload(nd, true);
+			npc->unload_duplicates(nd, true);
+			npc->unload(nd, true, true);
 		} else { // Remove single duplicate
-			npc->unload(nd, true);
+			npc->unload(nd, true, true);
 			if (nd->u.scr.script) {
 				script->free_code(nd->u.scr.script);
 				nd->u.scr.script = NULL;
