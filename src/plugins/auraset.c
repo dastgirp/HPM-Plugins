@@ -270,7 +270,7 @@ int status_change_start_post(int retVal, struct block_list *src, struct block_li
 }
 
 // [Dastgir/Hercules]
-int status_change_end_pre(struct block_list **bl, enum sc_type *type_, int *tid_, const char **file, int *line)
+int status_change_end_pre(struct block_list **bl, enum sc_type *type_, int *tid_)
 {
 	struct map_session_data *sd;
 	struct status_change *sc;

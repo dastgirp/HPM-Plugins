@@ -652,24 +652,24 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 			pc->paycash(sd,(int)z,0);
 			pc->getcash(vsd,(int)z,0);
 		} else {
-			int count = (int)z;
+			int count_decrease = (int)z;
 			int to_reduce = 0;
 			struct item item;
 			item.nameid = vend_loot;
-			item.amount = count;
+			item.amount = count_decrease;
 			item.identify = 1;
 
 			for (i = 0; i < MAX_INVENTORY; i++) {
 				if (sd->status.inventory[i].nameid == vend_loot) {
-					to_reduce = cap_value(sd->status.inventory[i].amount, 0, count);
+					to_reduce = cap_value(sd->status.inventory[i].amount, 0, count_decrease);
 					// Tried to cheat? Can't delete
 					if (pc->delitem(sd, i, to_reduce, 0, 6, LOG_TYPE_VENDING)) {
 						hookStop();
 						return;
 					}
-					count -= to_reduce;
+					count_decrease -= to_reduce;
 				}
-				if (count == 0)
+				if (count_decrease == 0)
 					break;
 			}
 			pc->additem(vsd, &item, (int)z, LOG_TYPE_VENDING);
