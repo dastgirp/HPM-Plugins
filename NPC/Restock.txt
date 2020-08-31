@@ -1,17 +1,20 @@
-/*
-CREATE TABLE IF NOT EXISTS `restock` (
-  `charid` int(10) NOT NULL,
-  `restockid` int(6) NOT NULL,
-  `restkq` int(5) NOT NULL,
-  `restkf` int(10) NOT NULL default '1'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 ;
+//===== Hercules Plugin ======================================
+//= Restock Script
+//===== By: ==================================================
+//= Dastgir/Hercules
+//= Samuel/Hercules
+//===== Current Version: =====================================
+//= 2.0 - Dastgir's latest script
+//= 2.1 - Fixed the script to work with the plugin
+//===== Compatible With: ===================================== 
+//= Hercules
+//===== Description: =========================================
+//= Enables Restock of Items.
+//===== Additional Information: ==============================
+//= Requires "restock plugin
+//============================================================
 
-Script By Dastgir/Hercules
-v1.0 - Intial Release
-TO be used with Restock Plugin
-*/
-
-prontera,140,140,5	script	Restock	4_M_ALCHE_C,{
+-	script	Restock	FAKE_NPC,{
 	end;
 
 OnInit:
@@ -22,6 +25,7 @@ OnInit:
 
 OnList:
 	restock_list();
+	restock_status();
 	end;
 
 OnToggle:
@@ -31,12 +35,13 @@ OnToggle:
 		end;
 	}
 	
-	dispbottom("Restock System: "+ (.@toggle == 0)?"Disabled.":"Enabled.");
+	dispbottom(sprintf("Restock System: %s",.@toggle ? "Enable" : "Disable"),C_LIME);
+	dispbottom("Use @restock2 to configure restock",C_LIME);
 	end;
 
 OnRestock:
 	if (restock_status() == 0) {
-		dispbottom("Restock is Currently Disabled, use @restock to Enable");
+		dispbottom("Restock is Currently Disabled, use @restock to Enable",C_LIME);
 		end;
 	}
 	.@quantity = atoi(.@atcmd_parameters$[1]);
@@ -44,44 +49,41 @@ OnRestock:
 	.@type2 = atoi(.@atcmd_parameters$[3]);
 	// All Parameters are not provided.
 	if (.@atcmd_numparameters < 4) {
-		dispbottom("Usage:");
-		dispbottom("@restock2 <ItemID> <Quantity> <RestockFrom> <Type>");
-		dispbottom("Restock From:");
-		dispbottom("1 = Storage");
-		dispbottom("2 = GStorage");
-		dispbottom("Type:");
-		dispbottom("1 = Add");
-		dispbottom("2 = Remove");
-		dispbottom("3 = Remove All Items");
-		dispbottom("5 = List Items")
-		dispbottom("@restock2 x y z 3 For Help");
-		dispbottom("@restock2 x y z 4 For Current Restocking List");
-		dispbottom("@restock2 x y z 5 For Removing All Items From Restock");
-		dispbottom("x,y,z Can be any number, e.g: @restock2 0 0 0 3 will give you help option,@restock2 x y z 5 will Empty your list");
+		dispbottom("Usage:",C_LIME);
+		dispbottom("@restock2 <ItemID> <Quantity> <RestockFrom> <Type>",C_LIME);
+		dispbottom("Restock From:",C_LIME);
+		dispbottom("1 = Storage",C_LIME);
+		dispbottom("2 = GStorage",C_LIME);
+		dispbottom("Type:",C_LIME);
+		dispbottom("1 = Add",C_LIME);
+		dispbottom("2 = Remove",C_LIME);
+		dispbottom("3 = Remove All Items",C_LIME);
+		dispbottom("@restock2 x y z 4 For Help",C_LIME);
+		dispbottom("@restock2 x y z 5 For Current Restocking List",C_LIME);
+		dispbottom("x,y,z Can be any number, e.g: @restock2 0 0 0 4 will give you help option,@restock2 x y z 3 will Empty your list",C_LIME);
 		end;
 	}
 	// Type2 => Help
-	if (.@type2 == 3) {
-		dispbottom("Help:");
-		dispbottom("If you want to restock 5 Orange Potion item from Storage, you can type");
-		dispbottom("@restock2 502 5 1 1");
-		dispbottom("If you want to restock the Orange Potion from GStorage,");
-		dispbottom("@restock2 502 5 1 2");
-		dispbottom("If you want to remove the restock of Orange Potion");
-		dispbottom("@restock2 502 0 2 0");
-		dispbottom("If You used restock from storage (@restock2 502 5 1 1) and then used same item from GStorage");
-		dispbottom("then the value will be overwritten and the item will be restocked from GStorage.");
+	if (.@type2 == 4) {
+		dispbottom("Help:",C_LIME);
+		dispbottom("If you want to restock 5 Orange Potion item from Storage, you can type",C_LIME);
+		dispbottom("@restock2 502 5 1 1",C_LIME);
+		dispbottom("If you want to restock the Orange Potion from GStorage,",C_LIME);
+		dispbottom("@restock2 502 5 1 2",C_LIME);
+		dispbottom("If you want to remove the restock of Orange Potion",C_LIME);
+		dispbottom("@restock2 502 0 2 2",C_LIME);
+		dispbottom("If You used restock from storage (@restock2 502 5 1 1) and then used same item from GStorage",C_LIME);
+		dispbottom("then the value will be overwritten and the item will be restocked from GStorage.",C_LIME);
 		end;
 	}
 	// Type2 => List Restock Item
-	if (.@type2 == 4) {
+	if (.@type2 == 5) {
 		restock_list();
 		end;
 	}
 	// Type2 => Clear Restock Items
-	else if (.@type2 == 5) {
+	else if (.@type2 == 3) {
 		restock(502, 0, RS_STORAGE, RS_TYPE_DEL_ALL);
-		dispbottom("All Restock Items Deleted.");
 		end;
 	}
 	// Initial ItemID = 0
@@ -91,67 +93,50 @@ OnRestock:
 	if (atoi(.@item_search$) > 0) {
 		.@item_id = atoi(.@item_search$);
 	} else {
-		.@found = searchitem(.@item_ids, .@item_search$);
+		.@found = searchitem(.@item_ids[0], .@item_search$);
 		if (!.@found) {
-			dispbottom("No Such Item Found");
+			dispbottom("No Such Item Found",C_LIME);
 			end;
 		}
-		dispbottom("Item Selected: "+ getitemname(.@item_ids[0]) +", Id: "+ .@item_ids[0]);
+		dispbottom("Item Selected: "+ getitemname(.@item_ids[0]) +", Id: "+ .@item_ids[0]+"",C_LIME);
 		.@item_id = .@item_ids[0];
 	}
 	// No Item ID Found
 	if (!.@item_id) {
-		dispbottom("No Item Selected.");
+		dispbottom("No Item Selected.",C_LIME);
 	} else if (getitemname(.@item_id) == "null") {
-		dispbottom("Proper Item ID Please");
+		dispbottom("Proper Item ID Please",C_LIME);
 		end;
 	}
 
 	if (.@type <= 0 || .@type > 2) {
-		dispbottom("Input Proper Type1 Please");
+		dispbottom("Input Proper Type1 Please",C_LIME);
 		end;
 	}
 
 	// Add Item to Restock List
 	if (.@type2 == 1){
-		if (restock(.@atcmd_parameters$[0], atoi(.@atcmd_parameters$[1]), atoi(.@atcmd_parameters$[2]), atoi(.@atcmd_parameters$[3])))
+		if (restock(.@item_id, atoi(.@atcmd_parameters$[1]), atoi(.@atcmd_parameters$[2]), atoi(.@atcmd_parameters$[3])))
 		// Invalid Quantity
 		if (.@quantity < 1){
-			dispbottom("Input Proper Quantity Please!");
+			dispbottom("Input Proper Quantity Please!",C_LIME);
 			end;
 		}
 		// Check if existing entry exists
-		query_sql("SELECT `restkf` FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id, .@rf);
+		query_sql("SELECT `restock_from` FROM `restock` WHERE `char_id`="+ getcharid(0) +" AND `item_id`="+ .@item_id, .@rf);
 		// Update the table if existing entry exists
 		if (.@rf) {
-			query_sql("UPDATE `restock` SET `restkq`="+ .@quantity +", `restkf`="+ .@type +" WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id);
+			query_sql("UPDATE `restock` SET `quantity`="+ .@quantity +", `restock_from`="+ .@type +" WHERE `char_id`="+ getcharid(0) +" AND `item_id`="+ .@item_id);
 		} else {
-			query_sql("INSERT INTO `restock` VALUES("+ getcharid(0) +","+ .@item_id +","+ .@quantity +","+ .@type +")");
+			query_sql("INSERT INTO `restock` (`char_id`,`item_id`,`quantity`,`restock_from`) VALUES ("+ getcharid(0) +","+ .@item_id +","+ .@quantity +","+ .@type +")");
 		}
-		// Check if Item Exists currently, if not then restock
-		if (countitem(.@item_id) < .@quantity) {
-			restkid = .@item_id;
-			callsub OnRestock;
-		}
-		dispbottom("Restocking "+.@quantity+" "+getitemname(.@item_id)+" From "+((.@type==1)?"Storage":"Guild Storage")+"!");
 		end;
 	}
 	// Remove Item from Restock List
 	if (.@type2 == 2) {
-		query_sql("DELETE FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ .@item_id);
-		dispbottom("Deleted "+ .@item_id +" From Restocking!");
+		restock(.@item_id,atoi(.@atcmd_parameters$[1]), atoi(.@atcmd_parameters$[2]), atoi(.@atcmd_parameters$[3]));
 		end;
 	}
 	end;
 
-OnRestock:
-	// Get Restock Amount
-	query_sql("SELECT `restkq`,`restkf` FROM `restock` WHERE `charid`="+ getcharid(0) +" AND `restockid`="+ restkid, .@qu, .@fr);
-	if (.@qu) {
-		// Restock Item
-		.@ru = restkid;
-		restock_item(.@ru, .@qu, .@fr);
-	}
-	restkid = 0;
-	end;
 }
