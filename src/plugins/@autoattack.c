@@ -62,7 +62,7 @@ void autoattack_motion(struct map_session_data* sd)
 		}
 	}
 	if (target_id == 0)
-		unit->walktoxy(&sd->bl, sd->bl.x+(rand()%2==0?-1:1)*(rand()%10), sd->bl.y+(rand()%2==0?-1:1)*(rand()%10),0);
+		unit->walk_toxy(&sd->bl, sd->bl.x+(rand()%2==0?-1:1)*(rand()%10), sd->bl.y+(rand()%2==0?-1:1)*(rand()%10),0);
 	return;
 }
 
