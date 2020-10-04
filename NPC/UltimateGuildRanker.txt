@@ -1,0 +1,274 @@
+/*
+
+CREATE TABLE IF NOT EXISTS `ugr_guild_info` (
+  `guild_id` mediumint(6) NOT NULL DEFAULT '0',
+  `breaks` smallint(5) NOT NULL DEFAULT '0',
+  `kills` smallint(5) NOT NULL DEFAULT '0',
+  `deaths` smallint(5) NOT NULL DEFAULT '0',
+  `APart` mediumint(6) NOT NULL DEFAULT '0',
+  `percent` SMALLINT(4) NOT NULL DEFAULT '0',
+  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',
+  `claim` tinyint(1) NOT NULL DEFAULT '1',
+  UNIQUE KEY `guild_id` (`guild_id`,`date`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `ugr_guild_infov` (
+  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',
+  `AgitCount` mediumint(6) NOT NULL DEFAULT '1',
+  `HighEmpBreak` MEDIUMINT(6) NOT NULL DEFAULT '0',
+  UNIQUE KEY `date` (`date`,`AgitCount`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `ugr_guild_char_info` (
+  `char_id` MEDIUMINT(7) NOT NULL DEFAULT '0',
+  `name` VARCHAR(24) NOT NULL,
+  `EmpBreak` MEDIUMINT(6) NOT NULL DEFAULT '0',
+  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',
+  UNIQUE KEY `date` (`date`,`char_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+
+Original Topic: https://herc.ws/board/topic/4941-ultimate-guild-ranker/
+
+$AgitCount = AgitCounts
+Suggested Percentage:
+Agit Counts = 20%
+      Formula: .20*(X/30*100) = 20%  where X is Agit Counts and 30 are days in the month. 
+Player KDR = 10%
+      Formula: .10*(TK/TD*100) = 10% where TK is Overall Total Kills and TD is Overall Total deaths of the Guild. (Total Kills/Deaths counts will remain even the members leaves the guild.)
+EmP Break = 50%
+       Formula: .50*(TB/HEB*100) = 50% where TB is Total Break while HEB is Highest Emp Break value. Meaning the highest break counts will be the default value to get the 20%. Meaning the most break counts guild will always get the 20% (Break counts will remain even the members leaves the guild.) 
+Active Participants =  20%
+       Formula: .20*(AP/TAP*100) = 20% where AP is the # of Max Members online per day divided by TAP or total possible online players in 1 month 75*30 = 2250
+
+---------------------------------------------
+=============================================
+==				Script By: 				 ====
+== 	  	  (Dastgir/Hercules)		     ====
+==             Version 1.4				 ====
+=============================================
+---------------------------------------------
+*/
+-	script	UltimateRanker#00	FAKE_NPC,{
+
+OnClock0001:
+	if (gettime(GETTIME_DAYOFMONTH)==1) {
+		query_sql "INSERT INTO `ugr_guild_infov` (`date`,`AgitCount`) VALUES ("+ ((gettime(GETTIME_YEAR)*100)+gettime(GETTIME_MONTH)) +","+$AgitCount+")"; 
+		$AgitCount = 1;
+		if (gettime(GETTIME_MONTH)==1){
+			.@date = ((gettime(GETTIME_YEAR)-1)*100)+12;
+		} else {
+			.@date = ((gettime(GETTIME_YEAR)*100)+gettime(GETTIME_MONTH)-1);
+		}
+		callfunc("Update_HEB", .@date);
+		query_sql "UPDATE `ugr_guild_info` SET `claim`=0 ORDER BY `percent` DESC LIMIT 1";
+	}
+	end;
+
+OnPCLoginEvent:
+	if (getcharid(2) && gettimetick(2) >= UGR_Time){
+		query_sql "INSERT INTO `ugr_guild_info` (`guild_id`,`APart`,`date`) VALUES ("+getcharid(2)+",1,"+gettimestr("%Y%m",7)+") ON DUPLICATE KEY UPDATE `APart`=`APart`+1 ";
+		UGR_Time = gettimetick(2)+(60*60*24); //One Day = 86400 Seconds
+	}
+	end;
+
+OnPCDieEvent:	//Set Guild Deaths
+	if (!getcharid(2) || killedrid==getcharid(0))
+		end;
+	query_sql "INSERT INTO `ugr_guild_info` (`guild_id`,`deaths`,`date`) VALUES ("+getcharid(2)+",1,"+gettimestr("%Y%m",7)+") ON DUPLICATE KEY UPDATE `deaths`=`deaths`+1 ";
+	end;
+	
+OnPCKillEvent:	//Set Guild Kills
+	if (!getcharid(2) || killedrid==getcharid(0))
+		end;
+	query_sql "INSERT INTO `ugr_guild_info` (`guild_id`,`kills`,`date`) VALUES ("+getcharid(2)+",1,"+gettimestr("%Y%m",7)+") ON DUPLICATE KEY UPDATE `kills`=`kills`+1 ";
+	end;
+	
+	
+OnEmpBreak:
+	if (!getcharid(2)) { // Check in case some emulator bug causing no_guild_member to break emperium.
+		consolemes(CONSOLEMES_DEBUG, "Emperium Broke without a Guild Attached.");
+		end;
+	}
+	query_sql "INSERT INTO `ugr_guild_info` (`guild_id`,`breaks`,`date`) VALUES ("+getcharid(2)+",1,"+gettimestr("%Y%m",7)+") ON DUPLICATE KEY UPDATE `breaks`=`breaks`+1 ";
+	query_sql "INSERT INTO `ugr_guild_char_info` (`char_id`,`name`, `EmpBreak`,`date`) VALUES ("+getcharid(0)+",'"+strcharinfo(0)+"',1,"+gettimestr("%Y%m",7)+") ON DUPLICATE KEY UPDATE `EmpBreak`=`EmpBreak`+1 ";
+	callfunc("Update_HEB", atoi(gettimestr("%Y%m",7)));
+	end;
+ 
+OnInit:
+	if ($AgitCount==0) {
+		$AgitCount=1;
+	}
+	.Config_UGR[0] = 20;	//Castle Opened till date.
+	.Config_UGR[1] = 10;	//KDR Percentage
+	.Config_UGR[2] = 50;	//EmpBreak Percentage
+	.Config_UGR[3] = 20;	//Active Participation
+	.Config_UGR[4] = (60*60);	//IF WoE Starts within x seconds, AgitCount will not increase.
+	.Config_UGR[5] = 40;	//GM Level to See Active Participants Column.
+	setarray .Prize,502,10;	//Prize(Format: ID1,Quantity1,ID2,Q2,ID3,Q3,.....,IDn,Qn)
+	query_sql "CREATE TABLE IF NOT EXISTS `ugr_guild_info` (  `guild_id` mediumint(6) NOT NULL DEFAULT '0',  `breaks` smallint(5) NOT NULL DEFAULT '0',  `kills` smallint(5) NOT NULL DEFAULT '0',  `deaths` smallint(5) NOT NULL DEFAULT '0',  `APart` mediumint(6) NOT NULL DEFAULT '0',  `percent` SMALLINT(4) NOT NULL DEFAULT '0',  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',  `claim` tinyint(1) NOT NULL DEFAULT '1',  UNIQUE KEY `guild_id` (`guild_id`,`date`)) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+	query_sql "CREATE TABLE IF NOT EXISTS `ugr_guild_infov` (  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',  `AgitCount` mediumint(6) NOT NULL DEFAULT '1',  `HighEmpBreak` MEDIUMINT(6) NOT NULL DEFAULT '0',  UNIQUE KEY `date` (`date`,`AgitCount`)) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+	query_sql "CREATE TABLE IF NOT EXISTS `ugr_guild_char_info` (  `char_id` MEDIUMINT(7) NOT NULL DEFAULT '0', `name` VARCHAR(24) NOT NULL, `EmpBreak` MEDIUMINT(6) NOT NULL DEFAULT '0',  `date` MEDIUMINT(7) NOT NULL DEFAULT '0',  UNIQUE KEY `date` (`date`,`char_id`)) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+	end;
+	
+OnAgitStart:
+	if (gettimetick(2) >= $ugr_last_tick ) {	//Don't Update AgitCount if WoE has been started in less than Config[4] seconds.
+		set $AgitCount,$AgitCount+1;
+		$ugr_last_tick = gettimetick(2)+(.Config_UGR[4]);
+	}
+	end;
+	
+}
+
+function	script	Update_HEB	{
+	query_sql "DELETE FROM `ugr_guild_info` WHERE (SELECT count(1) FROM `guild` WHERE `guild_id` = `ugr_guild_info`.`guild_id`) < 1";
+	//Select HEB
+	set .@time,getarg(0);
+	query_sql "SELECT `breaks` FROM `ugr_guild_info` WHERE `date`="+ .@time +" ORDER BY `breaks` DESC LIMIT 1",.@UGR_breaks;
+	if (.@UGR_breaks==0){
+		.@UGR_breaks=1;
+	}
+	query_sql "INSERT INTO `ugr_guild_infov` (`date`,`HighEmpBreak`) VALUES ("+ .@time +","+.@UGR_breaks+") ON DUPLICATE KEY UPDATE `HighEmpBreak`="+.@UGR_breaks;
+	//Update Formula
+	query_sql "UPDATE `ugr_guild_info` SET `percent`=( (("+$AgitCount+"/"+gettime(GETTIME_DAYOFMONTH)+"*100)*"+getvariableofnpc(.Config_UGR[0],"UltimateRanker#00")+"/100) + ( (`kills`/(IF(`deaths`=0, 1,`deaths`))*100)*"+getvariableofnpc(.Config_UGR[1],"UltimateRanker#00")+"/100)+((`breaks`/"+.@UGR_breaks+"*100)*"+getvariableofnpc(.Config_UGR[2],"UltimateRanker#00")+"/100)+((`APart`/(select count(*) FROM `guild_member` WHERE `guild_member`.`guild_id`=`ugr_guild_info`.`guild_id`)*100)*"+getvariableofnpc(.Config_UGR[3],"UltimateRanker#00")+"/100)) WHERE `date`="+.@time+" ";	//.@time to avoid previous months Re-Calculation
+	/*												-------------------------- AGIT COUNT CALCULATION ---------------------------------------------------   ----------------------------- KILL/DEATH RATIO CALCULATION ----------------------------------------------    -----------------------------------------  EMP_BREAK CALCULATION --------------------------  -------- ACTIVE PARTICIPATION CALCULATION WITH AUTO COUNTING OF MAX_GUILD MEMBERS -------------------------------------------------------------------------------------------*/
+	return;
+}
+
+prontera,152,152,5	script	UltimateGuildRanker	4_M_SWORDMAN,{
+	mes "[Guild Ranker]";
+	mes "Welcome to Ultimate Guild Ranking";
+	next;
+	mes "[Guild Ranker]";
+	mes "We are One of the kind in this World, We not only give you rank accordance to your Emperium Breaks,";
+	mes "But we also check other criteria like your kills,deaths,Guild Participants";
+	next;
+	callfunc("Update_HEB",atoi(gettimestr("%Y%m",7)));
+	mes "[Guild Ranker]";
+	switch(select("~ Show My Guild Statistics:~ Top 10 Guilds:~ Most Active Guild:~ Previous Month Top 10 Guilds:~Top 10 Emp Breaker[Char]:~Top 10 Emp Breaker[Guild]:~ Claim Previous Month Price")) {
+		case 1:
+			if (getcharid(2)==0) {
+				mes "You are not in Any Guild.";
+				close;
+			}
+			query_sql "SELECT `breaks`,`kills`,`deaths`,`APart`,`percent` FROM `ugr_guild_info` WHERE `date`="+gettimestr("%Y%m",7)+" AND `guild_id`="+getcharid(2)+" ORDER BY `percent` DESC LIMIT 10", .@breaks, .@kills, .@deaths, .@apart, .@percent;
+			if (!getarraysize(.@percent)){
+				mes "No Records of your guild";
+				close;
+			}
+			mes "Format:(Data Based on "+gettime(GETTIME_DAYOFMONTH)+"Days/"+$AgitCount+" Castles)";
+			mes "x.) [GuildName]-Breaks-Kills-Death-GuildPoints ";
+			if (getguildinfo(GUILDINFO_NAME, getcharid(2)) == "null")
+				requestguildinfo getcharid(2);
+			mes (.@i+1) +".) [^4B29D5"+ getguildinfo(GUILDINFO_NAME, getcharid(2))+"^000000] - ^49D529"+.@breaks+"^000000 - ^66D729"+.@kills+"^000000 - ^88D729"+.@deaths+"^000000 - ^D52929"+.@percent+"^000000 ";
+			close;
+		case 2:
+			mes "Top 10 Guilds:";
+			query_sql "SELECT `breaks`,`kills`,`deaths`,`APart`,`guild_id`,`percent` FROM `ugr_guild_info` WHERE `date`="+gettimestr("%Y%m",7)+" ORDER BY `percent` DESC LIMIT 10", .@breaks, .@kills, .@deaths, .@apart, .@guild_id, .@percent;
+			if (!getarraysize(.@guild_id) || .@guild_id==0) {
+				mes "No Top Guilds";
+				close;
+			}
+			mes "Format:(Data Based on "+gettime(GETTIME_DAYOFMONTH)+"Days/"+$AgitCount+" Castles)";
+			mes "x.) [GuildName]-Breaks-Kills-Death-GuildPoints"+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"-APart":"")+" ";
+			for (.@i=0; .@i<getarraysize(.@guild_id); .@i++) {
+				if (getguildinfo(GUILDINFO_NAME, .@guild_id[.@i]) == "null")
+					requestguildinfo .@guild_id[.@i];
+				mes (.@i+1) +".) [^4B29D5"+getguildinfo(GUILDINFO_NAME, .@guild_id[.@i])+"^000000] - ^49D529"+.@breaks[.@i]+"^000000 - ^66D729"+.@kills[.@i]+"^000000 - ^88D729"+.@deaths[.@i]+"^000000 - ^D52929"+.@percent[.@i]+"^000000 "+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"- ^D52929"+.@apart[.@i]+"^000000":"")+"";
+			}
+			
+			close;
+		case 3:
+			mes "Top 10 Active Guilds:";
+			query_sql "SELECT `guild_id`,`APart` FROM `ugr_guild_info` WHERE `date`="+gettimestr("%Y%m",7)+" ORDER BY `APart` DESC LIMIT 10",.@guild_id,.@apart;
+			if (!getarraysize(.@guild_id) || .@guild_id==0){mes "No Active Guilds"; close;}
+			mes "Format:(Data Based on "+gettime(GETTIME_DAYOFMONTH)+"Days/"+$AgitCount+" Castles)";
+			mes "x.) [GuildName]"+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"-ActiveParticipants":"")+" ";
+			for (.@i=0; .@i<getarraysize(.@guild_id); .@i++){
+				if (getguildinfo(GUILDINFO_NAME, .@guild_id[.@i]) == "null")
+					requestguildinfo .@guild_id[.@i];
+				mes (.@i+1) +".) [^4B29D5"+getguildinfo(GUILDINFO_NAME, .@guild_id[.@i])+"^000000] "+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"- ^D52929"+.@apart[.@i]+"^000000":"")+" ";
+			}
+			close;
+		case 4:
+			mes "Top 10 Guilds(Previous Month):";
+			if (gettime(GETTIME_MONTH)==1) {
+				.@date = ((gettime(GETTIME_YEAR)-1)*100)+12;
+			} else {
+				.@date = ((gettime(GETTIME_YEAR)*100)+gettime(GETTIME_MONTH)-1);
+			}
+			callfunc("Update_HEB", .@date);
+			query_sql "SELECT `breaks`,`kills`,`deaths`,`APart`,`guild_id`,`percent` FROM `ugr_guild_info` WHERE `date`="+ .@date +" ORDER BY `percent` DESC LIMIT 10",.@breaks,.@kills,.@deaths,.@apart,.@guild_id,.@percent;
+			query_sql "SELECT `AgitCount` from `ugr_guild_infov` WHERE `date`="+ .@date,$AgitCount;
+			if (!getarraysize(.@guild_id) || .@guild_id==0) {
+				mes "No Previous Guild Records.";
+				close;
+			}
+			if($AgitCount==0){
+				$AgitCount=1;
+			}	//Set it to 1.
+			mes "Month: "+ (.@date);
+			mes "Format:(Data based on "+ $AgitCount +" Castles)";
+			mes "x.) [GuildName]-Breaks-Kills-Death-GuildPoints"+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"-ActiveParticipants":"")+" ";
+			for (.@i=0; .@i<getarraysize(.@guild_id); .@i++) {
+				if (getguildinfo(GUILDINFO_NAME, .@guild_id[.@i]) == "null")
+					requestguildinfo .@guild_id[.@i];
+				mes (.@i+1) +".) [^4B29D5"+getguildinfo(GUILDINFO_NAME, .@guild_id[.@i])+"^000000] - ^49D529"+.@breaks[.@i]+"^000000 - ^66D729"+.@kills[.@i]+"^000000 - ^88D729"+.@deaths[.@i]+"^000000 - ^D52929"+.@percent[.@i]+"^000000 "+((getgmlevel()>=getvariableofnpc(.Config_UGR[5],"UltimateRanker#00"))?"- ^D52929"+.@apart[.@i]+"^000000":"")+"";
+			}
+			close;
+		
+		case 5:
+			query_sql "SELECT `name`,`EmpBreak` FROM `ugr_guild_char_info` WHERE `EmpBreak`>0 ORDER BY `EmpBreak` DESC LIMIT 10",.@name$,.@empbreak;
+			for (.@i=0; .@i<getarraysize(.@name$); .@i++) {
+				mes (.@i+1) +".) [^4B29D5"+.@name$[.@i]+"^000000] - ^49D529"+.@empbreak[.@i]+"^000000";
+			}
+			close;
+		case 6:
+			query_sql "SELECT `guild_id`,`breaks` FROM `ugr_guild_info` WHERE `breaks`>0 ORDER BY `breaks` DESC LIMIT 10",.@guild_id,.@empbreak;
+			for (.@i=0; .@i<getarraysize(.@guild_id); .@i++) {
+				if (getguildinfo(GUILDINFO_NAME, .@guild_id[.@i]) == "null")
+					requestguildinfo .@guild_id[.@i];
+				mes (.@i+1) +".) [^4B29D5"+getguildinfo(GUILDINFO_NAME, .@guild_id[.@i])+"^000000] - ^49D529"+.@empbreak[.@i]+"^000000";
+			}
+			close;
+		case 7:
+			mes "Previous Month Prize Claim:";
+			if (!getcharid(2)){
+				mes "You don't belong to Any Guild";
+				close;
+			}
+			if (getguildinfo(GUILDINFO_MASTER_CID) != getcharid(CHAR_ID_CHAR)){
+				mes "You are not GuildMaster";
+				close;
+			}
+			next;
+			mes "[Guild Ranker]";
+			if (gettime(GETTIME_MONTH)==1) {
+				.@date = ((gettime(GETTIME_YEAR)-1)*100)+12;
+			} else {
+				.@date = ((gettime(GETTIME_YEAR)*100)+gettime(GETTIME_MONTH)-1);
+			}
+			query_sql "SELECT `guild_id`,`percent`,`claim` FROM `ugr_guild_info` where date="+.@date+" ORDER BY `percent` DESC LIMIT 1 ",@guild_id,@percent,@claim;
+			if (@guild_id != getcharid(2)) {
+				mes "Your Guild is Not Top";
+				close;
+			}
+			if (@claim) {
+				mes "You have already claimed your prize.";
+				close;
+			}
+			query_sql "UPDATE `ugr_guild_info` SET `claim`=1 where `guild_id`="+getcharid(2)+" AND `claim`=0 AND date="+.@date;
+			@percent = 0; @claim = 0; @guild_id = 0;
+			.@i = 0;
+			while (.@i < getarraysize(getvariableofnpc(.Prize,"UltimateRanker#00"))){
+				if (getvariableofnpc(.Prize[i+1],"UltimateRanker#00")==0)
+					break;
+				getitem getvariableofnpc(.Prize[.@i],"UltimateRanker#00"), getvariableofnpc(.Prize[.@i+1],"UltimateRanker#00");
+				.@i = .@i+2;
+			}
+			mes "You Got your Prize";
+			close;
+		default:
+			close;
+	}
+}
