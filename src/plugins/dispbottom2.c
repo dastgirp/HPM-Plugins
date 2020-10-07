@@ -39,21 +39,19 @@ HPExport struct hplugin_info pinfo = {
 
 void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, uint32 color)
 {
-	int fd;
-	unsigned short len = strlen(msg) + 1;
-	
-	if (sd==NULL)
-		return;
-	
-	color = (color & 0x0000FF) << 16 | (color & 0x00FF00) | (color & 0xFF0000) >> 16; // RGB to BGR
+	int msg_len;
+
+	nullpo_retv(msg);
+	msg_len = (int)strlen(msg) + 1;
+	Assert_retv(msg_len <= INT16_MAX - 12);
 	
 	fd = sd->fd;
-	WFIFOHEAD(fd, len+12);
+	WFIFOHEAD(fd, msg_len + 12);
 	WFIFOW(fd,0) = 0x2C1;
-	WFIFOW(fd,2) = len+12;
+	WFIFOW(fd,2) = msg_len + 12;
 	WFIFOL(fd,4) = 0;
 	WFIFOL(fd,8) = color;
-	memcpy(WFIFOP(fd,12), msg, len);
+	memcpy(WFIFOP(fd,12), msg, msg_len);
 	WFIFOSET(fd, WFIFOW(fd,2));
 }
 
