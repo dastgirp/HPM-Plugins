@@ -149,12 +149,12 @@ int mob_clone_spawn_market(struct map_session_data *sd, int16 m, int16 x, int16 
 	db->base_exp = db->job_exp = db->range2 = db->range3 = 1;
 	db->option = 0;
 
-	md = mob->once_spawn_sub(&sd->bl, m, x, y, sd->status.name, class_, "", SZ_SMALL, AI_NONE);
+	md = mob->once_spawn_sub(&sd->bl, m, x, y, sd->status.name, class_, "", SZ_SMALL, AI_NONE, 0);
 	if (!md)
 		return 0;
 	md->special_state.clone = 1;
 	mob->spawn(md);
-	unit->setdir(&md->bl, unit->getdir(&sd->bl));
+	unit->set_dir(&md->bl, unit->getdir(&sd->bl));
 	cd = chat->create(&md->bl, market_title, "", 1, false, 0, "", 0, 1, MAX_LEVEL);
 	if (!cd)
 		return 0;
