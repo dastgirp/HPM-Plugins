@@ -226,15 +226,21 @@ int ev_return_bc(const char *key)
 //Clif Edits
 void clif_parse_SelectArrow_pre(int *fd,struct map_session_data **sd)
 {
+	int item_id = 0;
 	if (pc_istrading(*sd)) {
 	//Make it fail to avoid shop exploits where you sell something different than you see.
 		clif->skill_fail(*sd, (*sd)->ud.skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 		clif_menuskill_clear(*sd);
 		return;
 	}
+#if PACKETVER_MAIN_NUM >= 20181121 || PACKETVER_RE_NUM >= 20180704 || PACKETVER_ZERO_NUM >= 20181114
+	item_id = RFIFOL(*fd, 2);
+#else
+	item_id = RFIFOW(*fd, 2);
+#endif
 	switch( (*sd)->menuskill_id ) {
 		case MC_VENDING: // Extended Vending system 
-			skill_vending_ev(*sd, RFIFOW(*fd,2));
+			skill_vending_ev(*sd, item_id);
 			clif_menuskill_clear(*sd);
 			hookStop();
 			break;
@@ -292,33 +298,44 @@ void clif_parse_OpenVending_pre(int *fd, struct map_session_data **sd_) {
 }
 
 int clif_vend(struct map_session_data *sd, int skill_lv) {
+	nullpo_retr(0, sd);
+
+	int fd = sd->fd;
+	int count_len = ARRAYLENGTH(ext_vend);
+	if (bc_item_zeny) {
+		count_len += 1;
+	}
+	if (bc_item_cash) {
+		count_len += 1;
+	}
+	int len = count_len * sizeof(struct PACKET_ZC_MAKINGARROW_LIST_sub) + sizeof(struct PACKET_ZC_MAKINGARROW_LIST);
 	struct item_data *item;
-	int c, i, d = 0;
-	int fd;
-	nullpo_ret(sd);
-	fd = sd->fd;
-	WFIFOHEAD(fd, 8 * 8 + 8);
-	WFIFOW(fd,0) = 0x1ad;
-	if (bc_item_zeny){
-		WFIFOW(fd, d * 2 + 4) = bc_item_zeny;
-		d++;
-	}
-	if (bc_item_cash){
-		WFIFOW(fd, d * 2 + 4) = bc_item_cash;
-		d++;
-	}
-	for( c = d, i = 0; i < ARRAYLENGTH(ext_vend); i ++ ) {
-		if ((item = itemdb->exists(ext_vend[i].itemid)) != NULL && 
-			(int)item->nameid != bc_item_zeny && (int)item->nameid != bc_item_cash){
-		WFIFOW(fd, c * 2 + 4) = (int)item->nameid;
+	WFIFOHEAD(fd, len);
+	struct PACKET_ZC_MAKINGARROW_LIST *p = WFIFOP(fd, 0);
+	p->packetType = HEADER_ZC_MAKINGARROW_LIST;
+	int c = 0, i = 0;
+	while(i < count_len) {
+		if (i == 0 && bc_item_zeny){
+			p->items[c].itemId = bc_item_zeny;
 			c++;
+		} else if (i == 1 && bc_item_cash) {
+			p->items[c].itemId = bc_item_cash;
+			c++;
+		} else if (i > 1) {
+			if ((item = itemdb->exists(ext_vend[i-2].itemid)) != NULL && 
+				(int)item->nameid != bc_item_zeny && (int)item->nameid != bc_item_cash){
+					p->items[c].itemId = (int)item->nameid;
+					c++;
+			}
 		}
+		i += 1;
 	}
-	if ( c > 0 ) {
+	len = c * sizeof(struct PACKET_ZC_MAKINGARROW_LIST_sub) + sizeof(struct PACKET_ZC_MAKINGARROW_LIST);
+	p->packetLength = len;
+	WFIFOSET(fd, len);
+	if (c > 0) {
 		sd->menuskill_id = MC_VENDING;
-		sd->menuskill_val = skill_lv;
-		WFIFOW(fd,2) = c * 2 + 4;
-		WFIFOSET(fd, WFIFOW(fd, 2));
+		sd->menuskill_val = c;
 	} else {
 		clif->skill_fail(sd,MC_VENDING,USESKILL_FAIL_LEVEL,0, 0);
 		return 0;
@@ -652,24 +669,24 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 			pc->paycash(sd,(int)z,0);
 			pc->getcash(vsd,(int)z,0);
 		} else {
-			int count_decrease = (int)z;
+			int countItem = (int)z;
 			int to_reduce = 0;
-			struct item item;
+			struct item item = { 0 };
 			item.nameid = vend_loot;
-			item.amount = count_decrease;
+			item.amount = countItem;
 			item.identify = 1;
 
 			for (i = 0; i < MAX_INVENTORY; i++) {
 				if (sd->status.inventory[i].nameid == vend_loot) {
-					to_reduce = cap_value(sd->status.inventory[i].amount, 0, count_decrease);
+					to_reduce = cap_value(sd->status.inventory[i].amount, 0, countItem);
 					// Tried to cheat? Can't delete
 					if (pc->delitem(sd, i, to_reduce, 0, 6, LOG_TYPE_VENDING)) {
 						hookStop();
 						return;
 					}
-					count_decrease -= to_reduce;
+					countItem -= to_reduce;
 				}
-				if (count_decrease == 0)
+				if (countItem == 0)
 					break;
 			}
 			pc->additem(vsd, &item, (int)z, LOG_TYPE_VENDING);
@@ -687,7 +704,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	for (i = 0; i < count; i++) {
 		short amount = *(const uint16*)(data + 4*i + 0);
 		short idx	= *(const uint16*)(data + 4*i + 2);
-		const char *item_name = itemdb_jname(vsd->status.cart[idx].nameid);
+		const char *item_name = itemdb_jname(vsd->status.cart[idx - 2].nameid);
 		double rev = 0.;
 		idx -= 2;
 
