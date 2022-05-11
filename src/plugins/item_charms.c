@@ -164,7 +164,7 @@ int pc_additem_post(int retVal, struct map_session_data *sd, const struct item *
 	return retVal;
 }
 
-int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, short *reason, enum e_log_pick_type *log_type)
+int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type, enum delitem_reason *reason, enum e_log_pick_type *log_type)
 {
 	struct charm_item_data *cidata = NULL;
 	struct player_data *ssd = NULL;
@@ -193,7 +193,7 @@ int pc_delitem_pre(struct map_session_data **sd_, int *n, int *amount, int *type
 }
 
 // maybe I should've just overload this function ...
-int pc_delitem_post(int retVal, struct map_session_data *sd, int n, int amount, int type, short reason, e_log_pick_type log_type)
+int pc_delitem_post(int retVal, struct map_session_data *sd, int n, int amount, int type, enum delitem_reason reason, e_log_pick_type log_type)
 {
 	struct player_data *ssd = getFromMSD(sd, 0);
 	if (ssd && ssd->recalculate == 1) {
