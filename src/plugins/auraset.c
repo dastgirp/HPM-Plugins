@@ -86,7 +86,7 @@ BUILDIN(aura)
 		script_pushint(st, 0);
 		return false;
 	}
-	
+
 	// Set the Aura
 	for (i = 0; i < MAX_AURA; ++i) {
 		if (i == 0 ||
@@ -124,14 +124,14 @@ ACMD(aura)
 		clif->message(fd, "Please, enter at least an option (usage: @aura <aura1> {<aura2> <aura3>}).");
 		return false;
 	}
-	
+
 	for (i = 0; i < 3; ++i){
 		if (aura[i] >= 0) {
 			sprintf(output, "%s%d", AURA_VARIABLE, i+1);
 			pc_setglobalreg(sd, script->add_str(output), aura[i]);
 		}
 	}
-	
+
 	// Respawn
 	pc->setpos(sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
 	clif->message(fd, "Aura has been Set.");
@@ -146,7 +146,7 @@ void clif_sendaurastoone(struct map_session_data *sd, struct map_session_data *d
 
 	if (pc_ishiding(sd))
 		return;
-	
+
 	for (i = 0; i < MAX_AURA; ++i) {
 		sprintf(output, "%s%d", AURA_VARIABLE, i+1);
 		effect = pc_readglobalreg(sd, script->add_str(output));
@@ -164,14 +164,14 @@ void clif_sendauras(struct map_session_data *sd, enum send_target type, bool is_
 
 	if (pc_ishiding(sd) && is_hidden==true)
 		return;
-	
+
 	for (i = 0; i < MAX_AURA; ++i) {
 		sprintf(output, "%s%d", AURA_VARIABLE, i+1);
 		effect = pc_readglobalreg(sd, script->add_str(output));
 		if (effect > 0)
 			clif->specialeffect(&sd->bl, effect, type);
 	}
-	
+
 	return;
 }
 
@@ -184,7 +184,7 @@ bool clif_spawn_post(bool retVal, struct block_list *bl)
 		return retVal;
 	if (vd->class == INVISIBLE_CLASS)
 		return true; // Doesn't need to be spawned, so everything is alright
-	
+
 	if (bl->type == BL_PC)
 		clif_sendauras((TBL_PC*)bl, AREA, true);
 
@@ -194,7 +194,7 @@ bool clif_spawn_post(bool retVal, struct block_list *bl)
 // [Dastgir/Hercules]
 void clif_getareachar_unit_post(struct map_session_data *sd, struct block_list *bl)
 {
-	
+
 	struct view_data *vd;
 
 	vd = status->get_viewdata(bl);
@@ -247,7 +247,7 @@ void clif_getareachar_char(struct block_list *bl, short flag)
 }
 
 // [Dastgir/Hercules]
-int status_change_start_post(int retVal, struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag)
+int status_change_start_post(int retVal, struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, int flag, int skill_id)
 {
 	struct map_session_data *sd = NULL;
 	struct hide_data *data;
@@ -281,14 +281,14 @@ int status_change_end_pre(struct block_list **bl, enum sc_type *type_, int *tid_
 
 	if (*bl == NULL)
 		return 0;
-	
+
 	sc = status->get_sc(*bl);
-	
+
 	if (type < 0 || type >= SC_MAX || !sc || !(sce = sc->data[type]))
 		return 0;
 
 	sd = BL_CAST(BL_PC, *bl);
-	
+
 	if (sce->timer != tid && tid != INVALID_TIMER && sce->timer != INVALID_TIMER)
 		return 0;
 
@@ -316,11 +316,11 @@ HPExport void plugin_init(void)
 	int i;
 	for (i = 1; i < MAX_AURA; ++i)
 		sprintf(output, "%s?", output);
-	
+
 	addAtcommand("aura", aura);
 	addScriptCommand("aura", output, aura);
 
-	addHookPre(status, change_end_, status_change_end_pre);	
+	addHookPre(status, change_end_, status_change_end_pre);
 	addHookPost(clif, spawn, clif_spawn_post);
 	addHookPost(clif, getareachar_unit, clif_getareachar_unit_post);
 	addHookPost(clif, refresh, clif_refresh_post);
