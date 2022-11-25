@@ -6,7 +6,7 @@
 //= Dastgir
 //===== Current Version: =====================================
 //= v1.3
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= Hercules
 //===== Description: =========================================
 //= PK Mode
@@ -74,7 +74,7 @@ ACMD(pk)
 		return false;
 	}
 	if (ssd->pkmode_delay + config_delay > (int)time(NULL)) {
-		safesnprintf(output, CHAT_SIZE_MAX, "You must wait %d seconds before using this command again.", ssd->pkmode_delay + config_delay - (int)time(NULL));
+		snprintf(output, CHAT_SIZE_MAX, "You must wait %d seconds before using this command again.", ssd->pkmode_delay + config_delay - (int)time(NULL));
 		clif->message(sd->fd, output);
 		return false;
 	}

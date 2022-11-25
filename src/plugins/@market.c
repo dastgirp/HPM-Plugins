@@ -5,14 +5,14 @@
 //= Credit - Dastgir -> http://hercules.ws/board/topic/7188-market/
 //===== Current Version: =====================================
 //= 1.6
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= Hercules 2019-06-02
 //===== Description: =========================================
 //= Create a market clone, to leave a message for other players
 //= while the player can go hunting/questing/events
 //===== Topic ================================================
 //= http://hercules.ws/board/topic/7242-market-clone/
-//===== Additional Comments: =================================  
+//===== Additional Comments: =================================
 //= -- AtCommands --
 //= @market "<Title>" "<Message>" <Color>
 //=   create a market clone with a chat room titled -> "<Title>"
@@ -197,7 +197,7 @@ ACMD(market){
 		return false;
 	}
 	if (ssd->market_clone_delay + market_clone_delay > (int)time(NULL)) {
-		safesnprintf(atcmd_output, CHAT_SIZE_MAX, "You must wait %d seconds before using this command again.", ssd->market_clone_delay + market_clone_delay - (int)time(NULL));
+		snprintf(atcmd_output, CHAT_SIZE_MAX, "You must wait %d seconds before using this command again.", ssd->market_clone_delay + market_clone_delay - (int)time(NULL));
 		clif->message(fd, atcmd_output);
 		return false;
 	}
@@ -210,7 +210,7 @@ ACMD(market){
 		return false;
 	}
 	if (sd->status.zeny < market_clone_zenycost) {
-		safesnprintf(atcmd_output, CHAT_SIZE_MAX, "You must have at least %d zeny to have a Market clone.", market_clone_zenycost);
+		snprintf(atcmd_output, CHAT_SIZE_MAX, "You must have at least %d zeny to have a Market clone.", market_clone_zenycost);
 		clif->message(fd, atcmd_output);
 		return false;
 	}
@@ -271,7 +271,7 @@ ACMD(market){
 			return false;
 		}
 		temp[j] = '\0';
-		safestrncpy(title, temp, CHAT_SIZE_MAX);		
+		safestrncpy(title, temp, CHAT_SIZE_MAX);
 		++i;
 		if (message[i] != ' ') {
 			clif->message(fd, "Remember the [Space] between the <Title> and <Message>.");
@@ -330,7 +330,7 @@ ACMD(market){
 		return false;
 	}
 	if (strlen(title) >= CHATROOM_TITLE_SIZE) {
-		safesnprintf(atcmd_output, CHAT_SIZE_MAX, "The Title must not more than %d characters.", CHATROOM_TITLE_SIZE);
+		snprintf(atcmd_output, CHAT_SIZE_MAX, "The Title must not more than %d characters.", CHATROOM_TITLE_SIZE);
 		clif->message(fd, atcmd_output);
 		return false;
 	}
@@ -383,7 +383,7 @@ int npc_reload_pre(void) {
 		}
 	}
 	mapit->free(iter);
-	return 0;	
+	return 0;
 }
 
 int battle_check_target_post(int retVal, struct block_list *src, struct block_list *target, int flag) {
@@ -408,7 +408,7 @@ bool chat_joinchat_pre(struct map_session_data **sd_, int *chat_id, const char *
 		struct monster_data *mmd = getFromMOBDATA(md,0);
 		if (mmd) {
 			char output[CHAT_SIZE_MAX];
-			safesnprintf(output, CHAT_SIZE_MAX, "%s : %s", md->name, mmd->market_message);
+			snprintf(output, CHAT_SIZE_MAX, "%s : %s", md->name, mmd->market_message);
 			color_message(sd->fd, mmd->market_msg_color, output);
 			hookStop();
 			return true;

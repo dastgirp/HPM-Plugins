@@ -87,7 +87,7 @@ ACMD(afk)
 	clif->changelook(&sd->bl, LOOK_HEAD_TOP, 471);
 	clif->specialeffect(&sd->bl, 234, AREA);
 	if (afk_timeout) {
-		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout * 1000,0);
+		status->change_start(NULL, &sd->bl, SC_AUTOTRADE, 10000, 0, 0, 0, 0, afk_timeout * 1000, 0, SC_AUTOTRADE);
 	}
 	channel->quit(sd); //Quit from Channels.
 	clif->authfail_fd(fd, 15);
@@ -105,7 +105,7 @@ void afk_timeout_adjust(const char *key, const char *val)
 		afk_timeout = value;
 	}
 	return;
-	
+
 }
 
 int afk_timeout_return(const char *key)
@@ -129,7 +129,7 @@ void npc_parse_unknown_mapflag_pre(const char **name, const char **w3, const cha
 		mf_data->noafk = 1;
 		hookStop();
 	}
-	
+
 	return;
 }
 

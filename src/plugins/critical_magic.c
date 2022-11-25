@@ -51,7 +51,7 @@ HPExport struct hplugin_info pinfo =
 	HPM_VERSION,
 };
 
-// Configuration 
+// Configuration
 int blue_red_critical = 1; // 1 = Red, 2 = Blue
 
 struct tmp_data {
@@ -68,7 +68,7 @@ int skill_mcri_hit(int tid, int64 tick, int id, intptr_t data)
 	if (tmpd != NULL){
 		switch(blue_red_critical) {	// 1 = red ; 2 = blue
 			case 1:
-				clif->damage(tmpd->src, tmpd->bl, 1, 1, id, 0, 10, 0);		  
+				clif->damage(tmpd->src, tmpd->bl, 1, 1, id, 0, 10, 0);
 				break;
 			case 2:
 				clif->skill_damage(tmpd->src,tmpd->bl,timer->gettick(), 1, 1, id, 0, TK_STORMKICK, 1, 8);
@@ -99,7 +99,7 @@ void skill_attack_display_unknown_pre(int **attack_type, struct block_list **src
 	struct map_session_data *sd;
 	struct status_data *tstatus;
 	struct block_list *src = *src_, *bl = *bl_;
-	
+
 	sd = BL_CAST(BL_PC, src);
 	tstatus = status->get_status_data(bl);
 	if (src && (src->type == BL_PC || (battle->get_master(src))->type == BL_PC)) {
@@ -133,8 +133,8 @@ void skill_attack_display_unknown_pre(int **attack_type, struct block_list **src
 			u_ = tick + (d_ * num) + 1;
 			if (tstatus->hp <= damage) { //Kill Delay
 				damage = 1;
-				status->change_start(NULL, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, (int)u_, 2);   
-				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, (int)u_, 2);			  
+				status->change_start(NULL, bl, SC_BLADESTOP_WAIT, 10000, 1, 0, 0, 0, (int)u_, 2, SC_BLADESTOP_WAIT);
+				status->change_start(NULL, bl, SC_INVINCIBLE, 10000, 1, 0, 0, 0, (int)u_, 2, SC_INVINCIBLE);
 				timer->add(u_,skill_mcri_kill_delay,bl->id,(intptr_t)src);
 			}
 			clif->skill_nodamage(src,src,skill_id,skill_lv,1);
@@ -158,7 +158,7 @@ void critical_color(const char *key, const char *val)
 		blue_red_critical = value;
 	}
 	return;
-	
+
 }
 int critical_color_return(const char *key)
 {
