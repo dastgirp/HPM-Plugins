@@ -31,7 +31,7 @@
 #include "plugins/HPMHooking.h"
 #include "common/HPMDataCheck.h"
 
-#define OPTION_AUTOATTACK 0x30000000
+#define OPTION_AUTOATTACK 0x40000000
 
 HPExport struct hplugin_info pinfo = {
 	"autoattack",
