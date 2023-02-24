@@ -142,7 +142,7 @@ int gstorage_cant_take(struct map_session_data **sd, int *index, int *amount) {
 	return 1;
 }
 
-int pc_restrict_items(struct map_session_data **sd, int *n, int *amount, int *type, short *reason, e_log_pick_type *log_type){
+int pc_restrict_items(struct map_session_data **sd, int *n, int *amount, int *type, enum delitem_reason *reason, e_log_pick_type *log_type) {
 	if (*sd == NULL)
 		return 1;
 	if (is_secure(*sd) > 0) {
