@@ -494,7 +494,7 @@ void vending_list_pre(struct map_session_data **sd, unsigned int *id2) {
 	}
 }
 
-void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const uint8 **data_, int *count2) {
+void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned int *uid2, const struct CZ_PURCHASE_ITEM_FROMMC **data_, int *count2) {
 	int aid = *aid2;
 	unsigned int uid = *uid2;
 	int count = *count2;
@@ -505,7 +505,7 @@ void vending_purchasereq_mod(struct map_session_data **sd_, int *aid2, unsigned 
 	struct player_data* ssd;
 	struct map_session_data *sd = *sd_;
 	int vend_loot = 0;
-	const uint8 *data = *data_;
+	const struct CZ_PURCHASE_ITEM_FROMMC *data = *data_;
 
 	nullpo_retv(sd);
 	if (vsd == NULL || !vsd->state.vending || vsd->bl.id == sd->bl.id)
