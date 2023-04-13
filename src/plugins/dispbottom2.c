@@ -27,6 +27,7 @@
 #include "map/skill.h"
 #include "map/pc.h"
 #include "map/map.h"
+#include "common/nullpo.h"
 
 #include "common/HPMDataCheck.h"
 
@@ -45,7 +46,7 @@ void clif_displaymessagecolor(struct map_session_data *sd, const char* msg, uint
 	msg_len = (int)strlen(msg) + 1;
 	Assert_retv(msg_len <= INT16_MAX - 12);
 	
-	fd = sd->fd;
+	int fd = sd->fd;
 	WFIFOHEAD(fd, msg_len + 12);
 	WFIFOW(fd,0) = 0x2C1;
 	WFIFOW(fd,2) = msg_len + 12;
